@@ -6,9 +6,9 @@ This document details the specifications, file formats, mathematical foundations
 
 ## 1. System Overview
 The Astrolabe Program is a system-mapping tool that visualizes planetary systems ("Crystal Spheres") within the Spelljammer campaign setting. Systems are defined dynamically using structured JSON configuration files. The program renders these configurations into a unified workspace showcasing three vertical side-by-side panels arranged horizontally:
-1. **JSON Editor & Control Panel**: Raw text configuration editor with dynamic schema validation.
-2. **Bookmark Draw View**: A narrow vertical strip map focused on the relative radial scale of orbits.
-3. **System Navigation Chart**: A landscape interactive map displaying full orbital paths, sub-orbits (moons), and time-progression controls.
+1. **System Editor**: Raw text configuration editor with dynamic schema validation.
+2. **Bookmark**: A narrow vertical strip map focused on the relative radial scale of orbits.
+3. **Navigation Chart**: A landscape interactive map displaying full orbital paths, sub-orbits (moons), and time-progression controls.
 
 ---
 
@@ -148,9 +148,9 @@ The application uses an explicit **three-column side-by-side vertical layout** w
 +-------------------+----------------------------+------------------------------+
 |                   |                            |                              |
 |                   |                            |                              |
-|   JSON Editor &   |          Bookmark          |        Nav Chart Map         |
-|   Validation      |           (Portrait        |         (Landscape           |
-|   Panel           |            radial          |          responsive          |
+|   System Editor   |          Bookmark          |       Navigation Chart       |
+|   (JSON Code)     |           (Portrait        |         (Landscape           |
+|                   |            radial          |          responsive          |
 |                   |            orbits)         |          orbits)             |
 |                   |                            |                              |
 |                   |                            |                              |
@@ -172,13 +172,13 @@ Three quick-access buttons are directly available in the top navbar:
 
 ### 4.3 Vertical Layout Panels
 
-#### Panel 1: JSON Editor & Control Panel (Left Pane)
+#### Panel 1: System Editor (Left Pane)
 A vertical panel of width 360px.
 * **Inline Code Editor**: Text area that loads and displays the active system JSON configuration.
 * **On-the-fly Validation**: Parses input dynamically. Shows details of JSON syntax errors or schema validation warnings in a red alert banner.
 * **Apply & Save**: Commits edits directly to the local save folder.
 
-#### Panel 2: Portrait Bookmark View (Center Pane)
+#### Panel 2: Bookmark (Center Pane)
 A vertical strip (fixed width 280px) displaying a radial hierarchy.
 * **Default Theme**: Defaults to **Dark Mode** for enhanced starlight contrast.
 * **Scale-to-Fit Canvas**: The canvas itself is styled with standard CSS containment (`max-width: 100%`, `max-height: 100%`, `width: auto`, `height: auto`, and `aspect-ratio: 1 / 3`), which forces it to scale down to fit whichever dimension is smaller (width or height). 
@@ -188,7 +188,7 @@ A vertical strip (fixed width 280px) displaying a radial hierarchy.
 * **Scope**: Displays only objects directly orbiting the central star (ignoring moons).
 * **Compact Controls**: Small overlays to switch background mode (Light/Dark), toggle the shell boundary outline, toggle distance labels (DIST: ON/OFF), and export a high-res portrait PNG (300 DPI).
 
-#### Panel 3: System Nav Chart (Right Pane)
+#### Panel 3: Navigation Chart (Right Pane)
 A responsive map canvas occupying all remaining screen width (`flex: 1`).
 * **Dynamic Sizing**: Uses `ResizeObserver` to read container width and height. Resizes the canvas drawing buffer on window adjustments to prevent stretching or clipping.
 * **Scale-to-Fit**: Automatically updates zoom and centering offsets on load or window resize to ensure the entire Crystal Sphere shell remains visible within the viewport.
