@@ -1,6 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSystemStore } from '../store/useSystemStore';
-import { AlertCircle, ChevronLeft } from 'lucide-react';
+import { 
+  Sun, 
+  Globe, 
+  Moon, 
+  Plus, 
+  Trash2, 
+  ChevronDown, 
+  ChevronUp, 
+  ChevronLeft,
+  Settings,
+  Compass
+} from 'lucide-react';
+import { CelestialObject } from '../../types/astrolabe';
 
 interface SaveManagerProps {
   onCollapse?: () => void;
@@ -9,89 +21,99 @@ interface SaveManagerProps {
 export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
   const {
     activeSphere,
-    saveCurrentSphere,
-    setSphere,
+    updateActiveSphereMeta,
+    updateCelestialObject,
+    addCelestialObject,
+    removeCelestialObject,
+    setToastMessage,
   } = useSystemStore();
 
-  const [jsonText, setJsonText] = useState('');
-  const [validationError, setValidationError] = useState<string | null>(null);
-  const [isDirty, setIsDirty] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
-  // Sync editor text with activeSphere store changes
-  useEffect(() => {
-    if (activeSphere) {
-      const formatted = JSON.stringify(activeSphere, null, 2);
-      setJsonText(formatted);
-      setValidationError(null);
-      setIsDirty(false);
+  // If no active sphere is loaded
+  if (!activeSphere) {
+    return (
+      <div className="flex flex-col h-full bg-[var(--color-bg-panel)] scroll-border p-4 shadow-lg overflow-hidden">
+        <div className="border-b border-[var(--color-border-parchment)] pb-2 mb-3 shrink-0 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {onCollapse && (
+              <button
+                onClick={onCollapse}
+                className="p-1 rounded hover:bg-[var(--color-bg-base)] text-[var(--color-text-muted)] border border-transparent hover:border-[var(--color-border-parchment)] transition-all"
+                title="Collapse Editor Panel"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+            )}
+            <h4 className="font-title text-xs font-bold tracking-wider text-[var(--color-text-main)]">
+              System Editor
+            </h4>
+          </div>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
+          <Settings className="w-12 h-12 text-[var(--color-border-parchment)] stroke-[1] mb-2 animate-spin-slow" />
+          <p className="text-[11px] text-[var(--color-text-muted)] max-w-[200px]">
+            Please open an existing crystal system configuration file to enable form editing.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleUpdateObject = (index: number, updated: Partial<CelestialObject>) => {
+    // If changing type to star, reset orbital properties
+    if (updated.type === 'star') {
+      updated.distanceOrbited = 0;
+      updated.orbitedObjectName = null;
+      updated.initialAngle = 0;
+      updated.orbitalPeriodDays = 1;
     }
-  }, [activeSphere]);
+    updateCelestialObject(index, updated);
+  };
 
-  const handleJsonChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const val = e.target.value;
-    setJsonText(val);
-    setIsDirty(true);
+  const handleAddObject = () => {
+    const defaultParent = activeSphere.objects.find(o => o.type === 'star')?.name || null;
+    const newObj: CelestialObject = {
+      name: `New Body ${activeSphere.objects.length + 1}`,
+      type: 'planet',
+      size: 10,
+      description: 'A newly added planetary body.',
+      orbitedObjectName: defaultParent,
+      distanceOrbited: 1.0,
+      initialAngle: 0,
+      orbitalPeriodDays: 365,
+    };
+    addCelestialObject(newObj);
+    setExpandedIndex(activeSphere.objects.length);
+    setToastMessage({ type: 'success', text: `Added new celestial body "${newObj.name}"` });
+  };
 
-    try {
-      const parsed = JSON.parse(val);
-      if (!parsed.sphereName) {
-        setValidationError('Validation Error: Missing "sphereName" property.');
-      } else if (!parsed.currentCampaignDate) {
-        setValidationError('Validation Error: Missing "currentCampaignDate" property.');
-      } else if (parsed.currentSystemDate === undefined) {
-        setValidationError('Validation Error: Missing "currentSystemDate" property.');
-      } else if (!Array.isArray(parsed.objects)) {
-        setValidationError('Validation Error: "objects" must be an array.');
-      } else {
-        // Validate objects schema
-        let objError = null;
-        for (let i = 0; i < parsed.objects.length; i++) {
-          const obj = parsed.objects[i];
-          if (!obj.name) {
-            objError = `Validation Error: Object at index ${i} is missing "name".`;
-            break;
-          }
-          if (!obj.type) {
-            objError = `Validation Error: Object "${obj.name}" is missing "type".`;
-            break;
-          }
-          if (obj.distanceOrbited === undefined) {
-            objError = `Validation Error: Object "${obj.name}" is missing "distanceOrbited".`;
-            break;
-          }
-        }
-        setValidationError(objError);
+  const handleDeleteObject = (index: number, name: string) => {
+    if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+
+    // Correct broken references for sub-orbiting moons
+    activeSphere.objects.forEach((obj, idx) => {
+      if (obj.orbitedObjectName === name) {
+        updateCelestialObject(idx, { orbitedObjectName: null });
       }
-    } catch (err: any) {
-      setValidationError(`Syntax Error: ${err.message}`);
-    }
+    });
+
+    removeCelestialObject(index);
+    setExpandedIndex(null);
+    setToastMessage({ type: 'success', text: `Deleted "${name}"` });
   };
 
-  const handleApplyChanges = async () => {
-    if (validationError) return;
-    setLoading(true);
-    try {
-      const parsed = JSON.parse(jsonText);
-      setSphere(parsed);
-      setIsDirty(false);
-      
-      // Save changes back to the JSON file
-      await saveCurrentSphere();
-    } catch (err: any) {
-      setValidationError(`Apply failed: ${err.message}`);
-    }
-    setLoading(false);
-  };
-
-  const handleDiscardChanges = () => {
-    if (activeSphere) {
-      setJsonText(JSON.stringify(activeSphere, null, 2));
-      setValidationError(null);
-      setIsDirty(false);
+  // Helper to render type icons
+  const renderTypeIcon = (type: string) => {
+    switch (type) {
+      case 'star':
+        return <Sun className="w-3.5 h-3.5 text-yellow-600 dark:text-yellow-400" />;
+      case 'moon':
+        return <Moon className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />;
+      default:
+        return <Globe className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />;
     }
   };
-
 
   return (
     <div className="flex flex-col h-full bg-[var(--color-bg-panel)] scroll-border p-4 shadow-lg overflow-hidden">
@@ -113,60 +135,196 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
           </h4>
         </div>
         
-        {/* Controls: Discard / Apply & Save */}
-        {activeSphere && (
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={handleDiscardChanges}
-              disabled={!isDirty || loading}
-              className="text-[9px] font-bold px-2 py-0.5 bg-[var(--color-bg-base)] scroll-border hover:bg-[var(--color-border-parchment)] transition-colors disabled:opacity-50"
-              title="Discard all unapplied text modifications"
-            >
-              Discard
-            </button>
-            <button
-              onClick={handleApplyChanges}
-              disabled={!isDirty || !!validationError || loading}
-              className="text-[9px] font-bold px-2 py-0.5 bg-[var(--color-accent-gold)] text-[#2b2316] rounded hover:brightness-95 transition-all disabled:opacity-50"
-              title="Apply changes and save to file"
-            >
-              {loading ? 'APPLYING...' : 'APPLY & SAVE'}
-            </button>
-          </div>
-        )}
+        <span className="text-[9px] bg-green-950 border border-green-800 text-green-400 font-bold px-1.5 py-0.5 rounded shadow-sm">
+          LIVE SYNCED
+        </span>
       </div>
 
-      {/* Editor Main Text Area */}
-      <div className="flex-1 flex flex-col min-h-0 relative">
-        <div className="text-xs font-semibold text-[var(--color-text-muted)] mb-1 flex items-center justify-between">
-          <span>raw JSON system definitions</span>
-          {isDirty && !validationError && (
-            <span className="text-[10px] bg-[var(--color-accent-gold)] text-[#2b2316] font-bold px-1 rounded animate-pulse">
-              UNAPPLIED CHANGES
-            </span>
-          )}
-        </div>
+      {/* Editor Content Area */}
+      <div className="flex-1 overflow-y-auto pr-1 select-none">
         
-        <textarea
-          value={jsonText}
-          onChange={handleJsonChange}
-          disabled={!activeSphere}
-          className="flex-1 w-full p-3 font-mono text-[11px] leading-relaxed bg-[var(--color-canvas-bg)] text-[var(--color-text-main)] scroll-border outline-none resize-none focus:border-[var(--color-accent-gold)] focus:ring-1 focus:ring-[var(--color-accent-gold)] selection:bg-[var(--color-accent-gold)] selection:bg-opacity-30 disabled:opacity-50"
-          placeholder="Select File -> Open in the top-left menu to load a system config JSON..."
-          spellCheck={false}
-        />
-      </div>
+        {/* Section: System Metadata */}
+        <div className="bg-[var(--color-bg-base)] border border-[var(--color-border-parchment)] p-3 rounded mb-4 shadow-sm">
+          <div className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <Compass className="w-3 h-3 text-[var(--color-accent-gold)]" /> System Config
+          </div>
+          
+          <div className="editor-form-group">
+            <label>Sphere Name</label>
+            <input 
+              type="text" 
+              className="editor-input"
+              value={activeSphere.sphereName} 
+              onChange={e => updateActiveSphereMeta({ sphereName: e.target.value })}
+            />
+          </div>
 
-      {/* Validation Banner */}
-      {validationError && (
-        <div className="mt-2.5 p-2.5 bg-red-100 dark:bg-red-950 border border-red-300 dark:border-red-800 rounded flex gap-2 items-start shrink-0">
-          <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
-          <div className="text-[10px] font-semibold text-red-700 dark:text-red-300 break-words leading-normal max-w-full">
-            {validationError}
+          <div className="editor-form-group">
+            <label>Campaign Date</label>
+            <input 
+              type="text" 
+              className="editor-input"
+              value={activeSphere.currentCampaignDate} 
+              onChange={e => updateActiveSphereMeta({ currentCampaignDate: e.target.value })}
+            />
           </div>
         </div>
-      )}
 
+        {/* Section: Celestial Bodies Header */}
+        <div className="flex justify-between items-center mb-2.5">
+          <h5 className="font-title text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
+            Celestial Bodies
+          </h5>
+        </div>
+
+        {/* Action Button: Add Body */}
+        <button onClick={handleAddObject} className="add-body-btn">
+          <Plus className="w-3.5 h-3.5" /> Add Celestial Body
+        </button>
+
+        {/* Dynamic Accordion list of bodies */}
+        <div className="space-y-2">
+          {activeSphere.objects.map((obj, index) => {
+            const isExpanded = expandedIndex === index;
+            
+            return (
+              <div key={index} className="editor-card">
+                
+                {/* Accordion Card Header */}
+                <div 
+                  onClick={() => setExpandedIndex(isExpanded ? null : index)}
+                  className="editor-card-header"
+                >
+                  <div className="editor-card-title">
+                    {renderTypeIcon(obj.type)}
+                    <span className="truncate max-w-[140px]">{obj.name}</span>
+                    <span className="text-[9px] text-[var(--color-text-muted)] font-normal italic capitalize">
+                      ({obj.type})
+                    </span>
+                  </div>
+                  
+                  <div className="editor-card-actions" onClick={e => e.stopPropagation()}>
+                    <button
+                      onClick={() => handleDeleteObject(index, obj.name)}
+                      className="p-1 rounded text-red-600 hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+                      title={`Delete ${obj.name}`}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                    <div className="text-[var(--color-text-muted)]">
+                      {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Accordion Card Edit Inputs */}
+                {isExpanded && (
+                  <div className="editor-card-body">
+                    
+                    <div className="editor-form-group">
+                      <label>Name</label>
+                      <input 
+                        type="text" 
+                        className="editor-input"
+                        value={obj.name}
+                        onChange={e => handleUpdateObject(index, { name: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="editor-form-group">
+                      <label>Type</label>
+                      <select 
+                        className="editor-select"
+                        value={obj.type}
+                        onChange={e => handleUpdateObject(index, { type: e.target.value as 'star' | 'planet' | 'moon' })}
+                      >
+                        <option value="star">Star</option>
+                        <option value="planet">Planet</option>
+                        <option value="moon">Moon</option>
+                      </select>
+                    </div>
+
+                    <div className="editor-form-group">
+                      <label>Size</label>
+                      <input 
+                        type="number" 
+                        step="any"
+                        className="editor-input"
+                        value={obj.size}
+                        onChange={e => handleUpdateObject(index, { size: parseFloat(e.target.value) || 0 })}
+                      />
+                    </div>
+
+                    {obj.type !== 'star' && (
+                      <>
+                        <div className="editor-form-group">
+                          <label>Orbiting Parent</label>
+                          <select 
+                            className="editor-select"
+                            value={obj.orbitedObjectName || ''}
+                            onChange={e => handleUpdateObject(index, { orbitedObjectName: e.target.value === '' ? null : e.target.value })}
+                          >
+                            <option value="">None (Primary Star)</option>
+                            {activeSphere.objects
+                              .filter(o => o.name !== obj.name && o.type !== 'moon')
+                              .map(o => (
+                                <option key={o.name} value={o.name}>{o.name}</option>
+                              ))}
+                          </select>
+                        </div>
+
+                        <div className="editor-form-group">
+                          <label>Orbit Distance (AU)</label>
+                          <input 
+                            type="number" 
+                            step="any"
+                            className="editor-input"
+                            value={obj.distanceOrbited}
+                            onChange={e => handleUpdateObject(index, { distanceOrbited: parseFloat(e.target.value) || 0 })}
+                          />
+                        </div>
+
+                        <div className="editor-form-group">
+                          <label>Initial Angle (Deg)</label>
+                          <input 
+                            type="number" 
+                            step="any"
+                            className="editor-input"
+                            value={obj.initialAngle}
+                            onChange={e => handleUpdateObject(index, { initialAngle: parseFloat(e.target.value) || 0 })}
+                          />
+                        </div>
+
+                        <div className="editor-form-group">
+                          <label>Orbital Period (Days)</label>
+                          <input 
+                            type="number" 
+                            step="any"
+                            className="editor-input"
+                            value={obj.orbitalPeriodDays}
+                            onChange={e => handleUpdateObject(index, { orbitalPeriodDays: parseFloat(e.target.value) || 0 })}
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    <div className="editor-form-group">
+                      <label>Description</label>
+                      <textarea 
+                        className="editor-textarea"
+                        value={obj.description || ''}
+                        onChange={e => handleUpdateObject(index, { description: e.target.value })}
+                      />
+                    </div>
+
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+      </div>
     </div>
   );
 };

@@ -396,3 +396,114 @@ h1, h2, h3, h4, h5, .font-title {
     opacity: 1;
   }
 }
+
+/* Form styles for System Editor */
+.editor-form-group {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.editor-form-group label {
+  font-family: var(--font-title);
+  font-size: 10px;
+  font-weight: bold;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.editor-input, .editor-select, .editor-textarea {
+  width: 100%;
+  padding: 6px 10px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  background-color: var(--color-bg-base);
+  border: 1px solid var(--color-border-parchment);
+  border-radius: var(--border-radius-m);
+  color: var(--color-text-main);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.editor-input:focus, .editor-select:focus, .editor-textarea:focus {
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 0 0 1px var(--color-accent-gold);
+}
+
+.editor-textarea {
+  min-height: 50px;
+  resize: vertical;
+}
+
+.editor-card {
+  border: 1px solid var(--color-border-parchment);
+  border-radius: var(--border-radius-m);
+  background-color: var(--color-bg-base);
+  margin-bottom: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.editor-card-header {
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  background-color: rgba(94, 79, 60, 0.03);
+  transition: background-color 0.2s;
+  user-select: none;
+}
+
+.editor-card-header:hover {
+  background-color: rgba(94, 79, 60, 0.08);
+}
+
+.editor-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.editor-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editor-card-body {
+  padding: 12px;
+  border-top: 1px solid var(--color-border-parchment);
+  background-color: var(--color-bg-panel);
+}
+
+.add-body-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px;
+  border: 2px dashed var(--color-border-parchment);
+  border-radius: var(--border-radius-m);
+  background-color: transparent;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 16px;
+}
+
+.add-body-btn:hover {
+  border-color: var(--color-accent-gold);
+  color: var(--color-accent-gold);
+  background-color: rgba(94, 79, 60, 0.03);
+}
