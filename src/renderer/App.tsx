@@ -14,6 +14,8 @@ const App: React.FC = () => {
     saveCurrentSphere,
     createNewSphere,
     saveDirectory,
+    toastMessage,
+    setToastMessage,
   } = useSystemStore();
 
   // Dialog overlays state
@@ -59,20 +61,30 @@ const App: React.FC = () => {
 
   const handleSaveClick = async () => {
     if (!activeSphere) return;
-    const success = await saveCurrentSphere();
-    if (success) {
-      alert('System successfully saved to local directory.');
-    } else {
-      alert('Failed to save configuration.');
+    try {
+      const success = await saveCurrentSphere();
+      if (success) {
+        setToastMessage({ type: 'success', text: 'System successfully saved to local directory.' });
+      } else {
+        setToastMessage({ type: 'error', text: 'Failed to save configuration.' });
+      }
+    } catch (err: any) {
+      setToastMessage({ type: 'error', text: `Save error: ${err.message || err}` });
     }
   };
 
   const handleCreateNewSphere = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newSphereName.trim()) return;
-    await createNewSphere(newSphereName);
-    setNewSphereName('');
-    setShowNewModal(false);
+    const name = newSphereName.trim();
+    if (!name) return;
+    try {
+      await createNewSphere(name);
+      setNewSphereName('');
+      setShowNewModal(false);
+      setToastMessage({ type: 'success', text: `Successfully created crystal sphere "${name}"!` });
+    } catch (err: any) {
+      setToastMessage({ type: 'error', text: `Create Sphere Error: ${err.message || err}` });
+    }
   };
 
   const handleSelectDirectory = async () => {
@@ -85,6 +97,16 @@ const App: React.FC = () => {
 
   return (
     <div className="app-container">
+      
+      {/* Toast Notification Box */}
+      {toastMessage && (
+        <div className="toast-container">
+          <div className={`toast-box ${toastMessage.type}`}>
+            <span className={`toast-dot ${toastMessage.type}`} />
+            {toastMessage.text}
+          </div>
+        </div>
+      )}
       
       {/* Menu / Header Bar */}
       <header className="header-bar">

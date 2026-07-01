@@ -10,6 +10,7 @@ interface SystemState {
   bookmarkBackgroundMode: 'light' | 'dark';
   bookmarkShowShell: boolean;
   bookmarkShowDistance: boolean;
+  toastMessage: { type: 'success' | 'error'; text: string } | null;
   
   // Actions
   setSaveDirectory: (path: string) => Promise<void>;
@@ -28,6 +29,7 @@ interface SystemState {
   removeCelestialObject: (index: number) => void;
   updateActiveSphereMeta: (meta: { sphereName?: string; currentCampaignDate?: string }) => void;
   setSphere: (sphere: CrystalSphere) => void;
+  setToastMessage: (toast: { type: 'success' | 'error'; text: string } | null) => void;
 }
 
 export const useSystemStore = create<SystemState>((set, get) => ({
@@ -39,6 +41,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   bookmarkBackgroundMode: 'dark',
   bookmarkShowShell: true,
   bookmarkShowDistance: true,
+  toastMessage: null,
 
   setSaveDirectory: async (path: string) => {
     set({ saveDirectory: path });
@@ -129,6 +132,18 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   setBookmarkBackgroundMode: (mode) => set({ bookmarkBackgroundMode: mode }),
   setBookmarkShowShell: (show) => set({ bookmarkShowShell: show }),
   setBookmarkShowDistance: (show) => set({ bookmarkShowDistance: show }),
+  setToastMessage: (toast) => {
+    set({ toastMessage: toast });
+    if (toast) {
+      setTimeout(() => {
+        // Only clear if it hasn't been overwritten by another toast
+        const currentToast = get().toastMessage;
+        if (currentToast && currentToast.text === toast.text) {
+          set({ toastMessage: null });
+        }
+      }, 3500);
+    }
+  },
   
   setCurrentSystemDate: (date) => {
     set({ currentSystemDate: date });

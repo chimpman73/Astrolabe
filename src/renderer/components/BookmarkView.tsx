@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useSystemStore } from '../store/useSystemStore';
 import { ChevronLeft } from 'lucide-react';
+import { saveCanvasExport } from '../utils/exportHelper';
 
 interface BookmarkViewProps {
   onCollapse?: () => void;
@@ -15,6 +16,7 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
     setBookmarkBackgroundMode,
     setBookmarkShowShell,
     setBookmarkShowDistance,
+    setToastMessage,
   } = useSystemStore();
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -210,20 +212,7 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
     const dataUrl = exportCanvas.toDataURL('image/png');
     const defaultName = `${activeSphere?.sphereName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_bookmark.png`;
 
-    if (window.astrolabeAPI) {
-      const res = await window.astrolabeAPI.exportPngFile(dataUrl, defaultName);
-      if (res.success) {
-        alert(`Successfully exported Bookmark to:\n${res.data}`);
-      } else {
-        alert(`Export failed: ${res.error}`);
-      }
-    } else {
-      // Fallback: Web download
-      const link = document.createElement('a');
-      link.download = defaultName;
-      link.href = dataUrl;
-      link.click();
-    }
+    await saveCanvasExport(dataUrl, defaultName, 'Bookmark', setToastMessage);
   };
 
   return (

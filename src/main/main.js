@@ -156,7 +156,11 @@ ipcMain.handle('export-png-file', async (event, { dataUrl, defaultName }) => {
 // IPC Handler: Get Default Save Directory
 ipcMain.handle('get-default-save-directory', () => {
   try {
-    const defaultPath = 'C:\\John\\Code\\Astrolabe\\saves';
+    let defaultPath = 'C:\\John\\Code\\Astrolabe\\saves';
+    if (!fs.existsSync(defaultPath)) {
+      // Safe portable fallback in application root
+      defaultPath = path.join(app.getAppPath(), 'saves');
+    }
     if (!fs.existsSync(defaultPath)) {
       fs.mkdirSync(defaultPath, { recursive: true });
     }

@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useSystemStore } from '../store/useSystemStore';
 import { calculateSystemPositions } from '../utils/orbitMath';
 import { Play, Pause, FastForward, RotateCcw, Download, ZoomIn, ZoomOut, Maximize, ChevronLeft } from 'lucide-react';
+import { saveCanvasExport } from '../utils/exportHelper';
 
 interface NavChartViewProps {
   onCollapse?: () => void;
@@ -13,6 +14,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     currentSystemDate,
     setCurrentSystemDate,
     advanceSystemDate,
+    setToastMessage,
   } = useSystemStore();
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -441,19 +443,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     const dataUrl = exportCanvas.toDataURL('image/png');
     const defaultName = `${activeSphere?.sphereName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_system_nav_chart.png`;
 
-    if (window.astrolabeAPI) {
-      const res = await window.astrolabeAPI.exportPngFile(dataUrl, defaultName);
-      if (res.success) {
-        alert(`Successfully exported System Chart to:\n${res.data}`);
-      } else {
-        alert(`Export failed: ${res.error}`);
-      }
-    } else {
-      const link = document.createElement('a');
-      link.download = defaultName;
-      link.href = dataUrl;
-      link.click();
-    }
+    await saveCanvasExport(dataUrl, defaultName, 'Navigation Chart', setToastMessage);
   };
 
 

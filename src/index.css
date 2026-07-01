@@ -335,3 +335,64 @@ h1, h2, h3, h4, h5, .font-title {
   font-size: 10px;
   color: var(--color-text-muted);
 }
+
+/* Toast Notification Box */
+.toast-container {
+  position: fixed;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  pointer-events: none;
+  animation: slideDownToast 0.3s ease-out;
+}
+
+.toast-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--border-radius-m);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--color-border-parchment);
+}
+
+.toast-box.success {
+  background-color: #1c2e24;
+  color: #a3e635;
+  border-color: #273e31;
+}
+
+.toast-box.error {
+  background-color: #3b1b1b;
+  color: #f87171;
+  border-color: #582424;
+}
+
+.toast-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.toast-dot.success {
+  background-color: #a3e635;
+}
+
+.toast-dot.error {
+  background-color: #f87171;
+}
+
+@keyframes slideDownToast {
+  from {
+    top: 40px;
+    opacity: 0;
+  }
+  to {
+    top: 60px;
+    opacity: 1;
+  }
+}
