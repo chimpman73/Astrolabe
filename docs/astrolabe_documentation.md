@@ -174,7 +174,7 @@ Three quick-access buttons are directly available in the top navbar:
 
 #### Panel 1: System Editor (Left Pane)
 A vertical panel of width 360px.
-* **Inline Code Editor**: Text area that loads and displays the active system JSON configuration.
+* **Inline Form/Card Editor**: Form fields that load and display active celestial config parameters. Uses a scroll wrapper (`overflow-y: auto`) that provides scrollbar visibility and native mouse-wheel scrolling.
 * **On-the-fly Validation**: Parses input dynamically. Shows details of JSON syntax errors or schema validation warnings in a red alert banner.
 * **Apply & Save**: Commits edits directly to the local save folder.
 
@@ -185,19 +185,21 @@ A vertical strip (fixed width 280px) displaying a radial hierarchy.
 * **Dynamic Scaling & Boundaries**:
   * If the Crystal Shell outline is **ON**, the drawing boundary `shellDistance` defaults to `2 * maxDistance`, centering the furthest planet on screen and allocating the top half of the canvas to the shell and navigation metadata.
   * If the Crystal Shell outline is toggled **OFF**, the drawing boundary `shellDistance` recalibrates to `maxDistance`, scaling the furthest planet directly to the top of the canvas and distributing all planets proportionally across the full screen height (with proportional margins to prevent clipping).
-* **Scope**: Displays only objects directly orbiting the central star (ignoring moons).
+* **Scope**: Displays only objects directly orbiting the central star (ignoring moons, satellites, and sub-orbiting planets).
+* **Typography**: Celestial object labels (names and distances) are drawn with **ITC Eras-Bold** at a 1.5x scale multiplier for improved legibility. Shell boundary headers are rendered using the gothic fantasy font **Mephisto**.
 * **Compact Controls**: Small overlays to switch background mode (Light/Dark), toggle the shell boundary outline, toggle distance labels (DIST: ON/OFF), and export a high-res portrait PNG (300 DPI).
 
 #### Panel 3: Navigation Chart (Right Pane)
 A responsive map canvas occupying all remaining screen width (`flex: 1`).
 * **Dynamic Sizing**: Uses `ResizeObserver` to read container width and height. Resizes the canvas drawing buffer on window adjustments to prevent stretching or clipping.
-* **Scale-to-Fit**: Automatically updates zoom and centering offsets on load or window resize to ensure the entire Crystal Sphere shell remains visible within the viewport.
+* **Scale-to-Fit**: Automatically updates zoom and centering offsets on load or window resize to ensure the entire Crystal Sphere shell remains visible within the viewport. Autofit dimensions are calculated exclusively using primary celestial bodies that orbit the central star directly (excluding sub-orbiting planets).
 * **Simulation controls**: Scrubber controls and play/pause options to progress `currentSystemDate` and animate orbital vectors.
-* **Chart Export**: Combines map views to export a high-res landscape PNG (300 DPI).
+* **Chart Export**: Combines map views to export a high-res landscape PNG (300 DPI), featuring a left-pane System Directory list where sub-orbiting planets are correctly nested under their parent bodies instead of duplicate primary lists.
 
 ---
 
 ## 5. Technology Stack Recommendations
-* **Frontend**: React (TypeScript) + custom CSS custom properties (cinzel/outfit parchment theme).
+* **Frontend**: React (TypeScript) + custom CSS custom properties. Uses local `@font-face` loads for **Mephisto** (general application layers) and **ITC Eras-Bold** (canvas object labels).
+* **Font Loading Hook**: Uses `document.fonts.ready` observer in React component hooks to trigger automatic canvas redraws once font files have loaded asynchronously.
 * **State Management**: Zustand to coordinate dates, configurations, and file loading states.
 * **Native Wrappers**: Electron prebuilt binary exposing filesystem methods securely via IPC and preload contexts.
