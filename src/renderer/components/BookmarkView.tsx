@@ -21,14 +21,20 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Filter objects to only those that orbit the central star (orbitedObjectName is null or empty)
-  const planetaryObjects = activeSphere
-    ? activeSphere.objects.filter((obj) => !obj.orbitedObjectName && obj.distanceOrbited > 0)
-    : [];
-
   const centralStar = activeSphere
-    ? activeSphere.objects.find((obj) => !obj.orbitedObjectName && obj.distanceOrbited === 0) || activeSphere.objects[0]
+    ? activeSphere.objects.find((obj) => obj.type === 'star' || (!obj.orbitedObjectName && obj.distanceOrbited === 0)) || activeSphere.objects[0]
     : null;
+
+  // Filter objects to only those that orbit the central star (type === 'planet' or implicit star orbiters)
+  const planetaryObjects = activeSphere
+    ? activeSphere.objects.filter((obj) => 
+        obj.distanceOrbited > 0 && (
+          obj.type === 'planet' || 
+          !obj.orbitedObjectName || 
+          (centralStar && obj.orbitedObjectName === centralStar.name)
+        )
+      )
+    : [];
 
   // Furthest planetary distance
   const maxDistance = planetaryObjects.reduce((max, obj) => Math.max(max, obj.distanceOrbited), 0.1);

@@ -55,7 +55,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
   const objects = activeSphere?.objects || [];
   
   // Find central body
-  const centralStar = objects.find((o) => !o.orbitedObjectName && o.distanceOrbited === 0) || objects[0];
+  const centralStar = objects.find((o) => o.type === 'star' || (!o.orbitedObjectName && o.distanceOrbited === 0)) || objects[0];
 
   // Resolve positions
   const positions = calculateSystemPositions(objects, currentSystemDate);
@@ -84,7 +84,13 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     if (objects.length === 0) return;
     
     // Find max distance of primary objects
-    const primaryObjects = objects.filter((o) => !o.orbitedObjectName && o.distanceOrbited > 0);
+    const primaryObjects = objects.filter((o) => 
+      o.distanceOrbited > 0 && (
+        o.type === 'planet' || 
+        !o.orbitedObjectName || 
+        (centralStar && o.orbitedObjectName === centralStar.name)
+      )
+    );
     const maxDist = primaryObjects.reduce((max, o) => Math.max(max, o.distanceOrbited), 0.1);
     
     // The Crystal Sphere Shell is drawn at 2 * maxDist. We want it to fit comfortably inside the canvas viewport.
@@ -175,14 +181,21 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
       if (orbitRadius > 0) {
         ctx.beginPath();
         ctx.arc(parentProj.x, parentProj.y, orbitRadius, 0, 2 * Math.PI);
-        ctx.lineWidth = obj.orbitedObjectName ? 0.75 : 1.2;
-        ctx.strokeStyle = obj.orbitedObjectName ? colorOrbitDash : colorOrbit;
+        const isPrimaryOrbit = !obj.orbitedObjectName || obj.type === 'planet' || (centralStar && obj.orbitedObjectName === centralStar.name);
+        ctx.lineWidth = isPrimaryOrbit ? 1.2 : 0.75;
+        ctx.strokeStyle = isPrimaryOrbit ? colorOrbit : colorOrbitDash;
         ctx.stroke();
       }
     });
 
     // 2. Draw outer Crystal Sphere Shell boundary if max planet exists
-    const primaryObjects = objects.filter((o) => !o.orbitedObjectName && o.distanceOrbited > 0);
+    const primaryObjects = objects.filter((o) => 
+      o.distanceOrbited > 0 && (
+        o.type === 'planet' || 
+        !o.orbitedObjectName || 
+        (centralStar && o.orbitedObjectName === centralStar.name)
+      )
+    );
     if (primaryObjects.length > 0) {
       const maxDist = primaryObjects.reduce((max, o) => Math.max(max, o.distanceOrbited), 0.1);
       const shellProj = project(0, 0);
@@ -341,7 +354,13 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     
     if (mapCtx) {
       // Auto-fit zoom specifically for the export pane size
-      const primaryObjects = objects.filter((o) => !o.orbitedObjectName && o.distanceOrbited > 0);
+      const primaryObjects = objects.filter((o) => 
+        o.distanceOrbited > 0 && (
+          o.type === 'planet' || 
+          !o.orbitedObjectName || 
+          (centralStar && o.orbitedObjectName === centralStar.name)
+        )
+      );
       const maxDist = primaryObjects.reduce((max, o) => Math.max(max, o.distanceOrbited), 0.1);
       const exportZoom = (mapW * 0.4) / maxDist;
       const exportPan = { x: mapW / 2, y: mapH / 2 };
@@ -374,7 +393,11 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     let curY = 320;
 
     // Render primary planets
-    const primaries = objects.filter((o) => !o.orbitedObjectName);
+    const primaries = objects.filter((o) => 
+      o.type === 'star' || 
+      o.type === 'planet' || 
+      !o.orbitedObjectName
+    );
     
     primaries.forEach((obj) => {
       if (curY > exportHeight - 200) return; // Bounds limit
