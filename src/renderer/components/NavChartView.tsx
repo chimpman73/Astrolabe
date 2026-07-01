@@ -86,7 +86,6 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     // Find max distance of primary objects
     const primaryObjects = objects.filter((o) => 
       o.distanceOrbited > 0 && (
-        o.type === 'planet' || 
         !o.orbitedObjectName || 
         (centralStar && o.orbitedObjectName === centralStar.name)
       )
@@ -181,7 +180,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
       if (orbitRadius > 0) {
         ctx.beginPath();
         ctx.arc(parentProj.x, parentProj.y, orbitRadius, 0, 2 * Math.PI);
-        const isPrimaryOrbit = !obj.orbitedObjectName || obj.type === 'planet' || (centralStar && obj.orbitedObjectName === centralStar.name);
+        const isPrimaryOrbit = !obj.orbitedObjectName || (centralStar && obj.orbitedObjectName === centralStar.name);
         ctx.lineWidth = isPrimaryOrbit ? 1.2 : 0.75;
         ctx.strokeStyle = isPrimaryOrbit ? colorOrbit : colorOrbitDash;
         ctx.stroke();
@@ -191,7 +190,6 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     // 2. Draw outer Crystal Sphere Shell boundary if max planet exists
     const primaryObjects = objects.filter((o) => 
       o.distanceOrbited > 0 && (
-        o.type === 'planet' || 
         !o.orbitedObjectName || 
         (centralStar && o.orbitedObjectName === centralStar.name)
       )
@@ -356,7 +354,6 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
       // Auto-fit zoom specifically for the export pane size
       const primaryObjects = objects.filter((o) => 
         o.distanceOrbited > 0 && (
-          o.type === 'planet' || 
           !o.orbitedObjectName || 
           (centralStar && o.orbitedObjectName === centralStar.name)
         )
@@ -395,8 +392,8 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     // Render primary planets
     const primaries = objects.filter((o) => 
       o.type === 'star' || 
-      o.type === 'planet' || 
-      !o.orbitedObjectName
+      !o.orbitedObjectName || 
+      (centralStar && o.orbitedObjectName === centralStar.name)
     );
     
     primaries.forEach((obj) => {

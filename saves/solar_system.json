@@ -18,7 +18,7 @@
       "type": "planet",
       "size": 6,
       "description": "The smallest planet, closest to Sol, experiencing extreme temperature variations.",
-      "orbitedObjectName": null,
+      "orbitedObjectName": "Sol",
       "distanceOrbited": 0.39,
       "initialAngle": 45,
       "orbitalPeriodDays": 88
@@ -28,7 +28,7 @@
       "type": "planet",
       "size": 12,
       "description": "A terrestrial planet enveloped in a dense, carbon dioxide-rich atmosphere with runaway greenhouse temperatures.",
-      "orbitedObjectName": null,
+      "orbitedObjectName": "Sol",
       "distanceOrbited": 0.72,
       "initialAngle": 120,
       "orbitalPeriodDays": 225
@@ -38,7 +38,7 @@
       "type": "planet",
       "size": 13,
       "description": "Our home planet, a vibrant blue world rich in water, oxygen, and diverse life.",
-      "orbitedObjectName": null,
+      "orbitedObjectName": "Sol",
       "distanceOrbited": 1,
       "initialAngle": 0,
       "orbitalPeriodDays": 365
@@ -58,7 +58,7 @@
       "type": "planet",
       "size": 8,
       "description": "The Red Planet, characterized by iron oxide soil, polar ice caps, and historical water channels.",
-      "orbitedObjectName": null,
+      "orbitedObjectName": "Sol",
       "distanceOrbited": 1.52,
       "initialAngle": 220,
       "orbitalPeriodDays": 687
@@ -88,7 +88,7 @@
       "type": "planet",
       "size": 32,
       "description": "The largest planet in the system, a gas giant with massive storms and a powerful magnetic field.",
-      "orbitedObjectName": null,
+      "orbitedObjectName": "Sol",
       "distanceOrbited": 2.8,
       "initialAngle": 315,
       "orbitalPeriodDays": 4333

@@ -25,11 +25,10 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
     ? activeSphere.objects.find((obj) => obj.type === 'star' || (!obj.orbitedObjectName && obj.distanceOrbited === 0)) || activeSphere.objects[0]
     : null;
 
-  // Filter objects to only those that orbit the central star (type === 'planet' or implicit star orbiters)
+  // Filter objects to only those that orbit the central star (directly orbiting parent is central star/null)
   const planetaryObjects = activeSphere
     ? activeSphere.objects.filter((obj) => 
         obj.distanceOrbited > 0 && (
-          obj.type === 'planet' || 
           !obj.orbitedObjectName || 
           (centralStar && obj.orbitedObjectName === centralStar.name)
         )

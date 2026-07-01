@@ -33,13 +33,13 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
   // If no active sphere is loaded
   if (!activeSphere) {
     return (
-      <div className="flex flex-col flex-1 min-h-0 bg-[var(--color-bg-panel)] p-4 shadow-lg overflow-hidden">
-        <div className="border-b border-[var(--color-border-parchment)] pb-2 mb-3 shrink-0 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+      <div className="save-manager-container">
+        <div className="save-manager-header">
+          <div className="save-manager-header-title">
             {onCollapse && (
               <button
                 onClick={onCollapse}
-                className="p-1 rounded hover:bg-[var(--color-bg-base)] text-[var(--color-text-muted)] border border-transparent hover:border-[var(--color-border-parchment)] transition-all"
+                className="save-manager-collapse-btn"
                 title="Collapse Editor Panel"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
@@ -50,7 +50,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
             </h4>
           </div>
         </div>
-        <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
+        <div className="save-manager-empty-content">
           <Settings className="w-12 h-12 text-[var(--color-border-parchment)] stroke-[1] mb-2 animate-spin-slow" />
           <p className="text-[11px] text-[var(--color-text-muted)] max-w-[200px]">
             Please open an existing crystal system configuration file to enable form editing.
@@ -116,15 +116,15 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
   };
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 bg-[var(--color-bg-panel)] p-4 shadow-lg overflow-hidden">
+    <div className="save-manager-container">
       
       {/* Sidebar Header */}
-      <div className="border-b border-[var(--color-border-parchment)] pb-2 mb-3 shrink-0 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="save-manager-header">
+        <div className="save-manager-header-title">
           {onCollapse && (
             <button
               onClick={onCollapse}
-              className="p-1 rounded hover:bg-[var(--color-bg-base)] text-[var(--color-text-muted)] border border-transparent hover:border-[var(--color-border-parchment)] transition-all"
+              className="save-manager-collapse-btn"
               title="Collapse Editor Panel"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
@@ -135,17 +135,17 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
           </h4>
         </div>
         
-        <span className="text-[9px] bg-green-950 border border-green-800 text-green-400 font-bold px-1.5 py-0.5 rounded shadow-sm">
+        <span className="save-manager-sync-badge">
           LIVE SYNCED
         </span>
       </div>
 
       {/* Editor Content Area */}
-      <div className="flex-1 overflow-y-auto pr-1 min-h-0">
+      <div className="save-manager-content">
         
         {/* Section: System Metadata */}
-        <div className="bg-[var(--color-bg-base)] border border-[var(--color-border-parchment)] p-3 rounded mb-4 shadow-sm">
-          <div className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+        <div className="save-manager-section">
+          <div className="save-manager-section-title">
             <Compass className="w-3 h-3 text-[var(--color-accent-gold)]" /> System Config
           </div>
           
@@ -171,7 +171,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
         </div>
 
         {/* Section: Celestial Bodies Header */}
-        <div className="flex justify-between items-center mb-2.5">
+        <div className="save-manager-section-header">
           <h5 className="font-title text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
             Celestial Bodies
           </h5>
@@ -183,7 +183,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
         </button>
 
         {/* Dynamic Accordion list of bodies */}
-        <div className="space-y-2">
+        <div className="save-manager-list">
           {activeSphere.objects.map((obj, index) => {
             const isExpanded = expandedIndex === index;
             
@@ -197,8 +197,8 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                 >
                   <div className="editor-card-title">
                     {renderTypeIcon(obj.type)}
-                    <span className="truncate max-w-[140px]">{obj.name}</span>
-                    <span className="text-[9px] text-[var(--color-text-muted)] font-normal italic capitalize">
+                    <span className="editor-card-name">{obj.name}</span>
+                    <span className="editor-card-type-label">
                       ({obj.type})
                     </span>
                   </div>
@@ -206,12 +206,12 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                   <div className="editor-card-actions" onClick={e => e.stopPropagation()}>
                     <button
                       onClick={() => handleDeleteObject(index, obj.name)}
-                      className="p-1 rounded text-red-600 hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+                      className="editor-card-delete-btn"
                       title={`Delete ${obj.name}`}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
-                    <div className="text-[var(--color-text-muted)]">
+                    <div className="editor-card-chevron">
                       {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                     </div>
                   </div>
