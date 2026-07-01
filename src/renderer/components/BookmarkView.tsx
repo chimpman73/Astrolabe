@@ -99,7 +99,7 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
       ctx.stroke();
 
       // Star label
-      ctx.font = `bold ${Math.max(12, width * 0.045)}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
+      ctx.font = `bold ${Math.max(12, width * 0.045) * 1.5}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
       ctx.fillStyle = colorStroke;
       ctx.textAlign = 'center';
       ctx.fillText(centralStar.name.toUpperCase(), centerX, height - starRadius - 8);
@@ -136,7 +136,7 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
       ctx.stroke();
 
       // Shell label at the top center
-      ctx.font = `bold ${Math.max(10, width * 0.035)}px 'Mephisto', 'Cinzel', serif`;
+      ctx.font = `bold ${Math.max(10, width * 0.035) * 1.5}px 'Mephisto', 'Cinzel', serif`;
       ctx.fillStyle = colorStroke;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
@@ -172,19 +172,19 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
       }
 
       // Draw name label to the right
-      ctx.font = `normal ${Math.max(10, width * 0.035)}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
+      ctx.font = `normal ${Math.max(10, width * 0.035) * 1.5}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
       ctx.fillStyle = colorStroke;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText(obj.name, centerX + objSize + 8, objY);
+      ctx.fillText(obj.name, centerX + objSize + 12, objY);
 
       // Draw distance label to the left
       if (showDistance) {
-        ctx.font = `italic ${Math.max(8, width * 0.028)}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
+        ctx.font = `italic ${Math.max(8, width * 0.028) * 1.5}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
         ctx.fillStyle = colorMuted;
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
-        ctx.fillText(`${obj.distanceOrbited.toFixed(2)} AU`, centerX - objSize - 8, objY);
+        ctx.fillText(`${obj.distanceOrbited.toFixed(2)} AU`, centerX - objSize - 12, objY);
       }
     });
 
