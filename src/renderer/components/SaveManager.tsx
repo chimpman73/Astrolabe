@@ -33,7 +33,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
   // If no active sphere is loaded
   if (!activeSphere) {
     return (
-      <div className="flex flex-col h-full bg-[var(--color-bg-panel)] scroll-border p-4 shadow-lg overflow-hidden">
+      <div className="flex flex-col flex-1 min-h-0 bg-[var(--color-bg-panel)] p-4 shadow-lg overflow-hidden">
         <div className="border-b border-[var(--color-border-parchment)] pb-2 mb-3 shrink-0 flex items-center justify-between">
           <div className="flex items-center gap-2">
             {onCollapse && (
@@ -116,7 +116,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[var(--color-bg-panel)] scroll-border p-4 shadow-lg overflow-hidden">
+    <div className="flex flex-col flex-1 min-h-0 bg-[var(--color-bg-panel)] p-4 shadow-lg overflow-hidden">
       
       {/* Sidebar Header */}
       <div className="border-b border-[var(--color-border-parchment)] pb-2 mb-3 shrink-0 flex items-center justify-between">
@@ -141,7 +141,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
       </div>
 
       {/* Editor Content Area */}
-      <div className="flex-1 overflow-y-auto pr-1 select-none">
+      <div className="flex-1 overflow-y-auto pr-1 min-h-0">
         
         {/* Section: System Metadata */}
         <div className="bg-[var(--color-bg-base)] border border-[var(--color-border-parchment)] p-3 rounded mb-4 shadow-sm">
