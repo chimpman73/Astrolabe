@@ -1,0 +1,97 @@
+{
+  "sphereName": "Solar System",
+  "currentCampaignDate": "2026-06-30",
+  "currentSystemDate": 0,
+  "objects": [
+    {
+      "name": "Sol",
+      "type": "star",
+      "size": 60,
+      "description": "The central star of the Solar System, providing light and heat to all orbiting worlds.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 0,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 1
+    },
+    {
+      "name": "Mercury",
+      "type": "planet",
+      "size": 6,
+      "description": "The smallest planet, closest to Sol, experiencing extreme temperature variations.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 0.39,
+      "initialAngle": 45,
+      "orbitalPeriodDays": 88
+    },
+    {
+      "name": "Venus",
+      "type": "planet",
+      "size": 12,
+      "description": "A terrestrial planet enveloped in a dense, carbon dioxide-rich atmosphere with runaway greenhouse temperatures.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 0.72,
+      "initialAngle": 120,
+      "orbitalPeriodDays": 225
+    },
+    {
+      "name": "Earth",
+      "type": "planet",
+      "size": 13,
+      "description": "Our home planet, a vibrant blue world rich in water, oxygen, and diverse life.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 1,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 365
+    },
+    {
+      "name": "Luna",
+      "type": "moon",
+      "size": 3.5,
+      "description": "Earth's single natural satellite, responsible for tidal locks and ocean movements.",
+      "orbitedObjectName": "Earth",
+      "distanceOrbited": 0.15,
+      "initialAngle": 90,
+      "orbitalPeriodDays": 27
+    },
+    {
+      "name": "Mars",
+      "type": "planet",
+      "size": 8,
+      "description": "The Red Planet, characterized by iron oxide soil, polar ice caps, and historical water channels.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 1.52,
+      "initialAngle": 220,
+      "orbitalPeriodDays": 687
+    },
+    {
+      "name": "Phobos",
+      "type": "moon",
+      "size": 1.5,
+      "description": "The larger and inner moon of Mars, orbiting extremely close to its parent body.",
+      "orbitedObjectName": "Mars",
+      "distanceOrbited": 0.08,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 0.3
+    },
+    {
+      "name": "Deimos",
+      "type": "moon",
+      "size": 1,
+      "description": "The smaller and outer moon of Mars, taking a longer orbit around the red planet.",
+      "orbitedObjectName": "Mars",
+      "distanceOrbited": 0.14,
+      "initialAngle": 180,
+      "orbitalPeriodDays": 1.2
+    },
+    {
+      "name": "Jupiter",
+      "type": "planet",
+      "size": 32,
+      "description": "The largest planet in the system, a gas giant with massive storms and a powerful magnetic field.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 2.8,
+      "initialAngle": 315,
+      "orbitalPeriodDays": 4333
+    }
+  ]
+}
