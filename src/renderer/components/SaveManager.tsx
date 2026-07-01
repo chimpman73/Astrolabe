@@ -108,8 +108,8 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
           )}
-          <h4 className="font-title text-xs font-bold tracking-wider text-[var(--color-text-main)] uppercase">
-            JSON EDITOR
+          <h4 className="font-title text-xs font-bold tracking-wider text-[var(--color-text-main)]">
+            System Editor
           </h4>
         </div>
         

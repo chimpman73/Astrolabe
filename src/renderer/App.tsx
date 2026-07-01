@@ -146,13 +146,13 @@ const App: React.FC = () => {
               <div
                 onClick={() => setEditorCollapsed(false)}
                 className="collapsed-panel"
-                title="Expand Editor Panel"
+                title="Expand System Editor"
               >
                 <button className="p-1 rounded bg-[var(--color-bg-base)] border border-[var(--color-border-parchment)] text-[var(--color-text-muted)] mb-4">
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
                 <div className="vertical-text">
-                  JSON EDITOR
+                  System Editor
                 </div>
               </div>
             )}
@@ -166,13 +166,13 @@ const App: React.FC = () => {
               <div
                 onClick={() => setBookmarkCollapsed(false)}
                 className="collapsed-panel"
-                title="Expand Bookmark Panel"
+                title="Expand Bookmark"
               >
                 <button className="p-1 rounded bg-[var(--color-bg-base)] border border-[var(--color-border-parchment)] text-[var(--color-text-muted)] mb-4">
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
                 <div className="vertical-text">
-                  BOOKMARK MAP
+                  Bookmark
                 </div>
               </div>
             )}
@@ -186,13 +186,13 @@ const App: React.FC = () => {
               <div
                 onClick={() => setSystemNavCollapsed(false)}
                 className="collapsed-panel last"
-                title="Expand Map Panel"
+                title="Expand Navigation Chart"
               >
                 <button className="p-1 rounded bg-[var(--color-bg-base)] border border-[var(--color-border-parchment)] text-[var(--color-text-muted)] mb-4">
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
                 <div className="vertical-text">
-                  SYSTEM CHART
+                  Navigation Chart
                 </div>
               </div>
             )}

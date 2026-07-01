@@ -473,8 +473,8 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
           )}
-          <h4 className="font-title text-xs font-bold tracking-wider text-[var(--color-text-main)] uppercase whitespace-nowrap">
-            SYSTEM CHART
+          <h4 className="font-title text-xs font-bold tracking-wider text-[var(--color-text-main)] whitespace-nowrap">
+            Navigation Chart
           </h4>
           
           <div className="w-[1px] h-4 bg-[var(--color-border-parchment)] mx-1" />
