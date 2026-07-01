@@ -463,28 +463,39 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
       {/* Toolbar Overlay */}
       <div className="p-3 bg-opacity-70 backdrop-blur-md border-b border-[var(--color-border-parchment)] flex items-center justify-between bg-[var(--color-bg-panel)] shrink-0">
         
-        {/* Simulation Time Tracker */}
-        <div className="flex items-center gap-4">
-          <div className="text-xs font-semibold">
-            Current Epoch: <span className="font-mono text-sm text-[var(--color-accent-red)]">{Math.round(currentSystemDate)}</span> Days
-          </div>
-          <div className="text-[10px] text-[var(--color-text-muted)] italic hidden sm:inline">
-            Calendar Date: {activeSphere?.currentCampaignDate || 'Epoch Start'}
+        <div className="flex items-center gap-2">
+          {onCollapse && (
+            <button
+              onClick={onCollapse}
+              className="p-1 rounded hover:bg-[var(--color-bg-base)] text-[var(--color-text-muted)] border border-transparent hover:border-[var(--color-border-parchment)] transition-all"
+              title="Collapse Map Panel"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+          )}
+          <h4 className="font-title text-xs font-bold tracking-wider text-[var(--color-text-main)] uppercase whitespace-nowrap">
+            SYSTEM CHART
+          </h4>
+          
+          <div className="w-[1px] h-4 bg-[var(--color-border-parchment)] mx-1" />
+          
+          <div className="text-[10px] font-semibold hidden md:inline">
+            Epoch: <span className="font-mono text-xs text-[var(--color-accent-red)]">{Math.round(currentSystemDate)}</span> Days
           </div>
         </div>
 
         {/* Map navigation and theme items */}
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase mr-1">Skin:</span>
+          <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase mr-1 hidden sm:inline">Skin:</span>
           <button
             onClick={() => setMapTheme('parchment')}
-            className={`px-2 py-0.5 border border-[var(--color-border-parchment)] text-[10px] ${mapTheme === 'parchment' ? 'bg-[var(--color-accent-gold)] text-[#2b2316] font-semibold' : 'bg-transparent text-[var(--color-text-muted)]'}`}
+            className={`px-1.5 py-0.5 border border-[var(--color-border-parchment)] text-[9px] ${mapTheme === 'parchment' ? 'bg-[var(--color-accent-gold)] text-[#2b2316] font-semibold' : 'bg-transparent text-[var(--color-text-muted)]'}`}
           >
             Vellum
           </button>
           <button
             onClick={() => setMapTheme('space')}
-            className={`px-2 py-0.5 border border-[var(--color-border-parchment)] text-[10px] ${mapTheme === 'space' ? 'bg-blue-600 text-white font-semibold' : 'bg-transparent text-[var(--color-text-muted)]'}`}
+            className={`px-1.5 py-0.5 border border-[var(--color-border-parchment)] text-[9px] ${mapTheme === 'space' ? 'bg-blue-600 text-white font-semibold' : 'bg-transparent text-[var(--color-text-muted)]'}`}
           >
             Starfield
           </button>
@@ -496,40 +507,28 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
             title="Zoom In"
             className="p-1 scroll-border bg-[var(--color-bg-base)] hover:bg-[var(--color-border-parchment)] transition-colors"
           >
-            <ZoomIn className="w-3.5 h-3.5" />
+            <ZoomIn className="w-3 h-3" />
           </button>
           <button
             onClick={() => handleZoom(0.8)}
             title="Zoom Out"
             className="p-1 scroll-border bg-[var(--color-bg-base)] hover:bg-[var(--color-border-parchment)] transition-colors"
           >
-            <ZoomOut className="w-3.5 h-3.5" />
+            <ZoomOut className="w-3 h-3" />
           </button>
           <button
             onClick={handleAutoFit}
             title="Auto-Fit System"
             className="p-1 scroll-border bg-[var(--color-bg-base)] hover:bg-[var(--color-border-parchment)] transition-colors"
           >
-            <Maximize className="w-3.5 h-3.5" />
+            <Maximize className="w-3 h-3" />
           </button>
           <button
             onClick={handleExport}
-            className="flex items-center gap-1 px-2.5 py-1 bg-[var(--color-accent-gold)] text-[#2b2316] font-title font-bold text-[10px] rounded hover:brightness-95 transition-all shadow-sm"
+            className="flex items-center gap-1 px-2 py-0.5 bg-[var(--color-accent-gold)] text-[#2b2316] font-title font-bold text-[9px] rounded hover:brightness-95 transition-all shadow-sm"
           >
-            <Download className="w-3 h-3" /> Export Chart
+            <Download className="w-2.5 h-2.5" /> Export
           </button>
-          {onCollapse && (
-            <>
-              <div className="w-[1px] h-4 bg-[var(--color-border-parchment)] mx-1" />
-              <button
-                onClick={onCollapse}
-                className="p-1 scroll-border bg-[var(--color-bg-base)] hover:bg-[var(--color-border-parchment)] hover:text-[#2b2316] transition-colors rounded"
-                title="Collapse Map Panel"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-              </button>
-            </>
-          )}
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSystemStore } from '../store/useSystemStore';
-import { Save, AlertCircle, RefreshCw, ChevronLeft } from 'lucide-react';
+import { AlertCircle, ChevronLeft } from 'lucide-react';
 
 interface SaveManagerProps {
   onCollapse?: () => void;
@@ -11,7 +11,6 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
     activeSphere,
     saveCurrentSphere,
     setSphere,
-    savesList,
   } = useSystemStore();
 
   const [jsonText, setJsonText] = useState('');
@@ -93,35 +92,47 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
     }
   };
 
-  // Find active filename for title display
-  const activeFile = savesList.find((file) => file.sphereName === activeSphere?.sphereName);
 
   return (
     <div className="flex flex-col h-full bg-[var(--color-bg-panel)] scroll-border p-4 shadow-lg overflow-hidden">
       
       {/* Sidebar Header */}
-      <div className="border-b border-[var(--color-border-parchment)] pb-2 mb-3 shrink-0 flex justify-between items-start">
-        <div className="overflow-hidden flex-1">
-          <div className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
-            Active Configuration
-          </div>
-          <h3 className="font-title text-lg font-bold truncate">
-            {activeSphere?.sphereName || 'No Sphere Loaded'}
-          </h3>
-          {activeFile && (
-            <div className="text-[10px] font-mono text-[var(--color-text-muted)] truncate select-all">
-              {activeFile.filename}
-            </div>
+      <div className="border-b border-[var(--color-border-parchment)] pb-2 mb-3 shrink-0 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {onCollapse && (
+            <button
+              onClick={onCollapse}
+              className="p-1 rounded hover:bg-[var(--color-bg-base)] text-[var(--color-text-muted)] border border-transparent hover:border-[var(--color-border-parchment)] transition-all"
+              title="Collapse Editor Panel"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
           )}
+          <h4 className="font-title text-xs font-bold tracking-wider text-[var(--color-text-main)] uppercase">
+            JSON EDITOR
+          </h4>
         </div>
-        {onCollapse && (
-          <button
-            onClick={onCollapse}
-            className="p-1 rounded bg-[var(--color-bg-base)] border border-[var(--color-border-parchment)] hover:bg-[var(--color-border-parchment)] transition-colors text-[var(--color-text-muted)] mt-1 ml-2"
-            title="Collapse Editor Panel"
-          >
-            <ChevronLeft className="w-3.5 h-3.5" />
-          </button>
+        
+        {/* Controls: Discard / Apply & Save */}
+        {activeSphere && (
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={handleDiscardChanges}
+              disabled={!isDirty || loading}
+              className="text-[9px] font-bold px-2 py-0.5 bg-[var(--color-bg-base)] scroll-border hover:bg-[var(--color-border-parchment)] transition-colors disabled:opacity-50"
+              title="Discard all unapplied text modifications"
+            >
+              Discard
+            </button>
+            <button
+              onClick={handleApplyChanges}
+              disabled={!isDirty || !!validationError || loading}
+              className="text-[9px] font-bold px-2 py-0.5 bg-[var(--color-accent-gold)] text-[#2b2316] rounded hover:brightness-95 transition-all disabled:opacity-50"
+              title="Apply changes and save to file"
+            >
+              {loading ? 'APPLYING...' : 'APPLY & SAVE'}
+            </button>
+          </div>
         )}
       </div>
 
@@ -156,32 +167,6 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
         </div>
       )}
 
-      {/* Actions Bar */}
-      {activeSphere && (
-        <div className="flex gap-2 mt-3 shrink-0">
-          <button
-            onClick={handleDiscardChanges}
-            disabled={!isDirty || loading}
-            className="flex-1 py-2 border border-[var(--color-border-parchment)] hover:bg-[var(--color-bg-base)] text-xs font-semibold rounded transition-colors disabled:opacity-50"
-            title="Discard all unapplied text modifications"
-          >
-            Discard
-          </button>
-          
-          <button
-            onClick={handleApplyChanges}
-            disabled={!isDirty || !!validationError || loading}
-            className="flex-[2] py-2 bg-[var(--color-accent-gold)] hover:brightness-95 text-[#2b2316] font-title font-bold text-xs rounded shadow flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 disabled:brightness-100"
-          >
-            {loading ? (
-              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Save className="w-3.5 h-3.5" />
-            )}
-            Apply & Save
-          </button>
-        </div>
-      )}
     </div>
   );
 };

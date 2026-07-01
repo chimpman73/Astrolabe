@@ -126,7 +126,7 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
       ctx.fillText(
         (activeSphere?.sphereName || 'CRYSTAL SHELL').toUpperCase() + ' SHELL',
         centerX,
-        15
+        32
       );
     }
 
@@ -228,13 +228,9 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
 
   return (
     <div className="bookmark-view-content">
-      <div className="w-full border-b border-[var(--color-border-parchment)] pb-2 mb-2 shrink-0">
-        <div className="flex justify-between items-center px-1">
-          <span className="w-4" />
-          <h4 className="font-title text-xs font-bold tracking-wider text-[var(--color-text-muted)] text-center flex-1">
-            BOOKMARK MAP
-          </h4>
-          {onCollapse ? (
+      <div className="w-full border-b border-[var(--color-border-parchment)] pb-2 mb-2 shrink-0 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {onCollapse && (
             <button
               onClick={onCollapse}
               className="p-0.5 rounded hover:bg-[var(--color-bg-base)] text-[var(--color-text-muted)] border border-transparent hover:border-[var(--color-border-parchment)] transition-all"
@@ -242,40 +238,41 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
             >
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
-          ) : (
-            <span className="w-4" />
           )}
+          <h4 className="font-title text-xs font-bold tracking-wider text-[var(--color-text-main)] uppercase">
+            BOOKMARK
+          </h4>
         </div>
         
-        {/* Compact Toggles */}
-        <div className="flex justify-center gap-1.5 mt-1.5">
+        {/* Compact Toggles next to Title */}
+        <div className="flex items-center gap-1">
           <button
             onClick={() => setBookmarkBackgroundMode(bookmarkBackgroundMode === 'light' ? 'dark' : 'light')}
-            className="text-[9px] font-bold px-2 py-0.5 bg-[var(--color-bg-base)] scroll-border hover:bg-[var(--color-border-parchment)] transition-colors"
+            className="text-[8px] font-bold px-1.5 py-0.5 bg-[var(--color-bg-base)] scroll-border hover:bg-[var(--color-border-parchment)] transition-colors"
             title="Toggle Light/Dark Background"
           >
             {bookmarkBackgroundMode.toUpperCase()}
           </button>
           <button
             onClick={() => setBookmarkShowShell(!bookmarkShowShell)}
-            className="text-[9px] font-bold px-2 py-0.5 bg-[var(--color-bg-base)] scroll-border hover:bg-[var(--color-border-parchment)] transition-colors"
+            className="text-[8px] font-bold px-1.5 py-0.5 bg-[var(--color-bg-base)] scroll-border hover:bg-[var(--color-border-parchment)] transition-colors"
             title="Toggle Shell Outline"
           >
-            SHELL: {bookmarkShowShell ? 'ON' : 'OFF'}
+            {bookmarkShowShell ? 'SHELL' : 'NOSHELL'}
           </button>
           <button
             onClick={() => setBookmarkShowDistance(!bookmarkShowDistance)}
-            className="text-[9px] font-bold px-2 py-0.5 bg-[var(--color-bg-base)] scroll-border hover:bg-[var(--color-border-parchment)] transition-colors"
+            className="text-[8px] font-bold px-1.5 py-0.5 bg-[var(--color-bg-base)] scroll-border hover:bg-[var(--color-border-parchment)] transition-colors"
             title="Toggle Distance Labels"
           >
-            DIST: {bookmarkShowDistance ? 'ON' : 'OFF'}
+            {bookmarkShowDistance ? 'DIST' : 'NODIST'}
           </button>
           <button
             onClick={handleExport}
-            className="text-[9px] font-bold px-2 py-0.5 bg-[var(--color-accent-gold)] text-[#2b2316] rounded hover:brightness-95 transition-colors"
+            className="text-[8px] font-bold px-1.5 py-0.5 bg-[var(--color-accent-gold)] text-[#2b2316] rounded hover:brightness-95 transition-colors"
             title="Export 300 DPI PNG"
           >
-            EXPORT
+            EXP
           </button>
         </div>
       </div>
