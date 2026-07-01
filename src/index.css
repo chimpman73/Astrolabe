@@ -1,10 +1,24 @@
 /* Custom Global Styling for Astrolabe Program */
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Outfit:wght@300;400;500;600;700&display=swap');
 
+@font-face {
+  font-family: 'Mephisto';
+  src: url('../fonts/mephisto/MEPHISTO.TTF') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'ITC Eras-Bold';
+  src: url('../fonts/itc-eras-bold_eWFIh/ITC Eras Bold/ITC Eras Bold.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+}
+
 :root {
   /* Theme variables for light parchment (default) */
-  --font-title: 'Cinzel', Georgia, serif;
-  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-title: 'Mephisto', 'Cinzel', Georgia, serif;
+  --font-sans: 'Mephisto', 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   --color-bg-base: #f4edd8; /* Soft vellum/parchment background */
   --color-bg-panel: #ecdcb9; /* Darker parchment panel */

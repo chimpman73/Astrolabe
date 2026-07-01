@@ -17,6 +17,16 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     setToastMessage,
   } = useSystemStore();
 
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    if (document.fonts) {
+      document.fonts.ready.then(() => {
+        setFontsLoaded(true);
+      });
+    }
+  }, []);
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [dimensions, setDimensions] = useState({ width: 850, height: 600 });
@@ -254,8 +264,8 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
       const shouldLabel = obj.type !== 'moon' || activeZoom > 150;
       if (shouldLabel) {
         ctx.font = obj.type === 'star'
-          ? `bold 12px ${colorStroke === '#ffffff' ? 'sans-serif' : 'var(--font-title)'}`
-          : `500 10px var(--font-sans)`;
+          ? `bold 12px 'Mephisto', 'Cinzel', serif`
+          : `500 10px 'Mephisto', 'Outfit', sans-serif`;
         ctx.fillStyle = colorStroke;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
@@ -282,7 +292,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     if (!ctx) return;
 
     drawMap(ctx, dimensions.width, dimensions.height, mapTheme, zoom, pan);
-  }, [activeSphere, currentSystemDate, zoom, pan, mapTheme, objects, positions, dimensions]);
+  }, [activeSphere, currentSystemDate, zoom, pan, mapTheme, objects, positions, dimensions, fontsLoaded]);
 
   // Handle dragging/panning
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -379,10 +389,10 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
 
     // Render Directory Header
     ctx.fillStyle = colorStroke;
-    ctx.font = "bold 60px 'Cinzel', serif";
+    ctx.font = "bold 60px 'Mephisto', 'Cinzel', serif";
     ctx.fillText((activeSphere?.sphereName || 'CRYSTAL SPHERE').toUpperCase(), 110, 160);
 
-    ctx.font = "normal 32px 'Outfit', sans-serif";
+    ctx.font = "normal 32px 'Mephisto', 'Outfit', sans-serif";
     ctx.fillStyle = isParchment ? '#5e4f3c' : '#8e95ad';
     ctx.fillText(`System Directory — Epoch: Day ${currentSystemDate}`, 110, 220);
 
@@ -412,10 +422,10 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
 
       // Draw details
       ctx.fillStyle = colorStroke;
-      ctx.font = "bold 38px 'Cinzel', serif";
+      ctx.font = "bold 38px 'Mephisto', 'Cinzel', serif";
       ctx.fillText(obj.name, 200, curY + 15);
 
-      ctx.font = "italic 24px 'Outfit', sans-serif";
+      ctx.font = "italic 24px 'Mephisto', 'Outfit', sans-serif";
       ctx.fillStyle = isParchment ? '#5e4f3c' : '#8e95ad';
       const period = calculateSystemPositions([obj], 0)[obj.name]?.period || 0;
       ctx.fillText(
@@ -424,7 +434,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
         curY + 50
       );
 
-      ctx.font = "normal 24px 'Outfit', sans-serif";
+      ctx.font = "normal 24px 'Mephisto', 'Outfit', sans-serif";
       ctx.fillStyle = colorStroke;
       
       // Wrap description text
@@ -448,7 +458,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
       // Check moons under this planet
       const moons = objects.filter((m) => m.orbitedObjectName === obj.name);
       if (moons.length > 0) {
-        ctx.font = "bold 22px 'Outfit', sans-serif";
+        ctx.font = "bold 22px 'Mephisto', 'Outfit', sans-serif";
         ctx.fillStyle = isParchment ? '#8f3224' : '#4480e6';
         ctx.fillText(`Moons: ${moons.map((m) => m.name).join(', ')}`, 200, descY + 42);
         descY += 35;

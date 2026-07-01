@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useSystemStore } from '../store/useSystemStore';
 import { ChevronLeft } from 'lucide-react';
 import { saveCanvasExport } from '../utils/exportHelper';
@@ -18,6 +18,16 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
     setBookmarkShowDistance,
     setToastMessage,
   } = useSystemStore();
+
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    if (document.fonts) {
+      document.fonts.ready.then(() => {
+        setFontsLoaded(true);
+      });
+    }
+  }, []);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -89,7 +99,7 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
       ctx.stroke();
 
       // Star label
-      ctx.font = `bold ${Math.max(12, width * 0.045)}px 'Cinzel', serif`;
+      ctx.font = `bold ${Math.max(12, width * 0.045)}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
       ctx.fillStyle = colorStroke;
       ctx.textAlign = 'center';
       ctx.fillText(centralStar.name.toUpperCase(), centerX, height - starRadius - 8);
@@ -126,7 +136,7 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
       ctx.stroke();
 
       // Shell label at the top center
-      ctx.font = `bold ${Math.max(10, width * 0.035)}px 'Cinzel', serif`;
+      ctx.font = `bold ${Math.max(10, width * 0.035)}px 'Mephisto', 'Cinzel', serif`;
       ctx.fillStyle = colorStroke;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
@@ -162,7 +172,7 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
       }
 
       // Draw name label to the right
-      ctx.font = `normal ${Math.max(10, width * 0.035)}px 'Outfit', sans-serif`;
+      ctx.font = `normal ${Math.max(10, width * 0.035)}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
       ctx.fillStyle = colorStroke;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
@@ -170,7 +180,7 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
 
       // Draw distance label to the left
       if (showDistance) {
-        ctx.font = `italic ${Math.max(8, width * 0.028)}px 'Outfit', sans-serif`;
+        ctx.font = `italic ${Math.max(8, width * 0.028)}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
         ctx.fillStyle = colorMuted;
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
@@ -196,7 +206,7 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
 
     // Redraw using canvas layout coordinates
     drawBookmark(ctx, canvas.width, canvas.height, bookmarkBackgroundMode, bookmarkShowShell, bookmarkShowDistance);
-  }, [activeSphere, bookmarkBackgroundMode, bookmarkShowShell, bookmarkShowDistance, planetaryObjects, centralStar]);
+  }, [activeSphere, bookmarkBackgroundMode, bookmarkShowShell, bookmarkShowDistance, planetaryObjects, centralStar, fontsLoaded]);
 
   const handleExport = async () => {
     // High-DPI Export: Bookmark is 3 inches wide x 11 inches tall.
