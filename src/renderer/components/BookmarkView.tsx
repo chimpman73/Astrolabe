@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useSystemStore } from '../store/useSystemStore';
 import { ChevronLeft } from 'lucide-react';
 import { saveCanvasExport } from '../utils/exportHelper';
+import { drawSolidBody, drawElementAffinityBadge, getMotionSuffix } from '../utils/canvasRenderer';
 
 interface BookmarkViewProps {
   onCollapse?: () => void;
@@ -153,10 +154,8 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
       const objY = height - r;
       const sizeMultiplier = width / 300;
       const objSize = Math.max(4, obj.size * 0.6 * sizeMultiplier);
-      const shape = obj.worldShape ?? 'sphere';
 
-      // --- Nebula / Sargasso: cloud shape within bounding box ---
-      // Boundary points: top=(cx, cy-halfH), bottom=(cx, cy+halfH), left=(cx-halfW, cy), right=(cx+halfW, cy)
+      // --- Nebula / Sargasso: cloud shape following the orbital contour ---
       if (obj.type === 'nebula' || obj.type === 'sargasso') {
         const arcDegrees = obj.arcDegrees ?? 30;
         const arcFrac = Math.min(1.0, arcDegrees / 360);
@@ -164,7 +163,12 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
         const cloudW = width * arcFrac;
         // Size value controls how far the cloud expands away from the orbital line
         const halfH = Math.max(8, objSize * 1.5); 
+        
+        // Calculate the angle required to match the target horizontal width (cloudW)
         const halfW = cloudW / 2;
+        const safeR = Math.max(1, r);
+        const halfAngle = halfW >= safeR ? Math.PI : Math.asin(halfW / safeR);
+        
         const cloudFill = obj.type === 'nebula' ? '#6699ff' : '#44bb77';
 
         const isFullRing = arcDegrees >= 359;
@@ -176,27 +180,35 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
         ctx.fillStyle = cloudFill;
         ctx.beginPath();
         
-        // Outer edge (top)
+        // Outer edge (top/outer radius)
         for (let i = 0; i <= numSegments; i++) {
           const t = i / numSegments;
           const nx = -1 + 2 * t;
           const envelope = isFullRing ? 1 : (1 - nx * nx);
           // 40% amplitude creates distinct, puffy cloud bumps instead of a flat line
           const bump = 0.6 + 0.4 * Math.cos(nx * Math.PI * numBumps);
-          const x = centerX + nx * halfW;
-          const y = objY - halfH * envelope * bump;
+          
+          const alpha = 1.5 * Math.PI + nx * halfAngle;
+          const currentR = r + halfH * envelope * bump;
+          const x = centerX + currentR * Math.cos(alpha);
+          const y = centerY + currentR * Math.sin(alpha);
+          
           if (i === 0) ctx.moveTo(x, y);
           else ctx.lineTo(x, y);
         }
         
-        // Inner edge (bottom)
+        // Inner edge (bottom/inner radius)
         for (let i = numSegments; i >= 0; i--) {
           const t = i / numSegments;
           const nx = -1 + 2 * t;
           const envelope = isFullRing ? 1 : (1 - nx * nx);
           const bump = 0.6 + 0.4 * Math.cos(nx * Math.PI * numBumps);
-          const x = centerX + nx * halfW;
-          const y = objY + halfH * envelope * bump;
+          
+          const alpha = 1.5 * Math.PI + nx * halfAngle;
+          const currentR = Math.max(0, r - halfH * envelope * bump);
+          const x = centerX + currentR * Math.cos(alpha);
+          const y = centerY + currentR * Math.sin(alpha);
+          
           ctx.lineTo(x, y);
         }
         
@@ -204,78 +216,14 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
         ctx.fill();
         ctx.restore();
       } else {
-
-        // --- Shaped solid body ---
-        ctx.beginPath();
-        switch (shape) {
-          case 'disc':
-            ctx.ellipse(centerX, objY, objSize, objSize * 0.35, 0, 0, 2 * Math.PI);
-            break;
-          case 'pyramid':
-            ctx.moveTo(centerX, objY - objSize * 1.2);
-            ctx.lineTo(centerX + objSize, objY + objSize * 0.7);
-            ctx.lineTo(centerX - objSize, objY + objSize * 0.7);
-            ctx.closePath();
-            break;
-          case 'cluster': {
-            const offs = objSize * 0.55;
-            ctx.arc(centerX - offs, objY + offs * 0.4, objSize * 0.65, 0, 2 * Math.PI);
-            ctx.moveTo(centerX + offs + objSize * 0.65, objY + offs * 0.4);
-            ctx.arc(centerX + offs, objY + offs * 0.4, objSize * 0.65, 0, 2 * Math.PI);
-            ctx.moveTo(centerX + objSize * 0.65, objY - offs * 0.6);
-            ctx.arc(centerX, objY - offs * 0.6, objSize * 0.65, 0, 2 * Math.PI);
-            break;
-          }
-          case 'irregular': {
-            const ipts: [number, number][] = [
-              [0, -1.0], [0.55, -0.65], [1.0, -0.05], [0.7, 0.65],
-              [-0.1, 0.88], [-0.65, 0.55], [-0.95, 0.0], [-0.55, -0.7],
-            ];
-            const iradii = [1.0, 0.82, 0.95, 0.78, 0.88, 0.75, 0.92, 0.80];
-            ipts.forEach(([dx, dy], i) => {
-              const ir = objSize * iradii[i];
-              if (i === 0) ctx.moveTo(centerX + dx * ir, objY + dy * ir);
-              else ctx.lineTo(centerX + dx * ir, objY + dy * ir);
-            });
-            ctx.closePath();
-            break;
-          }
-          default: // sphere
-            ctx.arc(centerX, objY, objSize, 0, 2 * Math.PI);
-        }
-        ctx.fillStyle = colorBg;
-        ctx.fill();
-        ctx.strokeStyle = colorStroke;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Equatorial detail line for sphere/disc
-        if ((shape === 'sphere' || shape === 'disc') && (obj.type === 'planet' || objSize > 8)) {
-          ctx.beginPath();
-          ctx.moveTo(centerX - objSize, objY);
-          ctx.lineTo(centerX + objSize, objY);
-          ctx.stroke();
-        }
-
-        // --- Element affinity badge (colored dot, upper-right of body) ---
+        drawSolidBody(ctx, centerX, objY, obj, objSize, colorBg, colorStroke, true);
         if (obj.elementAffinity) {
-          const elementColors: Record<string, string> = {
-            fire: '#e53e3e', water: '#3182ce', earth: '#8b6914', air: '#a0aec0',
-          };
-          const badgeColor = elementColors[obj.elementAffinity] ?? '#888';
-          const badgeSize = Math.max(3, objSize * 0.42);
-          ctx.beginPath();
-          ctx.arc(centerX + objSize * 0.75, objY - objSize * 0.75, badgeSize, 0, 2 * Math.PI);
-          ctx.fillStyle = badgeColor;
-          ctx.fill();
-          ctx.strokeStyle = colorBg;
-          ctx.lineWidth = 1;
-          ctx.stroke();
+          drawElementAffinityBadge(ctx, centerX, objY, objSize, obj.elementAffinity, colorBg, 0.75, 1);
         }
       }
 
       // --- Motion indicator suffix (◆ = fixed, ↺ = retrograde) ---
-      const motionSuffix = obj.isStationary ? ' ◆' : obj.orbitDirection === 'retrograde' ? ' ↺' : '';
+      const motionSuffix = getMotionSuffix(obj.isStationary, obj.orbitDirection);
 
       // --- Name label to the right ---
       ctx.font = `normal ${Math.max(10, width * 0.035) * 1.5}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;

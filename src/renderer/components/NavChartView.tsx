@@ -3,6 +3,7 @@ import { useSystemStore } from '../store/useSystemStore';
 import { calculateSystemPositions } from '../utils/orbitMath';
 import { Play, Pause, FastForward, RotateCcw, Download, ZoomIn, ZoomOut, Maximize, ChevronLeft } from 'lucide-react';
 import { saveCanvasExport } from '../utils/exportHelper';
+import { drawSolidBody, drawElementAffinityBadge, drawStationaryIndicator, getMotionSuffix } from '../utils/canvasRenderer';
 
 interface NavChartViewProps {
   onCollapse?: () => void;
@@ -243,8 +244,9 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
       const arcHalf = (arcDegrees / 2) * (Math.PI / 180);
       const centerAngle = pos.angle * (Math.PI / 180);
 
-      // size controls how far it expands away from the orbital line (radial depth)
-      const halfH = Math.max(4, (obj.size / 100) * 25 * activeZoom);
+      // Match the planet render scale to ensure clouds have proportional thickness (radial depth)
+      const renderSize = Math.max(3, (obj.size / 100) * 20);
+      const halfH = Math.max(8, renderSize * 1.5);
 
       const isNebula = obj.type === 'nebula';
       const cloudFill = isParchment
@@ -302,7 +304,6 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
 
       const proj = project(pos.x, pos.y);
       const renderSize = Math.max(3, (obj.size / 100) * 20);
-      const shape = obj.worldShape ?? 'sphere';
 
       // Body coloring
       let bodyFill = colorBg;
@@ -323,48 +324,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
 
       // Draw Body (shape-aware) — skipped for cloud types; they are drawn as clouds in pass 3a
       if (obj.type !== 'nebula' && obj.type !== 'sargasso') {
-        ctx.beginPath();
-        switch (shape) {
-          case 'disc':
-            ctx.ellipse(proj.x, proj.y, renderSize, renderSize * 0.35, 0, 0, 2 * Math.PI);
-            break;
-          case 'pyramid':
-            ctx.moveTo(proj.x, proj.y - renderSize * 1.2);
-            ctx.lineTo(proj.x + renderSize, proj.y + renderSize * 0.7);
-            ctx.lineTo(proj.x - renderSize, proj.y + renderSize * 0.7);
-            ctx.closePath();
-            break;
-          case 'cluster': {
-            const offs = renderSize * 0.5;
-            ctx.arc(proj.x - offs, proj.y + offs * 0.4, renderSize * 0.65, 0, 2 * Math.PI);
-            ctx.moveTo(proj.x + offs + renderSize * 0.65, proj.y + offs * 0.4);
-            ctx.arc(proj.x + offs, proj.y + offs * 0.4, renderSize * 0.65, 0, 2 * Math.PI);
-            ctx.moveTo(proj.x + renderSize * 0.65, proj.y - offs * 0.6);
-            ctx.arc(proj.x, proj.y - offs * 0.6, renderSize * 0.65, 0, 2 * Math.PI);
-            break;
-          }
-          case 'irregular': {
-            const ipts: [number, number][] = [
-              [0, -1.0], [0.55, -0.65], [1.0, -0.05], [0.7, 0.65],
-              [-0.1, 0.88], [-0.65, 0.55], [-0.95, 0.0], [-0.55, -0.7],
-            ];
-            const iradii = [1.0, 0.82, 0.95, 0.78, 0.88, 0.75, 0.92, 0.80];
-            ipts.forEach(([dx, dy], i) => {
-              const ir = renderSize * iradii[i];
-              if (i === 0) ctx.moveTo(proj.x + dx * ir, proj.y + dy * ir);
-              else ctx.lineTo(proj.x + dx * ir, proj.y + dy * ir);
-            });
-            ctx.closePath();
-            break;
-          }
-          default: // sphere
-            ctx.arc(proj.x, proj.y, renderSize, 0, 2 * Math.PI);
-        }
-        ctx.fillStyle = bodyFill;
-        ctx.fill();
-        ctx.lineWidth = obj.type === 'star' ? 2 : 1.5;
-        ctx.strokeStyle = bodyStroke;
-        ctx.stroke();
+        drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, bodyFill, bodyStroke, false);
 
         // Star sunburst ring
         if (obj.type === 'star') {
@@ -378,42 +338,18 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
 
       // --- Element affinity badge (colored dot, upper-right of body) ---
       if (obj.elementAffinity && obj.type !== 'star') {
-        const elementColors: Record<string, string> = {
-          fire: '#e53e3e', water: '#3182ce', earth: '#8b6914', air: '#a0aec0',
-        };
-        const badgeColor = elementColors[obj.elementAffinity];
-        if (badgeColor) {
-          const badgeSize = Math.max(2, renderSize * 0.42);
-          ctx.beginPath();
-          ctx.arc(proj.x + renderSize * 0.72, proj.y - renderSize * 0.72, badgeSize, 0, 2 * Math.PI);
-          ctx.fillStyle = badgeColor;
-          ctx.fill();
-          ctx.strokeStyle = colorBg;
-          ctx.lineWidth = 0.75;
-          ctx.stroke();
-        }
+        drawElementAffinityBadge(ctx, proj.x, proj.y, renderSize, obj.elementAffinity, colorBg, 0.72, 0.75);
       }
 
       // --- Stationary diamond ring indicator ---
       if (obj.isStationary && obj.type !== 'star') {
-        const ds = renderSize + 5;
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(proj.x, proj.y - ds);
-        ctx.lineTo(proj.x + ds, proj.y);
-        ctx.lineTo(proj.x, proj.y + ds);
-        ctx.lineTo(proj.x - ds, proj.y);
-        ctx.closePath();
-        ctx.strokeStyle = colorMuted;
-        ctx.lineWidth = 0.75;
-        ctx.stroke();
-        ctx.restore();
+        drawStationaryIndicator(ctx, proj.x, proj.y, renderSize, colorMuted);
       }
 
       // Label (with motion indicator suffix)
       const shouldLabel = obj.type !== 'moon' || activeZoom > 150;
       if (shouldLabel) {
-        const motionTag = obj.isStationary ? ' ◆' : obj.orbitDirection === 'retrograde' ? ' ↺' : '';
+        const motionTag = getMotionSuffix(obj.isStationary, obj.orbitDirection);
         ctx.font = obj.type === 'star'
           ? `bold 12px 'Mephisto', 'Cinzel', serif`
           : `500 10px 'Mephisto', 'Outfit', sans-serif`;

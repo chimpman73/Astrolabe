@@ -3,7 +3,9 @@ import { useSystemStore } from './store/useSystemStore';
 import { BookmarkView } from './components/BookmarkView';
 import { NavChartView } from './components/NavChartView';
 import { SaveManager } from './components/SaveManager';
-import { Compass, HelpCircle, FileJson, X, ChevronRight } from 'lucide-react';
+import { OpenSystemModal } from './components/OpenSystemModal';
+import { NewSystemModal } from './components/NewSystemModal';
+import { Compass, HelpCircle, ChevronRight } from 'lucide-react';
 
 const App: React.FC = () => {
   const {
@@ -12,8 +14,6 @@ const App: React.FC = () => {
     loadSphere,
     savesList,
     saveCurrentSphere,
-    createNewSphere,
-    saveDirectory,
     toastMessage,
     setToastMessage,
   } = useSystemStore();
@@ -21,7 +21,6 @@ const App: React.FC = () => {
   // Dialog overlays state
   const [showOpenModal, setShowOpenModal] = useState(false);
   const [showNewModal, setShowNewModal] = useState(false);
-  const [newSphereName, setNewSphereName] = useState('');
 
   // Panel collapse states
   const [editorCollapsed, setEditorCollapsed] = useState(false);
@@ -70,28 +69,6 @@ const App: React.FC = () => {
       }
     } catch (err: any) {
       setToastMessage({ type: 'error', text: `Save error: ${err.message || err}` });
-    }
-  };
-
-  const handleCreateNewSphere = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const name = newSphereName.trim();
-    if (!name) return;
-    try {
-      await createNewSphere(name);
-      setNewSphereName('');
-      setShowNewModal(false);
-      setToastMessage({ type: 'success', text: `Successfully created crystal sphere "${name}"!` });
-    } catch (err: any) {
-      setToastMessage({ type: 'error', text: `Create Sphere Error: ${err.message || err}` });
-    }
-  };
-
-  const handleSelectDirectory = async () => {
-    if (!window.astrolabeAPI) return;
-    const res = await window.astrolabeAPI.selectSaveDirectory();
-    if (res.success && res.data) {
-      await setSaveDirectory(res.data);
     }
   };
 
@@ -240,119 +217,8 @@ const App: React.FC = () => {
         )}
       </div>
 
-      {/* Modal Overlay: File Open Picker */}
-      {showOpenModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-[var(--color-bg-panel)] scroll-border p-6 rounded shadow-xl max-w-md w-full max-h-[80vh] flex flex-col">
-            
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-[var(--color-border-parchment)] pb-2 mb-4 shrink-0">
-              <h4 className="font-title text-lg font-bold">Open Crystal Sphere System</h4>
-              <button
-                onClick={() => setShowOpenModal(false)}
-                className="p-1 rounded hover:bg-[var(--color-bg-base)] text-[var(--color-text-muted)]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Folder Selection Header info */}
-            <div className="mb-4 text-xs shrink-0">
-              <span className="font-bold text-[var(--color-text-muted)] block uppercase mb-1">Active Directory:</span>
-              <div className="font-mono bg-[var(--color-bg-base)] p-2 rounded text-[10px] break-all border border-[var(--color-border-parchment)] mb-2 flex items-center justify-between gap-2">
-                <span className="truncate flex-1">{saveDirectory || 'No directory selected'}</span>
-                <button
-                  onClick={handleSelectDirectory}
-                  className="px-2 py-0.5 bg-[var(--color-border-parchment)] text-[10px] rounded hover:brightness-95 select-none shrink-0"
-                >
-                  Change
-                </button>
-              </div>
-            </div>
-
-            {/* Saves Directory Files List */}
-            <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[150px]">
-              {savesList.length === 0 ? (
-                <div className="text-center text-xs text-[var(--color-text-muted)] italic py-10">
-                  No compatible CrystalSphere .json configuration files found in this save directory.
-                </div>
-              ) : (
-                savesList.map((file) => {
-                  const isActive = activeSphere?.sphereName === file.sphereName;
-                  return (
-                    <button
-                      key={file.filename}
-                      onClick={() => {
-                        loadSphere(file.fullPath);
-                        setShowOpenModal(false);
-                      }}
-                      className={`w-full flex items-start gap-3 p-3 text-left transition-colors border rounded ${isActive ? 'bg-[var(--color-accent-gold)] bg-opacity-20 border-[var(--color-accent-gold)]' : 'bg-[var(--color-bg-base)] border-[var(--color-border-parchment)] hover:bg-[var(--color-border-parchment)]'}`}
-                    >
-                      <FileJson className={`w-5 h-5 shrink-0 mt-0.5 ${isActive ? 'text-[var(--color-accent-gold)]' : 'text-[var(--color-text-muted)]'}`} />
-                      <div className="overflow-hidden">
-                        <div className="font-bold text-xs truncate">{file.sphereName}</div>
-                        <div className="text-[9px] text-[var(--color-text-muted)] truncate">{file.filename}</div>
-                      </div>
-                    </button>
-                  );
-                })
-              )}
-            </div>
-
-            {/* Modal Footer close button */}
-            <div className="mt-4 border-t border-[var(--color-border-parchment)] pt-3 flex justify-end shrink-0">
-              <button
-                onClick={() => setShowOpenModal(false)}
-                className="px-4 py-1.5 border border-[var(--color-border-parchment)] hover:bg-[var(--color-bg-base)] text-xs font-semibold rounded"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Overlay: Create New Sphere */}
-      {showNewModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <form
-            onSubmit={handleCreateNewSphere}
-            className="bg-[var(--color-bg-panel)] scroll-border p-6 rounded shadow-xl max-w-sm w-full"
-          >
-            <h4 className="font-title text-base border-b border-[var(--color-border-parchment)] pb-2 mb-4 font-bold">
-              New Crystal Sphere
-            </h4>
-            <div className="mb-4">
-              <label className="block text-[10px] font-bold text-[var(--color-text-muted)] uppercase mb-1">
-                Sphere Name:
-              </label>
-              <input
-                type="text"
-                required
-                value={newSphereName}
-                onChange={(e) => setNewSphereName(e.target.value)}
-                placeholder="e.g. Realmspace"
-                className="w-full p-2 text-xs bg-[var(--color-bg-base)] scroll-border outline-none focus:border-[var(--color-accent-gold)]"
-              />
-            </div>
-            <div className="flex gap-2 justify-end">
-              <button
-                type="button"
-                onClick={() => setShowNewModal(false)}
-                className="px-3 py-1.5 border border-[var(--color-border-parchment)] text-xs rounded hover:bg-[var(--color-bg-base)]"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-1.5 bg-[var(--color-accent-gold)] text-[#2b2316] font-title font-bold text-xs rounded hover:brightness-95 transition-all"
-              >
-                Create System
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+      {showOpenModal && <OpenSystemModal onClose={() => setShowOpenModal(false)} />}
+      {showNewModal && <NewSystemModal onClose={() => setShowNewModal(false)} />}
     </div>
   );
 };
