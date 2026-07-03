@@ -118,9 +118,16 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
   };
 
   // Set default zoom based on max distance and active dimensions
+  const lastFitSphere = useRef<string | null>(null);
+
   useEffect(() => {
-    handleAutoFit();
-  }, [activeSphere, dimensions.width, dimensions.height]);
+    if (dimensions.width > 0 && dimensions.height > 0) {
+      if (lastFitSphere.current !== activeSphere?.sphereName) {
+        handleAutoFit();
+        lastFitSphere.current = activeSphere?.sphereName || null;
+      }
+    }
+  }, [activeSphere?.sphereName, dimensions.width, dimensions.height]);
 
   // Canvas drawing routine
   const drawMap = (
@@ -415,7 +422,41 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
 
   // Zoom logic
   const handleZoom = (factor: number) => {
-    setZoom((prev) => Math.max(5, Math.min(1000, prev * factor)));
+    setZoom((prevZoom) => {
+      const newZoom = Math.max(5, Math.min(1000, prevZoom * factor));
+      setPan((prevPan) => {
+        const mouseX = dimensions.width / 2;
+        const mouseY = dimensions.height / 2;
+        const modelX = (mouseX - prevPan.x) / prevZoom;
+        const modelY = (mouseY - prevPan.y) / prevZoom;
+        return {
+          x: mouseX - modelX * newZoom,
+          y: mouseY - modelY * newZoom,
+        };
+      });
+      return newZoom;
+    });
+  };
+
+  const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
+    const zoomFactor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    setZoom((prevZoom) => {
+      const newZoom = Math.max(5, Math.min(1000, prevZoom * zoomFactor));
+      setPan((prevPan) => {
+        const modelX = (mouseX - prevPan.x) / prevZoom;
+        const modelY = (mouseY - prevPan.y) / prevZoom;
+        return {
+          x: mouseX - modelX * newZoom,
+          y: mouseY - modelY * newZoom,
+        };
+      });
+      return newZoom;
+    });
   };
 
   // Export full map layout (Landscape 300 DPI: 11" x 8.5" = 3300px x 2550px)
@@ -671,6 +712,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUpOrLeave}
           onMouseLeave={handleMouseUpOrLeave}
+          onWheel={handleWheel}
           className="w-full h-full cursor-grab active:cursor-grabbing"
           style={{ display: 'block' }}
         />
