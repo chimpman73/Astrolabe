@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useSystemStore } from '../store/useSystemStore';
 import { ChevronLeft } from 'lucide-react';
 import { saveCanvasExport } from '../utils/exportHelper';
-import { drawSolidBody, drawElementAffinityBadge, getMotionSuffix } from '../utils/canvasRenderer';
+import { drawSolidBody, getMotionSuffix, getBodyColors } from '../utils/canvasRenderer';
 
 interface BookmarkViewProps {
   onCollapse?: () => void;
@@ -32,17 +32,17 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const centralStar = activeSphere
-    ? activeSphere.objects.find((obj) => obj.type === 'star' || (!obj.orbitedObjectName && obj.distanceOrbited === 0)) || activeSphere.objects[0]
-    : null;
+  const isPrimary = (obj: any) => {
+    if (!obj.orbitedObjectName) return true;
+    const parent = activeSphere?.objects.find((o) => o.name === obj.orbitedObjectName);
+    if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
+    return false;
+  };
 
-  // Filter objects to only those that orbit the central star (directly orbiting parent is central star/null)
+  // Filter objects to only those that orbit the central point (0,0) or orbit a body at (0,0)
   const planetaryObjects = activeSphere
     ? activeSphere.objects.filter((obj) => 
-        obj.distanceOrbited > 0 && (
-          !obj.orbitedObjectName || 
-          (centralStar && obj.orbitedObjectName === centralStar.name)
-        )
+        obj.distanceOrbited >= 0 && isPrimary(obj)
       )
     : [];
 
@@ -70,41 +70,22 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
     ctx.fillRect(0, 0, width, height);
 
     // Coordinate settings
+    const bottomMargin = 15;
     const centerX = width / 2;
-    const centerY = height; // Star center is at the bottom
+    const centerY = height - bottomMargin; // True center is slightly above bottom edge
 
-    const shellDistance = showShell ? maxDistance * 2 : maxDistance;
+    const isRelative = activeSphere?.shellBoundaryType === 'relativeMargin';
+    const shellDistance = showShell ? (isRelative ? maxDistance * 1.2 : maxDistance * 2) : maxDistance;
 
     // Helper: translate distance into pixel radius
     const getPixelRadius = (distance: number) => {
+      if (shellDistance === 0) return 0;
       const topMargin = showShell ? 15 : 45;
-      const bottomMargin = 15;
       const scaleHeight = height - topMargin - bottomMargin;
-      return (distance / shellDistance) * scaleHeight + bottomMargin;
+      return (distance / shellDistance) * scaleHeight;
     };
 
-    // Draw central star at bottom center
-    if (centralStar) {
-      const starRadius = Math.max(15, (centralStar.size / 100) * (width * 0.2));
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, starRadius, 0, 2 * Math.PI);
-      ctx.fillStyle = colorBg;
-      ctx.fill();
-      ctx.strokeStyle = colorStroke;
-      ctx.lineWidth = 3;
-      ctx.stroke();
 
-      // Star core details
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, starRadius - 6, 0, 2 * Math.PI);
-      ctx.stroke();
-
-      // Star label
-      ctx.font = `bold ${Math.max(12, width * 0.045) * 1.5}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
-      ctx.fillStyle = colorStroke;
-      ctx.textAlign = 'center';
-      ctx.fillText(centralStar.name.toUpperCase(), centerX, height - starRadius - 8);
-    }
 
     // Intentionally blank - getPixelRadius is now declared above Star drawing
 
@@ -151,7 +132,7 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
     // Draw objects and labels along the center line
     planetaryObjects.forEach((obj) => {
       const r = getPixelRadius(obj.distanceOrbited);
-      const objY = height - r;
+      const objY = centerY - r;
       const sizeMultiplier = width / 300;
       const objSize = Math.max(4, obj.size * 0.6 * sizeMultiplier);
 
@@ -216,10 +197,8 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
         ctx.fill();
         ctx.restore();
       } else {
-        drawSolidBody(ctx, centerX, objY, obj, objSize, colorBg, colorStroke, true);
-        if (obj.elementAffinity) {
-          drawElementAffinityBadge(ctx, centerX, objY, objSize, obj.elementAffinity, colorBg, 0.75, 1);
-        }
+        const { bodyFill, bodyStroke } = getBodyColors(obj, !isDark, colorBg, colorStroke, '#e2b34a');
+        drawSolidBody(ctx, centerX, objY, obj, objSize, bodyFill, bodyStroke, false);
       }
 
       // --- Motion indicator suffix (◆ = fixed, ↺ = retrograde) ---
@@ -260,7 +239,7 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
 
     // Redraw using canvas layout coordinates
     drawBookmark(ctx, canvas.width, canvas.height, bookmarkBackgroundMode, bookmarkShowShell, bookmarkShowDistance);
-  }, [activeSphere, bookmarkBackgroundMode, bookmarkShowShell, bookmarkShowDistance, planetaryObjects, centralStar, fontsLoaded]);
+  }, [activeSphere, bookmarkBackgroundMode, bookmarkShowShell, bookmarkShowDistance, planetaryObjects, fontsLoaded]);
 
   const handleExport = async () => {
     // High-DPI Export: Bookmark is 3 inches wide x 11 inches tall.

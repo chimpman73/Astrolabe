@@ -63,10 +63,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
   }
 
   const handleUpdateObject = (index: number, updated: Partial<CelestialObject>) => {
-    // If changing type to star, reset orbital properties
     if (updated.type === 'star') {
-      updated.distanceOrbited = 0;
-      updated.orbitedObjectName = null;
       updated.initialAngle = 0;
       updated.orbitalPeriodDays = 1;
     }
@@ -79,13 +76,12 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
   };
 
   const handleAddObject = () => {
-    const defaultParent = activeSphere.objects.find(o => o.type === 'star')?.name || null;
     const newObj: CelestialObject = {
       name: `New Body ${activeSphere.objects.length + 1}`,
       type: 'planet',
       size: 10,
       description: 'A newly added planetary body.',
-      orbitedObjectName: defaultParent,
+      orbitedObjectName: null,
       distanceOrbited: 1.0,
       initialAngle: 0,
       orbitalPeriodDays: 365,
@@ -179,6 +175,18 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
               onChange={e => updateActiveSphereMeta({ currentCampaignDate: e.target.value })}
             />
           </div>
+
+          <div className="editor-form-group">
+            <label>Shell Boundary</label>
+            <select
+              className="editor-select"
+              value={activeSphere.shellBoundaryType || 'double'}
+              onChange={e => updateActiveSphereMeta({ shellBoundaryType: e.target.value as 'double' | 'relativeMargin' })}
+            >
+              <option value="double">Double (Max x2)</option>
+              <option value="relativeMargin">Plus Margin (Max x1.2)</option>
+            </select>
+          </div>
         </div>
 
         {/* Section: Celestial Bodies Header */}
@@ -271,8 +279,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                       />
                     </div>
 
-                    {obj.type !== 'star' && (
-                      <>
+
                         <div className="editor-form-group">
                           <label>Orbiting Parent</label>
                           <select 
@@ -280,7 +287,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                             value={obj.orbitedObjectName || ''}
                             onChange={e => handleUpdateObject(index, { orbitedObjectName: e.target.value === '' ? null : e.target.value })}
                           >
-                            <option value="">None (Primary Star)</option>
+                            <option value="">None (System Center)</option>
                             {activeSphere.objects
                               .filter(o => o.name !== obj.name && o.type !== 'moon')
                               .map(o => (
@@ -382,6 +389,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                             <option value="water">💧 Water</option>
                             <option value="earth">🪨 Earth</option>
                             <option value="air">💨 Air</option>
+                            <option value="mixed">🌿 Mixed</option>
                           </select>
                         </div>
 
@@ -400,8 +408,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                             />
                           </div>
                         )}
-                      </>
-                    )}
+
 
                     <div className="editor-form-group">
                       <label>Description</label>

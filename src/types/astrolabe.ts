@@ -3,7 +3,7 @@ export type CelestialObjectType =
   | 'station' | 'nebula' | 'sargasso' | 'custom';
 
 export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular';
-export type ElementAffinity = 'fire' | 'water' | 'earth' | 'air';
+export type ElementAffinity = 'fire' | 'water' | 'earth' | 'air' | 'mixed';
 export type OrbitDirection = 'prograde' | 'retrograde';
 
 export interface CelestialObject {
@@ -33,6 +33,7 @@ export interface CrystalSphere {
   sphereName: string;
   currentCampaignDate: string;
   currentSystemDate: number; // elapsed days from start epoch
+  shellBoundaryType?: 'double' | 'relativeMargin'; // 'double' = maxDist * 2, 'relativeMargin' = maxDist * 1.2
   objects: CelestialObject[];
 }
 

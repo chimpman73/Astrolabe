@@ -1,36 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSystemStore } from '../store/useSystemStore';
 
 interface NewSystemModalProps {
   onClose: () => void;
 }
 
-export const NewSystemModal: React.FC<NewSystemModalProps> = ({ onClose }) => {
-  const { createNewSphere, setToastMessage } = useSystemStore();
+export const SaveAsModal: React.FC<NewSystemModalProps> = ({ onClose }) => {
+  const { activeSphere, updateActiveSphereMeta, saveCurrentSphere, setToastMessage } = useSystemStore();
   const [newSphereName, setNewSphereName] = useState('');
 
-  const handleCreateNewSphere = async (e: React.FormEvent) => {
+  useEffect(() => {
+    if (activeSphere) {
+      if (activeSphere.sphereName === 'Untitled System') {
+        setNewSphereName('');
+      } else {
+        setNewSphereName(activeSphere.sphereName + ' (Copy)');
+      }
+    }
+  }, [activeSphere]);
+
+  const handleSaveAsSphere = async (e: React.FormEvent) => {
     e.preventDefault();
     const name = newSphereName.trim();
     if (!name) return;
     try {
-      await createNewSphere(name);
-      setNewSphereName('');
+      updateActiveSphereMeta({ sphereName: name });
+      const success = await saveCurrentSphere();
+      if (success) {
+        setToastMessage({ type: 'success', text: `Successfully saved as "${name}"!` });
+      } else {
+        setToastMessage({ type: 'error', text: `Failed to save new configuration.` });
+      }
       onClose();
-      setToastMessage({ type: 'success', text: `Successfully created crystal sphere "${name}"!` });
     } catch (err: any) {
-      setToastMessage({ type: 'error', text: `Create Sphere Error: ${err.message || err}` });
+      setToastMessage({ type: 'error', text: `Save As Error: ${err.message || err}` });
     }
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <form
-        onSubmit={handleCreateNewSphere}
+        onSubmit={handleSaveAsSphere}
         className="bg-[var(--color-bg-panel)] scroll-border p-6 rounded shadow-xl max-w-sm w-full"
       >
         <h4 className="font-title text-base border-b border-[var(--color-border-parchment)] pb-2 mb-4 font-bold">
-          New Crystal Sphere
+          Save As...
         </h4>
         <div className="mb-4">
           <label className="block text-[10px] font-bold text-[var(--color-text-muted)] uppercase mb-1">
@@ -57,7 +71,7 @@ export const NewSystemModal: React.FC<NewSystemModalProps> = ({ onClose }) => {
             type="submit"
             className="px-4 py-1.5 bg-[var(--color-accent-gold)] text-[#2b2316] font-title font-bold text-xs rounded hover:brightness-95 transition-all"
           >
-            Create System
+            Save
           </button>
         </div>
       </form>

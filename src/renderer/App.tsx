@@ -4,7 +4,7 @@ import { BookmarkView } from './components/BookmarkView';
 import { NavChartView } from './components/NavChartView';
 import { SaveManager } from './components/SaveManager';
 import { OpenSystemModal } from './components/OpenSystemModal';
-import { NewSystemModal } from './components/NewSystemModal';
+import { SaveAsModal } from './components/SaveAsModal';
 import { Compass, HelpCircle, ChevronRight } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -20,7 +20,7 @@ const App: React.FC = () => {
 
   // Dialog overlays state
   const [showOpenModal, setShowOpenModal] = useState(false);
-  const [showNewModal, setShowNewModal] = useState(false);
+  const [showSaveAsModal, setShowSaveAsModal] = useState(false);
 
   // Panel collapse states
   const [editorCollapsed, setEditorCollapsed] = useState(false);
@@ -55,7 +55,11 @@ const App: React.FC = () => {
   };
 
   const handleNewClick = () => {
-    setShowNewModal(true);
+    useSystemStore.getState().createNewSphere();
+  };
+
+  const handleSaveAsClick = () => {
+    setShowSaveAsModal(true);
   };
 
   const handleSaveClick = async () => {
@@ -116,11 +120,19 @@ const App: React.FC = () => {
             </button>
             <button
               onClick={handleSaveClick}
-              disabled={!activeSphere}
+              disabled={!activeSphere || activeSphere.sphereName === 'Untitled System'}
               className="header-btn"
               title="Save changes to active file"
             >
               Save
+            </button>
+            <button
+              onClick={handleSaveAsClick}
+              disabled={!activeSphere}
+              className="header-btn"
+              title="Save as a new Crystal Sphere"
+            >
+              Save As
             </button>
           </div>
         </div>
@@ -217,8 +229,9 @@ const App: React.FC = () => {
         )}
       </div>
 
+      {/* Modals */}
       {showOpenModal && <OpenSystemModal onClose={() => setShowOpenModal(false)} />}
-      {showNewModal && <NewSystemModal onClose={() => setShowNewModal(false)} />}
+      {showSaveAsModal && <SaveAsModal onClose={() => setShowSaveAsModal(false)} />}
     </div>
   );
 };

@@ -3,7 +3,7 @@ import { useSystemStore } from '../store/useSystemStore';
 import { calculateSystemPositions } from '../utils/orbitMath';
 import { Play, Pause, FastForward, RotateCcw, Download, ZoomIn, ZoomOut, Maximize, ChevronLeft } from 'lucide-react';
 import { saveCanvasExport } from '../utils/exportHelper';
-import { drawSolidBody, drawElementAffinityBadge, drawStationaryIndicator, getMotionSuffix } from '../utils/canvasRenderer';
+import { drawSolidBody, drawStationaryIndicator, getMotionSuffix, getBodyColors } from '../utils/canvasRenderer';
 
 interface NavChartViewProps {
   onCollapse?: () => void;
@@ -65,8 +65,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
 
   const objects = activeSphere?.objects || [];
   
-  // Find central body
-  const centralStar = objects.find((o) => o.type === 'star' || (!o.orbitedObjectName && o.distanceOrbited === 0)) || objects[0];
+  // Central body is implicitly (0,0).
 
   // Resolve positions
   const positions = calculateSystemPositions(objects, currentSystemDate);
@@ -94,18 +93,25 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
   const handleAutoFit = () => {
     if (objects.length === 0) return;
     
+    const isPrimary = (obj: any) => {
+      if (!obj.orbitedObjectName) return true;
+      const parent = objects.find((o) => o.name === obj.orbitedObjectName);
+      if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
+      return false;
+    };
+    
     // Find max distance of primary objects
     const primaryObjects = objects.filter((o) => 
-      o.distanceOrbited > 0 && (
-        !o.orbitedObjectName || 
-        (centralStar && o.orbitedObjectName === centralStar.name)
-      )
+      o.distanceOrbited > 0 && isPrimary(o)
     );
     const maxDist = primaryObjects.reduce((max, o) => Math.max(max, o.distanceOrbited), 0.1);
     
-    // The Crystal Sphere Shell is drawn at 2 * maxDist. We want it to fit comfortably inside the canvas viewport.
+    const isRelative = activeSphere?.shellBoundaryType === 'relativeMargin';
+    const shellScale = isRelative ? 1.2 : 2.0;
+    
+    // The Crystal Sphere Shell is drawn at shellScale * maxDist. We want it to fit comfortably inside the canvas viewport.
     const minSize = Math.min(dimensions.width, dimensions.height);
-    const targetZoom = (minSize * 0.22) / maxDist; // Set maxDist to 22% of viewport, fitting 2 * maxDist at 44% radius
+    const targetZoom = (minSize * (0.44 / shellScale)) / maxDist; 
     
     setZoom(targetZoom);
     setPan({ x: dimensions.width / 2, y: dimensions.height / 2 });
@@ -164,6 +170,21 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     }
     ctx.stroke();
 
+    // Compass Rose decoration (drawn at coordinate origin)
+    const starProjRaw = { x: activePan.x, y: activePan.y };
+    if (!isParchment) {
+      // Draw a subtle sun icon behind the center if it's space theme
+      ctx.beginPath();
+      for (let i = 0; i < 8; i++) {
+        const rad = (i * Math.PI) / 4;
+        ctx.moveTo(starProjRaw.x, starProjRaw.y);
+        ctx.lineTo(starProjRaw.x + Math.cos(rad) * 15, starProjRaw.y + Math.sin(rad) * 15);
+      }
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
     // Project coordinates from model space (AU) to canvas space
     const project = (xModel: number, yModel: number) => {
       return {
@@ -191,7 +212,13 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
       if (orbitRadius > 0) {
         ctx.beginPath();
         ctx.arc(parentProj.x, parentProj.y, orbitRadius, 0, 2 * Math.PI);
-        const isPrimaryOrbit = !obj.orbitedObjectName || (centralStar && obj.orbitedObjectName === centralStar.name);
+        const isPrimary = (o: any) => {
+          if (!o.orbitedObjectName) return true;
+          const parent = objects.find((p) => p.name === o.orbitedObjectName);
+          if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
+          return false;
+        };
+        const isPrimaryOrbit = isPrimary(obj);
         ctx.lineWidth = isPrimaryOrbit ? 1.2 : 0.75;
         ctx.strokeStyle = isPrimaryOrbit ? colorOrbit : colorOrbitDash;
         ctx.stroke();
@@ -199,16 +226,20 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     });
 
     // 2. Draw outer Crystal Sphere Shell boundary if max planet exists
+    const isPrimaryOuter = (obj: any) => {
+      if (!obj.orbitedObjectName) return true;
+      const parent = objects.find((p) => p.name === obj.orbitedObjectName);
+      if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
+      return false;
+    };
     const primaryObjects = objects.filter((o) => 
-      o.distanceOrbited > 0 && (
-        !o.orbitedObjectName || 
-        (centralStar && o.orbitedObjectName === centralStar.name)
-      )
+      o.distanceOrbited > 0 && isPrimaryOuter(o)
     );
     if (primaryObjects.length > 0) {
       const maxDist = primaryObjects.reduce((max, o) => Math.max(max, o.distanceOrbited), 0.1);
       const shellProj = project(0, 0);
-      const shellRadius = maxDist * 2 * activeZoom;
+      const isRelative = activeSphere?.shellBoundaryType === 'relativeMargin';
+      const shellRadius = maxDist * (isRelative ? 1.2 : 2) * activeZoom;
 
       // Draw thick outer sphere boundary
       ctx.beginPath();
@@ -305,22 +336,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
       const proj = project(pos.x, pos.y);
       const renderSize = Math.max(3, (obj.size / 100) * 20);
 
-      // Body coloring
-      let bodyFill = colorBg;
-      let bodyStroke = colorStroke;
-      
-      if (obj.type === 'star') {
-        bodyFill = colorGold;
-        bodyStroke = colorStroke;
-      } else if (obj.type === 'moon') {
-        bodyFill = isParchment ? '#dcd2b9' : '#555866';
-      } else if (obj.type === 'nebula') {
-        bodyFill = isParchment ? 'rgba(80,110,200,0.5)' : 'rgba(100,150,255,0.6)';
-        bodyStroke = isParchment ? '#5070c8' : '#8aabff';
-      } else if (obj.type === 'sargasso') {
-        bodyFill = isParchment ? 'rgba(50,140,80,0.5)' : 'rgba(60,190,100,0.6)';
-        bodyStroke = isParchment ? '#2a7840' : '#55cc80';
-      }
+      const { bodyFill, bodyStroke } = getBodyColors(obj, isParchment, colorBg, colorStroke, colorGold);
 
       // Draw Body (shape-aware) — skipped for cloud types; they are drawn as clouds in pass 3a
       if (obj.type !== 'nebula' && obj.type !== 'sargasso') {
@@ -336,11 +352,6 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
         }
       }
 
-      // --- Element affinity badge (colored dot, upper-right of body) ---
-      if (obj.elementAffinity && obj.type !== 'star') {
-        drawElementAffinityBadge(ctx, proj.x, proj.y, renderSize, obj.elementAffinity, colorBg, 0.72, 0.75);
-      }
-
       // --- Stationary diamond ring indicator ---
       if (obj.isStationary && obj.type !== 'star') {
         drawStationaryIndicator(ctx, proj.x, proj.y, renderSize, colorMuted);
@@ -351,8 +362,8 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
       if (shouldLabel) {
         const motionTag = getMotionSuffix(obj.isStationary, obj.orbitDirection);
         ctx.font = obj.type === 'star'
-          ? `bold 12px 'Mephisto', 'Cinzel', serif`
-          : `500 10px 'Mephisto', 'Outfit', sans-serif`;
+          ? `bold 12px 'Elan', 'Cinzel', serif`
+          : `500 10px 'Elan', 'Outfit', sans-serif`;
         ctx.fillStyle = colorStroke;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
@@ -360,14 +371,6 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
       }
     });
 
-    // Compass Rose decoration (drawn at star center if visible)
-    if (centralStar) {
-      const starProj = project(0, 0);
-      ctx.beginPath();
-      ctx.arc(starProj.x, starProj.y, 4, 0, 2 * Math.PI);
-      ctx.fillStyle = colorStroke;
-      ctx.fill();
-    }
   };
 
   // Redraw canvas
@@ -448,15 +451,19 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     const mapCtx = mapCanvas.getContext('2d');
     
     if (mapCtx) {
-      // Auto-fit zoom specifically for the export pane size
+      const isPrimaryExp = (obj: any) => {
+        if (!obj.orbitedObjectName) return true;
+        const parent = objects.find((p) => p.name === obj.orbitedObjectName);
+        if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
+        return false;
+      };
       const primaryObjects = objects.filter((o) => 
-        o.distanceOrbited > 0 && (
-          !o.orbitedObjectName || 
-          (centralStar && o.orbitedObjectName === centralStar.name)
-        )
+        o.distanceOrbited > 0 && isPrimaryExp(o)
       );
       const maxDist = primaryObjects.reduce((max, o) => Math.max(max, o.distanceOrbited), 0.1);
-      const exportZoom = (mapW * 0.4) / maxDist;
+      const isRelative = activeSphere?.shellBoundaryType === 'relativeMargin';
+      const shellScale = isRelative ? 1.2 : 2.0;
+      const exportZoom = (mapW * (0.8 / shellScale)) / maxDist;
       const exportPan = { x: mapW / 2, y: mapH / 2 };
 
       drawMap(mapCtx, mapW, mapH, mapTheme, exportZoom, exportPan);
@@ -487,10 +494,14 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     let curY = 320;
 
     // Render primary planets
+    const isPrimaryLabel = (obj: any) => {
+      if (!obj.orbitedObjectName) return true;
+      const parent = objects.find((p) => p.name === obj.orbitedObjectName);
+      if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
+      return false;
+    };
     const primaries = objects.filter((o) => 
-      o.type === 'star' || 
-      !o.orbitedObjectName || 
-      (centralStar && o.orbitedObjectName === centralStar.name)
+      o.type === 'star' || isPrimaryLabel(o)
     );
     
     primaries.forEach((obj) => {

@@ -41,6 +41,11 @@ The application saves and loads system states via JSON configuration files store
       "minimum": 0,
       "description": "The system epoch date in elapsed days. Used to calculate active orbital angles."
     },
+    "shellBoundaryType": {
+      "type": "string",
+      "enum": ["double", "relativeMargin"],
+      "description": "Configures how far the crystal shell is placed relative to the furthest orbit. Defaults to double."
+    },
     "objects": {
       "type": "array",
       "items": {
@@ -134,7 +139,7 @@ Positions are evaluated in 2D polar space relative to the orbited parent object.
 4. **Global Offset Transformation**:
    For any body orbiting a parent:
    $$\mathbf{x}_{\text{global}} = \mathbf{x}_{\text{parent\_global}} + \mathbf{x}_{\text{rel}}$$
-   *The primary/central star (where `orbitedObjectName` is null) sits at $\mathbf{x}_{\text{central}} = (0, 0)$.*
+   *Primary objects (where `orbitedObjectName` is null) orbit the invisible coordinate origin $\mathbf{x}_{\text{central}} = (0, 0)$. Stars are treated as standard celestial bodies.*
 
 ---
 
@@ -183,7 +188,7 @@ A vertical strip (fixed width 280px) displaying a radial hierarchy.
 * **Default Theme**: Defaults to **Dark Mode** for enhanced starlight contrast.
 * **Scale-to-Fit Canvas**: The canvas itself is styled with standard CSS containment (`max-width: 100%`, `max-height: 100%`, `width: auto`, `height: auto`, and `aspect-ratio: 1 / 3`), which forces it to scale down to fit whichever dimension is smaller (width or height). 
 * **Dynamic Scaling & Boundaries**:
-  * If the Crystal Shell outline is **ON**, the drawing boundary `shellDistance` defaults to `2 * maxDistance`, centering the furthest planet on screen and allocating the top half of the canvas to the shell and navigation metadata.
+  * If the Crystal Shell outline is **ON**, the drawing boundary `shellDistance` defaults to `2 * maxDistance` (Double) or `1.2 * maxDistance` (Relative Margin) depending on `shellBoundaryType`, centering the furthest planet on screen and allocating the top portion of the canvas to the shell and navigation metadata.
   * If the Crystal Shell outline is toggled **OFF**, the drawing boundary `shellDistance` recalibrates to `maxDistance`, scaling the furthest planet directly to the top of the canvas and distributing all planets proportionally across the full screen height (with proportional margins to prevent clipping).
 * **Scope**: Displays only objects directly orbiting the central star (ignoring moons, satellites, and sub-orbiting planets).
 * **Typography**: Celestial object labels (names and distances) are drawn with **ITC Eras-Bold** at a 1.5x scale multiplier for improved legibility. Shell boundary headers are rendered using the gothic fantasy font **Mephisto**.
@@ -192,7 +197,7 @@ A vertical strip (fixed width 280px) displaying a radial hierarchy.
 #### Panel 3: Navigation Chart (Right Pane)
 A responsive map canvas occupying all remaining screen width (`flex: 1`).
 * **Dynamic Sizing**: Uses `ResizeObserver` to read container width and height. Resizes the canvas drawing buffer on window adjustments to prevent stretching or clipping.
-* **Scale-to-Fit**: Automatically updates zoom and centering offsets on load or window resize to ensure the entire Crystal Sphere shell remains visible within the viewport. Autofit dimensions are calculated exclusively using primary celestial bodies that orbit the central star directly (excluding sub-orbiting planets).
+* **Scale-to-Fit**: Automatically updates zoom and centering offsets on load or window resize to ensure the entire Crystal Sphere shell remains visible within the viewport. Autofit dimensions are calculated exclusively using primary celestial bodies that orbit the invisible coordinate origin directly (excluding sub-orbiting planets). The zoom boundary respects the active `shellBoundaryType`.
 * **Simulation controls**: Scrubber controls and play/pause options to progress `currentSystemDate` and animate orbital vectors.
 * **Chart Export**: Combines map views to export a high-res landscape PNG (300 DPI), featuring a left-pane System Directory list where sub-orbiting planets are correctly nested under their parent bodies instead of duplicate primary lists.
 

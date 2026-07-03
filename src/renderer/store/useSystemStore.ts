@@ -17,7 +17,7 @@ interface SystemState {
   loadSavesList: () => Promise<void>;
   loadSphere: (filePath: string) => Promise<boolean>;
   saveCurrentSphere: () => Promise<boolean>;
-  createNewSphere: (name: string) => Promise<void>;
+  createNewSphere: () => Promise<void>;
   setActiveView: (view: 'bookmark' | 'navchart') => void;
   setBookmarkBackgroundMode: (mode: 'light' | 'dark') => void;
   setBookmarkShowShell: (show: boolean) => void;
@@ -27,7 +27,7 @@ interface SystemState {
   updateCelestialObject: (index: number, updated: Partial<CelestialObject>) => void;
   addCelestialObject: (object: CelestialObject) => void;
   removeCelestialObject: (index: number) => void;
-  updateActiveSphereMeta: (meta: { sphereName?: string; currentCampaignDate?: string }) => void;
+  updateActiveSphereMeta: (meta: { sphereName?: string; currentCampaignDate?: string; shellBoundaryType?: 'double' | 'relativeMargin' }) => void;
   setSphere: (sphere: CrystalSphere) => void;
   setToastMessage: (toast: { type: 'success' | 'error'; text: string } | null) => void;
 }
@@ -101,31 +101,18 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     return false;
   },
 
-  createNewSphere: async (name: string) => {
+  createNewSphere: async () => {
     const defaultSphere: CrystalSphere = {
-      sphereName: name,
+      sphereName: 'Untitled System',
       currentCampaignDate: new Date().toISOString().split('T')[0],
       currentSystemDate: 0,
-      objects: [
-        {
-          name: 'Primary Star',
-          type: 'star',
-          size: 50,
-          description: 'A glowing central fire-body.',
-          orbitedObjectName: null,
-          distanceOrbited: 0,
-          initialAngle: 0,
-          orbitalPeriodDays: 1,
-        }
-      ],
+      objects: [],
     };
 
     set({
       activeSphere: defaultSphere,
       currentSystemDate: 0,
     });
-
-    await get().saveCurrentSphere();
   },
 
   setActiveView: (view) => set({ activeView: view }),

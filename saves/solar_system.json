@@ -1,7 +1,7 @@
 {
   "sphereName": "Solar System",
   "currentCampaignDate": "2026-06-30",
-  "currentSystemDate": 0,
+  "currentSystemDate": 394,
   "objects": [
     {
       "name": "Sol",
@@ -11,7 +11,8 @@
       "orbitedObjectName": null,
       "distanceOrbited": 0,
       "initialAngle": 0,
-      "orbitalPeriodDays": 1
+      "orbitalPeriodDays": 1,
+      "isStationary": true
     },
     {
       "name": "Mercury",
@@ -93,5 +94,6 @@
       "initialAngle": 315,
       "orbitalPeriodDays": 4333
     }
-  ]
+  ],
+  "shellBoundaryType": "double"
 }

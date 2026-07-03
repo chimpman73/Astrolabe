@@ -66,29 +66,46 @@ export const drawSolidBody = (
   }
 };
 
-export const drawElementAffinityBadge = (
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  size: number,
-  affinity: string,
-  strokeColor: string,
-  xOffsetFactor: number = 0.75,
-  lineWidth: number = 1
-) => {
+export const getElementColor = (affinity: string | null) => {
+  if (!affinity) return null;
   const elementColors: Record<string, string> = {
-    fire: '#e53e3e', water: '#3182ce', earth: '#8b6914', air: '#a0aec0',
+    fire: '#eab308', // yellow
+    water: '#3b82f6', // blue
+    earth: '#8b4513', // brown
+    air: '#ffffff', // white
+    mixed: '#22c55e', // green
   };
-  const badgeColor = elementColors[affinity] ?? '#888';
-  
-  const badgeSize = Math.max(3, size * 0.42);
-  ctx.beginPath();
-  ctx.arc(x + size * xOffsetFactor, y - size * xOffsetFactor, badgeSize, 0, 2 * Math.PI);
-  ctx.fillStyle = badgeColor;
-  ctx.fill();
-  ctx.strokeStyle = strokeColor;
-  ctx.lineWidth = lineWidth;
-  ctx.stroke();
+  return elementColors[affinity] || null;
+};
+
+export const getBodyColors = (
+  obj: CelestialObject,
+  isParchment: boolean,
+  defaultBg: string,
+  defaultStroke: string,
+  defaultGold: string
+) => {
+  let bodyFill = defaultBg;
+  let bodyStroke = defaultStroke;
+
+  const elemColor = getElementColor(obj.elementAffinity ?? null);
+
+  if (obj.type === 'star') {
+    bodyFill = elemColor || defaultGold;
+    bodyStroke = defaultStroke;
+  } else if (obj.type === 'moon') {
+    bodyFill = elemColor || (isParchment ? '#dcd2b9' : '#555866');
+  } else if (obj.type === 'nebula') {
+    bodyFill = elemColor || (isParchment ? 'rgba(80,110,200,0.5)' : 'rgba(100,150,255,0.6)');
+    bodyStroke = isParchment ? '#5070c8' : '#8aabff';
+  } else if (obj.type === 'sargasso') {
+    bodyFill = elemColor || (isParchment ? 'rgba(50,140,80,0.5)' : 'rgba(60,190,100,0.6)');
+    bodyStroke = isParchment ? '#2a7840' : '#55cc80';
+  } else {
+    if (elemColor) bodyFill = elemColor;
+  }
+
+  return { bodyFill, bodyStroke };
 };
 
 export const drawStationaryIndicator = (
