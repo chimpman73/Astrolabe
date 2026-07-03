@@ -1,7 +1,7 @@
 {
   "sphereName": "Herospace",
   "currentCampaignDate": "2026-07-03",
-  "currentSystemDate": 0,
+  "currentSystemDate": 2398,
   "objects": [
     {
       "name": "S1",
@@ -58,7 +58,7 @@
       "orbitedObjectName": "Ge'Neva",
       "distanceOrbited": 0.16,
       "initialAngle": 240,
-      "orbitalPeriodDays": 365,
+      "orbitalPeriodDays": 28,
       "isStationary": false,
       "orbitDirection": "prograde"
     },

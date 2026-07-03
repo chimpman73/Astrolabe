@@ -252,6 +252,17 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
       ctx.arc(shellProj.x, shellProj.y, shellRadius - 5, 0, 2 * Math.PI);
       ctx.lineWidth = 0.75;
       ctx.stroke();
+
+      // Draw shell title
+      ctx.font = `bold 24px 'Elan', 'Cinzel', serif`;
+      ctx.fillStyle = colorStroke;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(
+        (activeSphere?.sphereName || 'CRYSTAL SHELL').toUpperCase() + ' SHELL',
+        shellProj.x,
+        shellProj.y - shellRadius - 10
+      );
     }
 
     // 3a. Draw nebula / sargasso cloud shapes (rendered behind all solid bodies)

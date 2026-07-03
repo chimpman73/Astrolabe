@@ -118,7 +118,7 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
       ctx.stroke();
 
       // Shell label at the top center
-      ctx.font = `bold ${Math.max(10, width * 0.035) * 1.5}px 'Mephisto', 'Cinzel', serif`;
+      ctx.font = `bold ${Math.max(10, width * 0.035) * 1.5}px 'Elan', 'Cinzel', serif`;
       ctx.fillStyle = colorStroke;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
