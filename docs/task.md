@@ -23,6 +23,11 @@ This file tracks the design, development, and integration tasks for the Astrolab
 | **AST-015** | Sub-orbiting Parent Filtering | High | `Done` | Exclude sub-orbiting planets from the central star scale scope in Bookmark and Nav views. |
 | **AST-016** | Custom Font Declarations & Observers | Medium | `Done` | Configure Mephisto and ITC Eras-Bold via local @font-face rules and browser font ready handlers. |
 | **AST-017** | Bookmark Label Enlargement | Medium | `Done` | Increase all Bookmark canvas text labels by 1.5x. |
+| **AST-018** | Stationary & Retrograde Orbits | High | `Done` | Add `isStationary` flag and `orbitDirection` field; update math engine and both canvas views. |
+| **AST-019** | Non-Standard World Shapes | High | `Done` | Add `worldShape` field; render disc, pyramid, cluster, and irregular shapes on both canvases. |
+| **AST-020** | Elemental Affinity Icons | Medium | `Done` | Add `elementAffinity` field; render color-coded element badges on body sprites in both views. |
+| **AST-021** | Nebula & Sargasso Cloud Objects | High | `Done` | Add `nebula`/`sargasso` types and `arcDegrees` field; render as arc-wedge smears in Nav Chart and horizontal cloud ellipses in Bookmark. |
+| **AST-022** | Fantasy Extension Documentation | Low | `Done` | Update `astrolabe_documentation.md` schema and math sections; update `task.md`. |
 
 ---
 
@@ -88,3 +93,33 @@ This file tracks the design, development, and integration tasks for the Astrolab
 - [x] **AST-017: Bookmark Label Enlargement**
   * Increased label dimensions (star, objects, shell) by 1.5x on canvas
   * Adjusted label text offsets to prevent overlap with celestial bodies
+
+### Phase 7: Fantasy World Extensions
+- [x] **AST-018: Stationary & Retrograde Orbits**
+  * Added `isStationary` boolean field — stationary objects stay fixed at `initialAngle`, unaffected by time
+  * Added `orbitDirection` (`prograde` | `retrograde`) — retrograde negates angular velocity for clockwise motion
+  * Updated `calculateAngle()` in `orbitMath.ts` with new optional parameters
+  * System Editor: tri-state motion control button group (▶ PRO / ◆ FIXED / ◄ RETRO)
+  * Bookmark View: appends ` ◆` or ` ↺` suffix to stationary/retrograde body labels
+  * Nav Chart: diamond ring indicator drawn around stationary bodies; ↺ label suffix for retrograde
+
+- [x] **AST-019: Non-Standard World Shapes**
+  * Added `worldShape` field: `sphere` (default), `disc`, `pyramid`, `cluster`, `irregular`
+  * Both canvas views switch on `worldShape` to draw ellipses, triangles, multi-circle clusters, or jagged polygons
+  * System Editor: dropdown selector hidden for nebula/sargasso types
+
+- [x] **AST-020: Elemental Affinity Icons**
+  * Added `elementAffinity` field: `fire` (red), `water` (blue), `earth` (brown), `air` (grey), or `null`
+  * Both canvas views render a small color-coded filled circle badge in the upper-right quadrant of the body sprite
+  * System Editor: dropdown selector for all non-star objects
+
+- [x] **AST-021: Nebula & Sargasso Cloud Objects**
+  * Added `nebula` and `sargasso` to `CelestialObjectType` enum
+  * Added `arcDegrees` field (angular arc width in degrees) — controls cloud extent along the orbital path
+  * Nav Chart: renders a filled arc-wedge smear (`radialDepth × arcDegrees`) behind all solid bodies
+  * Bookmark View: renders as a semi-transparent horizontal ellipse cloud, scaled to `arcDegrees` fraction of canvas width
+  * System Editor: `arcDegrees` input field visible only for cloud-type objects
+
+- [x] **AST-022: Fantasy Extension Documentation**
+  * Updated `astrolabe_documentation.md` schema section (5 new JSON fields)
+  * Updated `task.md` with new tasks AST-018 through AST-022

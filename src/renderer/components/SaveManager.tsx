@@ -10,9 +10,11 @@ import {
   ChevronUp, 
   ChevronLeft,
   Settings,
-  Compass
+  Compass,
+  Cloud,
+  Wind,
 } from 'lucide-react';
-import { CelestialObject } from '../../types/astrolabe';
+import { CelestialObject, CelestialObjectType, WorldShape, ElementAffinity } from '../../types/astrolabe';
 
 interface SaveManagerProps {
   onCollapse?: () => void;
@@ -68,6 +70,11 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
       updated.initialAngle = 0;
       updated.orbitalPeriodDays = 1;
     }
+    // If changing type to a cloud object, ensure a default arc width exists
+    if (updated.type === 'nebula' || updated.type === 'sargasso') {
+      const current = activeSphere!.objects[index];
+      updated.arcDegrees = updated.arcDegrees ?? current.arcDegrees ?? 30;
+    }
     updateCelestialObject(index, updated);
   };
 
@@ -110,6 +117,10 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
         return <Sun className="w-3.5 h-3.5 text-yellow-600 dark:text-yellow-400" />;
       case 'moon':
         return <Moon className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />;
+      case 'nebula':
+        return <Cloud className="w-3.5 h-3.5 text-blue-400" />;
+      case 'sargasso':
+        return <Wind className="w-3.5 h-3.5 text-green-500" />;
       default:
         return <Globe className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />;
     }
@@ -236,11 +247,16 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                       <select 
                         className="editor-select"
                         value={obj.type}
-                        onChange={e => handleUpdateObject(index, { type: e.target.value as 'star' | 'planet' | 'moon' })}
+                        onChange={e => handleUpdateObject(index, { type: e.target.value as CelestialObjectType })}
                       >
-                        <option value="star">Star</option>
-                        <option value="planet">Planet</option>
-                        <option value="moon">Moon</option>
+                        <option value="star">⭐ Star</option>
+                        <option value="planet">🌍 Planet</option>
+                        <option value="moon">🌕 Moon</option>
+                        <option value="asteroid">☄️ Asteroid</option>
+                        <option value="station">🏙️ Station</option>
+                        <option value="nebula">☁️ Nebula</option>
+                        <option value="sargasso">🌿 Sargasso</option>
+                        <option value="custom">✨ Custom</option>
                       </select>
                     </div>
 
@@ -305,6 +321,85 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                             onChange={e => handleUpdateObject(index, { orbitalPeriodDays: parseFloat(e.target.value) || 0 })}
                           />
                         </div>
+
+                        {/* Orbit Motion: Prograde / Stationary / Retrograde */}
+                        <div className="editor-form-group">
+                          <label>Orbit Motion</label>
+                          <div className="flex gap-1">
+                            {(['prograde', 'stationary', 'retrograde'] as const).map((motion) => {
+                              const isActive =
+                                motion === 'stationary' ? !!obj.isStationary
+                                : !obj.isStationary && (obj.orbitDirection ?? 'prograde') === motion;
+                              return (
+                                <button
+                                  key={motion}
+                                  type="button"
+                                  onClick={() => handleUpdateObject(index, {
+                                    isStationary: motion === 'stationary',
+                                    orbitDirection: motion !== 'stationary' ? motion : obj.orbitDirection,
+                                  })}
+                                  className={`flex-1 text-[9px] py-1 font-bold transition-colors ${
+                                    isActive
+                                      ? 'bg-[var(--color-accent-gold)] text-[#2b2316] border border-[var(--color-accent-gold)]'
+                                      : 'bg-transparent text-[var(--color-text-muted)] border border-[var(--color-border-parchment)] hover:bg-[var(--color-bg-base)]'
+                                  }`}
+                                >
+                                  {motion === 'prograde' ? '▶ PRO' : motion === 'stationary' ? '◆ FIXED' : '◄ RETRO'}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* World Shape (not shown for cloud-type objects) */}
+                        {obj.type !== 'nebula' && obj.type !== 'sargasso' && (
+                          <div className="editor-form-group">
+                            <label>World Shape</label>
+                            <select
+                              className="editor-select"
+                              value={obj.worldShape ?? 'sphere'}
+                              onChange={e => handleUpdateObject(index, { worldShape: e.target.value as WorldShape })}
+                            >
+                              <option value="sphere">● Sphere (Default)</option>
+                              <option value="disc">⬡ Disc World</option>
+                              <option value="pyramid">△ Pyramid World</option>
+                              <option value="cluster">⊛ Cluster World</option>
+                              <option value="irregular">✦ Irregular</option>
+                            </select>
+                          </div>
+                        )}
+
+                        {/* Element Affinity */}
+                        <div className="editor-form-group">
+                          <label>Element Affinity</label>
+                          <select
+                            className="editor-select"
+                            value={obj.elementAffinity ?? ''}
+                            onChange={e => handleUpdateObject(index, { elementAffinity: (e.target.value || null) as ElementAffinity | null })}
+                          >
+                            <option value="">None</option>
+                            <option value="fire">🔥 Fire</option>
+                            <option value="water">💧 Water</option>
+                            <option value="earth">🪨 Earth</option>
+                            <option value="air">💨 Air</option>
+                          </select>
+                        </div>
+
+                        {/* Arc Width — nebula/sargasso only */}
+                        {(obj.type === 'nebula' || obj.type === 'sargasso') && (
+                          <div className="editor-form-group">
+                            <label>Arc Width (°)</label>
+                            <input
+                              type="number"
+                              step="1"
+                              min="1"
+                              max="359"
+                              className="editor-input"
+                              value={obj.arcDegrees ?? 30}
+                              onChange={e => handleUpdateObject(index, { arcDegrees: parseFloat(e.target.value) || 30 })}
+                            />
+                          </div>
+                        )}
                       </>
                     )}
 

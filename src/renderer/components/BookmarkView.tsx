@@ -151,34 +151,140 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
     planetaryObjects.forEach((obj) => {
       const r = getPixelRadius(obj.distanceOrbited);
       const objY = height - r;
-      const sizeMultiplier = width / 300; // Visual scale scaling
+      const sizeMultiplier = width / 300;
       const objSize = Math.max(4, obj.size * 0.6 * sizeMultiplier);
+      const shape = obj.worldShape ?? 'sphere';
 
-      // Draw planet body
-      ctx.beginPath();
-      ctx.arc(centerX, objY, objSize, 0, 2 * Math.PI);
-      ctx.fillStyle = colorBg;
-      ctx.fill();
-      ctx.strokeStyle = colorStroke;
-      ctx.lineWidth = 2;
-      ctx.stroke();
+      // --- Nebula / Sargasso: cloud shape within bounding box ---
+      // Boundary points: top=(cx, cy-halfH), bottom=(cx, cy+halfH), left=(cx-halfW, cy), right=(cx+halfW, cy)
+      if (obj.type === 'nebula' || obj.type === 'sargasso') {
+        const arcDegrees = obj.arcDegrees ?? 30;
+        const arcFrac = Math.min(1.0, arcDegrees / 360);
+        // Width spans the entire orbital period for 360 degrees
+        const cloudW = width * arcFrac;
+        // Size value controls how far the cloud expands away from the orbital line
+        const halfH = Math.max(8, objSize * 1.5); 
+        const halfW = cloudW / 2;
+        const cloudFill = obj.type === 'nebula' ? '#6699ff' : '#44bb77';
 
-      // Internal detail lines based on type
-      if (obj.type === 'planet' || objSize > 8) {
+        const isFullRing = arcDegrees >= 359;
+        const numBumps = Math.max(3, Math.floor(arcDegrees / 20));
+        const numSegments = Math.max(100, Math.floor(cloudW)); // higher resolution for smooth bumps
+
+        ctx.save();
+        ctx.globalAlpha = 0.35;
+        ctx.fillStyle = cloudFill;
         ctx.beginPath();
-        ctx.moveTo(centerX - objSize, objY);
-        ctx.lineTo(centerX + objSize, objY);
+        
+        // Outer edge (top)
+        for (let i = 0; i <= numSegments; i++) {
+          const t = i / numSegments;
+          const nx = -1 + 2 * t;
+          const envelope = isFullRing ? 1 : (1 - nx * nx);
+          // 40% amplitude creates distinct, puffy cloud bumps instead of a flat line
+          const bump = 0.6 + 0.4 * Math.cos(nx * Math.PI * numBumps);
+          const x = centerX + nx * halfW;
+          const y = objY - halfH * envelope * bump;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        
+        // Inner edge (bottom)
+        for (let i = numSegments; i >= 0; i--) {
+          const t = i / numSegments;
+          const nx = -1 + 2 * t;
+          const envelope = isFullRing ? 1 : (1 - nx * nx);
+          const bump = 0.6 + 0.4 * Math.cos(nx * Math.PI * numBumps);
+          const x = centerX + nx * halfW;
+          const y = objY + halfH * envelope * bump;
+          ctx.lineTo(x, y);
+        }
+        
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      } else {
+
+        // --- Shaped solid body ---
+        ctx.beginPath();
+        switch (shape) {
+          case 'disc':
+            ctx.ellipse(centerX, objY, objSize, objSize * 0.35, 0, 0, 2 * Math.PI);
+            break;
+          case 'pyramid':
+            ctx.moveTo(centerX, objY - objSize * 1.2);
+            ctx.lineTo(centerX + objSize, objY + objSize * 0.7);
+            ctx.lineTo(centerX - objSize, objY + objSize * 0.7);
+            ctx.closePath();
+            break;
+          case 'cluster': {
+            const offs = objSize * 0.55;
+            ctx.arc(centerX - offs, objY + offs * 0.4, objSize * 0.65, 0, 2 * Math.PI);
+            ctx.moveTo(centerX + offs + objSize * 0.65, objY + offs * 0.4);
+            ctx.arc(centerX + offs, objY + offs * 0.4, objSize * 0.65, 0, 2 * Math.PI);
+            ctx.moveTo(centerX + objSize * 0.65, objY - offs * 0.6);
+            ctx.arc(centerX, objY - offs * 0.6, objSize * 0.65, 0, 2 * Math.PI);
+            break;
+          }
+          case 'irregular': {
+            const ipts: [number, number][] = [
+              [0, -1.0], [0.55, -0.65], [1.0, -0.05], [0.7, 0.65],
+              [-0.1, 0.88], [-0.65, 0.55], [-0.95, 0.0], [-0.55, -0.7],
+            ];
+            const iradii = [1.0, 0.82, 0.95, 0.78, 0.88, 0.75, 0.92, 0.80];
+            ipts.forEach(([dx, dy], i) => {
+              const ir = objSize * iradii[i];
+              if (i === 0) ctx.moveTo(centerX + dx * ir, objY + dy * ir);
+              else ctx.lineTo(centerX + dx * ir, objY + dy * ir);
+            });
+            ctx.closePath();
+            break;
+          }
+          default: // sphere
+            ctx.arc(centerX, objY, objSize, 0, 2 * Math.PI);
+        }
+        ctx.fillStyle = colorBg;
+        ctx.fill();
+        ctx.strokeStyle = colorStroke;
+        ctx.lineWidth = 2;
         ctx.stroke();
+
+        // Equatorial detail line for sphere/disc
+        if ((shape === 'sphere' || shape === 'disc') && (obj.type === 'planet' || objSize > 8)) {
+          ctx.beginPath();
+          ctx.moveTo(centerX - objSize, objY);
+          ctx.lineTo(centerX + objSize, objY);
+          ctx.stroke();
+        }
+
+        // --- Element affinity badge (colored dot, upper-right of body) ---
+        if (obj.elementAffinity) {
+          const elementColors: Record<string, string> = {
+            fire: '#e53e3e', water: '#3182ce', earth: '#8b6914', air: '#a0aec0',
+          };
+          const badgeColor = elementColors[obj.elementAffinity] ?? '#888';
+          const badgeSize = Math.max(3, objSize * 0.42);
+          ctx.beginPath();
+          ctx.arc(centerX + objSize * 0.75, objY - objSize * 0.75, badgeSize, 0, 2 * Math.PI);
+          ctx.fillStyle = badgeColor;
+          ctx.fill();
+          ctx.strokeStyle = colorBg;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
       }
 
-      // Draw name label to the right
+      // --- Motion indicator suffix (◆ = fixed, ↺ = retrograde) ---
+      const motionSuffix = obj.isStationary ? ' ◆' : obj.orbitDirection === 'retrograde' ? ' ↺' : '';
+
+      // --- Name label to the right ---
       ctx.font = `normal ${Math.max(10, width * 0.035) * 1.5}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
       ctx.fillStyle = colorStroke;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText(obj.name, centerX + objSize + 12, objY);
+      ctx.fillText(obj.name + motionSuffix, centerX + objSize + 12, objY);
 
-      // Draw distance label to the left
+      // --- Distance label to the left ---
       if (showDistance) {
         ctx.font = `italic ${Math.max(8, width * 0.028) * 1.5}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
         ctx.fillStyle = colorMuted;

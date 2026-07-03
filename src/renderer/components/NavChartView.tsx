@@ -222,13 +222,87 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
       ctx.stroke();
     }
 
-    // 3. Draw bodies and labels (front-to-back)
+    // 3a. Draw nebula / sargasso cloud shapes (rendered behind all solid bodies)
+    // Cloud spans the orbital path, bounding points map to polar coordinates
+    objects.forEach((obj) => {
+      if (obj.type !== 'nebula' && obj.type !== 'sargasso') return;
+
+      const pos = positions[obj.name];
+      if (!pos || obj.distanceOrbited <= 0) return;
+
+      // Resolve parent canvas position
+      let px = 0, py = 0;
+      if (obj.orbitedObjectName) {
+        const parentPos = positions[obj.orbitedObjectName];
+        if (parentPos) { px = parentPos.x; py = parentPos.y; }
+      }
+      const parentProj = project(px, py);
+
+      const orbitR = obj.distanceOrbited * activeZoom;
+      const arcDegrees = obj.arcDegrees ?? 30;
+      const arcHalf = (arcDegrees / 2) * (Math.PI / 180);
+      const centerAngle = pos.angle * (Math.PI / 180);
+
+      // size controls how far it expands away from the orbital line (radial depth)
+      const halfH = Math.max(4, (obj.size / 100) * 25 * activeZoom);
+
+      const isNebula = obj.type === 'nebula';
+      const cloudFill = isParchment
+        ? (isNebula ? 'rgba(80,110,200,0.4)' : 'rgba(50,150,80,0.4)')
+        : (isNebula ? 'rgba(100,150,255,0.45)' : 'rgba(60,200,100,0.45)');
+
+      const isFullRing = arcDegrees >= 359;
+      const numBumps = Math.max(3, Math.floor(arcDegrees / 20));
+      const numSegments = Math.max(40, Math.floor(arcDegrees * 1.5));
+
+      ctx.save();
+      ctx.beginPath();
+      
+      // Outer edge
+      for (let i = 0; i <= numSegments; i++) {
+        const t = i / numSegments;
+        const nx = -1 + 2 * t; // -1 to 1
+        const envelope = isFullRing ? 1 : (1 - nx * nx);
+        const bump = 0.85 + 0.15 * Math.cos(nx * Math.PI * numBumps);
+        
+        const angle = centerAngle + nx * arcHalf;
+        const rOuter = orbitR + halfH * envelope * bump;
+        
+        const x = parentProj.x + rOuter * Math.cos(angle);
+        const y = parentProj.y + rOuter * Math.sin(angle);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      
+      // Inner edge
+      for (let i = numSegments; i >= 0; i--) {
+        const t = i / numSegments;
+        const nx = -1 + 2 * t;
+        const envelope = isFullRing ? 1 : (1 - nx * nx);
+        const bump = 0.85 + 0.15 * Math.cos(nx * Math.PI * numBumps);
+        
+        const angle = centerAngle + nx * arcHalf;
+        const rInner = orbitR - halfH * envelope * bump;
+        
+        const x = parentProj.x + rInner * Math.cos(angle);
+        const y = parentProj.y + rInner * Math.sin(angle);
+        ctx.lineTo(x, y);
+      }
+      
+      ctx.closePath();
+      ctx.fillStyle = cloudFill;
+      ctx.fill();
+      ctx.restore();
+    });
+
+    // 3b. Draw solid bodies and labels (front-to-back)
     objects.forEach((obj) => {
       const pos = positions[obj.name];
       if (!pos) return;
 
       const proj = project(pos.x, pos.y);
       const renderSize = Math.max(3, (obj.size / 100) * 20);
+      const shape = obj.worldShape ?? 'sphere';
 
       // Body coloring
       let bodyFill = colorBg;
@@ -239,37 +313,114 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
         bodyStroke = colorStroke;
       } else if (obj.type === 'moon') {
         bodyFill = isParchment ? '#dcd2b9' : '#555866';
+      } else if (obj.type === 'nebula') {
+        bodyFill = isParchment ? 'rgba(80,110,200,0.5)' : 'rgba(100,150,255,0.6)';
+        bodyStroke = isParchment ? '#5070c8' : '#8aabff';
+      } else if (obj.type === 'sargasso') {
+        bodyFill = isParchment ? 'rgba(50,140,80,0.5)' : 'rgba(60,190,100,0.6)';
+        bodyStroke = isParchment ? '#2a7840' : '#55cc80';
       }
 
-      // Draw Body
-      ctx.beginPath();
-      ctx.arc(proj.x, proj.y, renderSize, 0, 2 * Math.PI);
-      ctx.fillStyle = bodyFill;
-      ctx.fill();
-      
-      ctx.lineWidth = obj.type === 'star' ? 2 : 1.5;
-      ctx.strokeStyle = bodyStroke;
-      ctx.stroke();
-
-      // Mini features for stars (sunbursts)
-      if (obj.type === 'star') {
+      // Draw Body (shape-aware) — skipped for cloud types; they are drawn as clouds in pass 3a
+      if (obj.type !== 'nebula' && obj.type !== 'sargasso') {
         ctx.beginPath();
-        ctx.arc(proj.x, proj.y, renderSize + 4, 0, 2 * Math.PI);
-        ctx.strokeStyle = colorMuted;
-        ctx.lineWidth = 0.5;
+        switch (shape) {
+          case 'disc':
+            ctx.ellipse(proj.x, proj.y, renderSize, renderSize * 0.35, 0, 0, 2 * Math.PI);
+            break;
+          case 'pyramid':
+            ctx.moveTo(proj.x, proj.y - renderSize * 1.2);
+            ctx.lineTo(proj.x + renderSize, proj.y + renderSize * 0.7);
+            ctx.lineTo(proj.x - renderSize, proj.y + renderSize * 0.7);
+            ctx.closePath();
+            break;
+          case 'cluster': {
+            const offs = renderSize * 0.5;
+            ctx.arc(proj.x - offs, proj.y + offs * 0.4, renderSize * 0.65, 0, 2 * Math.PI);
+            ctx.moveTo(proj.x + offs + renderSize * 0.65, proj.y + offs * 0.4);
+            ctx.arc(proj.x + offs, proj.y + offs * 0.4, renderSize * 0.65, 0, 2 * Math.PI);
+            ctx.moveTo(proj.x + renderSize * 0.65, proj.y - offs * 0.6);
+            ctx.arc(proj.x, proj.y - offs * 0.6, renderSize * 0.65, 0, 2 * Math.PI);
+            break;
+          }
+          case 'irregular': {
+            const ipts: [number, number][] = [
+              [0, -1.0], [0.55, -0.65], [1.0, -0.05], [0.7, 0.65],
+              [-0.1, 0.88], [-0.65, 0.55], [-0.95, 0.0], [-0.55, -0.7],
+            ];
+            const iradii = [1.0, 0.82, 0.95, 0.78, 0.88, 0.75, 0.92, 0.80];
+            ipts.forEach(([dx, dy], i) => {
+              const ir = renderSize * iradii[i];
+              if (i === 0) ctx.moveTo(proj.x + dx * ir, proj.y + dy * ir);
+              else ctx.lineTo(proj.x + dx * ir, proj.y + dy * ir);
+            });
+            ctx.closePath();
+            break;
+          }
+          default: // sphere
+            ctx.arc(proj.x, proj.y, renderSize, 0, 2 * Math.PI);
+        }
+        ctx.fillStyle = bodyFill;
+        ctx.fill();
+        ctx.lineWidth = obj.type === 'star' ? 2 : 1.5;
+        ctx.strokeStyle = bodyStroke;
         ctx.stroke();
+
+        // Star sunburst ring
+        if (obj.type === 'star') {
+          ctx.beginPath();
+          ctx.arc(proj.x, proj.y, renderSize + 4, 0, 2 * Math.PI);
+          ctx.strokeStyle = colorMuted;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
       }
 
-      // Label (Only display names for non-moons, or when zoomed in)
+      // --- Element affinity badge (colored dot, upper-right of body) ---
+      if (obj.elementAffinity && obj.type !== 'star') {
+        const elementColors: Record<string, string> = {
+          fire: '#e53e3e', water: '#3182ce', earth: '#8b6914', air: '#a0aec0',
+        };
+        const badgeColor = elementColors[obj.elementAffinity];
+        if (badgeColor) {
+          const badgeSize = Math.max(2, renderSize * 0.42);
+          ctx.beginPath();
+          ctx.arc(proj.x + renderSize * 0.72, proj.y - renderSize * 0.72, badgeSize, 0, 2 * Math.PI);
+          ctx.fillStyle = badgeColor;
+          ctx.fill();
+          ctx.strokeStyle = colorBg;
+          ctx.lineWidth = 0.75;
+          ctx.stroke();
+        }
+      }
+
+      // --- Stationary diamond ring indicator ---
+      if (obj.isStationary && obj.type !== 'star') {
+        const ds = renderSize + 5;
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(proj.x, proj.y - ds);
+        ctx.lineTo(proj.x + ds, proj.y);
+        ctx.lineTo(proj.x, proj.y + ds);
+        ctx.lineTo(proj.x - ds, proj.y);
+        ctx.closePath();
+        ctx.strokeStyle = colorMuted;
+        ctx.lineWidth = 0.75;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Label (with motion indicator suffix)
       const shouldLabel = obj.type !== 'moon' || activeZoom > 150;
       if (shouldLabel) {
+        const motionTag = obj.isStationary ? ' ◆' : obj.orbitDirection === 'retrograde' ? ' ↺' : '';
         ctx.font = obj.type === 'star'
           ? `bold 12px 'Mephisto', 'Cinzel', serif`
           : `500 10px 'Mephisto', 'Outfit', sans-serif`;
         ctx.fillStyle = colorStroke;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
-        ctx.fillText(obj.name, proj.x, proj.y + renderSize + 5);
+        ctx.fillText(obj.name + motionTag, proj.x, proj.y + renderSize + 5);
       }
     });
 

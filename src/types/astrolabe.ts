@@ -1,4 +1,10 @@
-export type CelestialObjectType = 'star' | 'planet' | 'moon' | 'asteroid' | 'station' | 'custom';
+export type CelestialObjectType =
+  | 'star' | 'planet' | 'moon' | 'asteroid'
+  | 'station' | 'nebula' | 'sargasso' | 'custom';
+
+export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular';
+export type ElementAffinity = 'fire' | 'water' | 'earth' | 'air';
+export type OrbitDirection = 'prograde' | 'retrograde';
 
 export interface CelestialObject {
   name: string;
@@ -9,6 +15,18 @@ export interface CelestialObject {
   distanceOrbited: number; // radius from parent in AU or system units
   initialAngle: number; // angle in degrees at t=0
   orbitalPeriodDays?: number; // optional orbital override
+
+  // --- Fantasy Extensions ---
+  /** If true, the object remains fixed at initialAngle and does not advance with time. */
+  isStationary?: boolean;
+  /** Direction of orbital travel. Retrograde moves clockwise (negative angular velocity). Defaults to prograde. */
+  orbitDirection?: OrbitDirection;
+  /** Visual shape of the celestial body. Defaults to sphere. */
+  worldShape?: WorldShape;
+  /** Elemental association for fantasy worlds. */
+  elementAffinity?: ElementAffinity | null;
+  /** For nebula/sargasso types: angular arc width in degrees along the orbital path. */
+  arcDegrees?: number;
 }
 
 export interface CrystalSphere {

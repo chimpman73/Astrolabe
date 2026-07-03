@@ -1,4 +1,4 @@
-import { CelestialObject } from '../../types/astrolabe';
+import { CelestialObject, OrbitDirection } from '../../types/astrolabe';
 
 /**
  * Calculates the orbital period (P) in days using Keplerian scaling: P = k * d^1.5.
@@ -13,11 +13,21 @@ export function calculateOrbitalPeriod(distance: number, override?: number): num
 
 /**
  * Calculates the active angle in degrees based on time elapsed.
- * Formula: theta(t) = (initialAngle + (360 / P) * t) mod 360
+ * Formula: theta(t) = (initialAngle ± (360 / P) * t) mod 360
+ * @param isStationary - If true, always returns initialAngle (object is fixed in space).
+ * @param direction - 'retrograde' reverses angular velocity, producing clockwise motion.
  */
-export function calculateAngle(initialAngle: number, periodDays: number, currentDays: number): number {
+export function calculateAngle(
+  initialAngle: number,
+  periodDays: number,
+  currentDays: number,
+  isStationary?: boolean,
+  direction?: OrbitDirection
+): number {
+  if (isStationary) return initialAngle;
   if (periodDays <= 0) return initialAngle;
-  const deltaAngle = (360 / periodDays) * currentDays;
+  const dirMult = direction === 'retrograde' ? -1 : 1;
+  const deltaAngle = dirMult * (360 / periodDays) * currentDays;
   let angle = (initialAngle + deltaAngle) % 360;
   if (angle < 0) angle += 360;
   return angle;
@@ -65,7 +75,7 @@ export function calculateSystemPositions(
     }
 
     const period = calculateOrbitalPeriod(obj.distanceOrbited, obj.orbitalPeriodDays);
-    const angle = calculateAngle(obj.initialAngle, period, currentDays);
+    const angle = calculateAngle(obj.initialAngle, period, currentDays, obj.isStationary, obj.orbitDirection);
 
     // If it has no parent, it orbits the central star at coordinate (0, 0)
     if (!obj.orbitedObjectName || obj.orbitedObjectName === name) {
