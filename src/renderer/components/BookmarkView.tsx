@@ -265,12 +265,12 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
 
   return (
     <div className="bookmark-view-content">
-      <div className="w-full border-b border-[var(--color-border-parchment)] pb-2 mb-2 shrink-0 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="save-manager-header w-full">
+        <div className="save-manager-header-title">
           {onCollapse && (
             <button
               onClick={onCollapse}
-              className="p-0.5 rounded hover:bg-[var(--color-bg-base)] text-[var(--color-text-muted)] border border-transparent hover:border-[var(--color-border-parchment)] transition-all"
+              className="save-manager-collapse-btn"
               title="Collapse Bookmark Panel"
             >
               <ChevronLeft className="w-3.5 h-3.5" />

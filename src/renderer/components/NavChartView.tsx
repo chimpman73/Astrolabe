@@ -579,13 +579,13 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     <div className="navchart-view-content">
       
       {/* Toolbar Overlay */}
-      <div className="p-3 bg-opacity-70 backdrop-blur-md border-b border-[var(--color-border-parchment)] flex items-center justify-between bg-[var(--color-bg-panel)] shrink-0">
+      <div className="save-manager-header w-full px-4 pt-4">
         
-        <div className="flex items-center gap-2">
+        <div className="save-manager-header-title">
           {onCollapse && (
             <button
               onClick={onCollapse}
-              className="p-1 rounded hover:bg-[var(--color-bg-base)] text-[var(--color-text-muted)] border border-transparent hover:border-[var(--color-border-parchment)] transition-all"
+              className="save-manager-collapse-btn"
               title="Collapse Map Panel"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
