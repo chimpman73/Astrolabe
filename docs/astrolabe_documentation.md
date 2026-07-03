@@ -70,7 +70,7 @@ The application saves and loads system states via JSON configuration files store
         },
         "type": {
           "type": "string",
-          "enum": ["star", "planet", "moon", "asteroid", "station", "custom"],
+          "enum": ["star", "planet", "moon", "asteroid", "station", "custom", "nebula", "sargasso", "living_world"],
           "description": "Category of the celestial body."
         },
         "size": {
@@ -101,6 +101,33 @@ The application saves and loads system states via JSON configuration files store
           "type": "number",
           "minimum": 0.1,
           "description": "Optional override for orbital period in days. If omitted, it is calculated automatically from orbital distance."
+        },
+        "branchLevels": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Depth/tiers of branching for a living_world."
+        },
+        "branchDensity": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Branching factor/density for a living_world."
+        },
+        "branchExtent": {
+          "type": "number",
+          "minimum": 0.1,
+          "description": "Length of primary branches in AU for a living_world."
+        },
+        "hasLeaves": {
+          "type": "boolean",
+          "description": "Whether to draw leaves at the branch tips for a living_world."
+        },
+        "branchBend": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 2.0,
+          "description": "How much the branches bend at nodes for a living_world."
         }
       }
     }

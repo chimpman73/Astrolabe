@@ -13,6 +13,7 @@ import {
   Compass,
   Cloud,
   Wind,
+  TreeDeciduous,
 } from 'lucide-react';
 import { CelestialObject, CelestialObjectType, WorldShape, ElementAffinity } from '../../types/astrolabe';
 
@@ -72,6 +73,14 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
       const current = activeSphere!.objects[index];
       updated.arcDegrees = updated.arcDegrees ?? current.arcDegrees ?? 30;
     }
+    if (updated.type === 'living_world') {
+      const current = activeSphere!.objects[index];
+      updated.branchLevels = updated.branchLevels ?? current.branchLevels ?? 2;
+      updated.branchDensity = updated.branchDensity ?? current.branchDensity ?? 3;
+      updated.branchExtent = updated.branchExtent ?? current.branchExtent ?? 2.5;
+      updated.hasLeaves = updated.hasLeaves ?? current.hasLeaves ?? true;
+      updated.branchBend = updated.branchBend ?? current.branchBend ?? 0.5;
+    }
     updateCelestialObject(index, updated);
   };
 
@@ -117,6 +126,8 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
         return <Cloud className="w-3.5 h-3.5 text-blue-400" />;
       case 'sargasso':
         return <Wind className="w-3.5 h-3.5 text-green-500" />;
+      case 'living_world':
+        return <TreeDeciduous className="w-3.5 h-3.5 text-green-600 dark:text-green-500" />;
       default:
         return <Globe className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />;
     }
@@ -176,16 +187,42 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
             />
           </div>
 
-          <div className="editor-form-group">
-            <label>Shell Boundary</label>
-            <select
-              className="editor-select"
-              value={activeSphere.shellBoundaryType || 'double'}
-              onChange={e => updateActiveSphereMeta({ shellBoundaryType: e.target.value as 'double' | 'relativeMargin' })}
-            >
-              <option value="double">Double (Max x2)</option>
-              <option value="relativeMargin">Plus Margin (Max x1.2)</option>
-            </select>
+          <div className="editor-form-group" style={{ alignItems: 'flex-start' }}>
+            <label style={{ marginBottom: '8px' }}>Shell Boundary</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '12px' }}>
+                <input 
+                  type="radio" 
+                  name="shellBoundaryType"
+                  checked={(!activeSphere.shellBoundaryType || activeSphere.shellBoundaryType === 'double')}
+                  onChange={() => updateActiveSphereMeta({ shellBoundaryType: 'double' })}
+                />
+                Double (Max x2)
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '12px' }}>
+                <input 
+                  type="radio" 
+                  name="shellBoundaryType"
+                  checked={(activeSphere.shellBoundaryType === 'custom' || activeSphere.shellBoundaryType === 'relativeMargin')}
+                  onChange={() => updateActiveSphereMeta({ shellBoundaryType: 'custom' })}
+                />
+                Custom Margin
+              </label>
+              {(activeSphere.shellBoundaryType === 'custom' || activeSphere.shellBoundaryType === 'relativeMargin') && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '24px' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>Max x</span>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="1.0"
+                    className="editor-input"
+                    style={{ width: '80px' }}
+                    value={activeSphere.shellCustomScale ?? 1.2}
+                    onChange={e => updateActiveSphereMeta({ shellCustomScale: parseFloat(e.target.value) || 1.2 })}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -264,6 +301,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                         <option value="station">🏙️ Station</option>
                         <option value="nebula">☁️ Nebula</option>
                         <option value="sargasso">🌿 Sargasso</option>
+                        <option value="living_world">🌳 Living World</option>
                         <option value="custom">✨ Custom</option>
                       </select>
                     </div>
@@ -359,7 +397,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                         </div>
 
                         {/* World Shape (not shown for cloud-type objects) */}
-                        {obj.type !== 'nebula' && obj.type !== 'sargasso' && (
+                        {obj.type !== 'nebula' && obj.type !== 'sargasso' && obj.type !== 'living_world' && (
                           <div className="editor-form-group">
                             <label>World Shape</label>
                             <select
@@ -407,6 +445,67 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               onChange={e => handleUpdateObject(index, { arcDegrees: parseFloat(e.target.value) || 30 })}
                             />
                           </div>
+                        )}
+
+                        {/* Living World Config */}
+                        {obj.type === 'living_world' && (
+                          <>
+                            <div className="editor-form-group">
+                              <label>Branch Levels</label>
+                              <input
+                                type="number"
+                                step="1"
+                                min="1"
+                                max="6"
+                                className="editor-input"
+                                value={obj.branchLevels ?? 2}
+                                onChange={e => handleUpdateObject(index, { branchLevels: parseInt(e.target.value, 10) || 2 })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Branch Density</label>
+                              <input
+                                type="number"
+                                step="1"
+                                min="1"
+                                max="10"
+                                className="editor-input"
+                                value={obj.branchDensity ?? 3}
+                                onChange={e => handleUpdateObject(index, { branchDensity: parseInt(e.target.value, 10) || 3 })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Branch Length (AU)</label>
+                              <input
+                                type="number"
+                                step="0.1"
+                                min="0.1"
+                                className="editor-input"
+                                value={obj.branchExtent ?? 2.5}
+                                onChange={e => handleUpdateObject(index, { branchExtent: parseFloat(e.target.value) || 2.5 })}
+                              />
+                            </div>
+                            <div className="editor-form-group flex items-center justify-between mt-2">
+                              <label className="mb-0">Has Leaves</label>
+                              <input
+                                type="checkbox"
+                                checked={obj.hasLeaves ?? true}
+                                onChange={e => handleUpdateObject(index, { hasLeaves: e.target.checked })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Branch Bend</label>
+                              <input
+                                type="number"
+                                step="0.1"
+                                min="0.0"
+                                max="2.0"
+                                className="editor-input"
+                                value={obj.branchBend ?? 0.5}
+                                onChange={e => handleUpdateObject(index, { branchBend: parseFloat(e.target.value) || 0.0 })}
+                              />
+                            </div>
+                          </>
                         )}
 
 

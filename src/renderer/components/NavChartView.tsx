@@ -93,21 +93,17 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
   const handleAutoFit = () => {
     if (objects.length === 0) return;
     
-    const isPrimary = (obj: any) => {
-      if (!obj.orbitedObjectName) return true;
-      const parent = objects.find((o) => o.name === obj.orbitedObjectName);
-      if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
-      return false;
-    };
+    let maxDist = 0.1;
+    objects.forEach(o => {
+      const pos = positions[o.name];
+      if (!pos) return;
+      const dist = Math.sqrt(pos.x * pos.x + pos.y * pos.y);
+      const reach = o.type === 'living_world' ? dist + (o.branchExtent || 0) : dist;
+      if (reach > maxDist) maxDist = reach;
+    });
     
-    // Find max distance of primary objects
-    const primaryObjects = objects.filter((o) => 
-      o.distanceOrbited > 0 && isPrimary(o)
-    );
-    const maxDist = primaryObjects.reduce((max, o) => Math.max(max, o.distanceOrbited), 0.1);
-    
-    const isRelative = activeSphere?.shellBoundaryType === 'relativeMargin';
-    const shellScale = isRelative ? 1.2 : 2.0;
+    const isCustom = activeSphere?.shellBoundaryType === 'custom' || activeSphere?.shellBoundaryType === 'relativeMargin';
+    const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
     
     // The Crystal Sphere Shell is drawn at shellScale * maxDist. We want it to fit comfortably inside the canvas viewport.
     const minSize = Math.min(dimensions.width, dimensions.height);
@@ -233,20 +229,18 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     });
 
     // 2. Draw outer Crystal Sphere Shell boundary if max planet exists
-    const isPrimaryOuter = (obj: any) => {
-      if (!obj.orbitedObjectName) return true;
-      const parent = objects.find((p) => p.name === obj.orbitedObjectName);
-      if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
-      return false;
-    };
-    const primaryObjects = objects.filter((o) => 
-      o.distanceOrbited > 0 && isPrimaryOuter(o)
-    );
-    if (primaryObjects.length > 0) {
-      const maxDist = primaryObjects.reduce((max, o) => Math.max(max, o.distanceOrbited), 0.1);
+      let maxDist = 0.1;
+      objects.forEach(o => {
+        const pos = positions[o.name];
+        if (!pos) return;
+        const dist = Math.sqrt(pos.x * pos.x + pos.y * pos.y);
+        const reach = o.type === 'living_world' ? dist + (o.branchExtent || 0) : dist;
+        if (reach > maxDist) maxDist = reach;
+      });
       const shellProj = project(0, 0);
-      const isRelative = activeSphere?.shellBoundaryType === 'relativeMargin';
-      const shellRadius = maxDist * (isRelative ? 1.2 : 2) * activeZoom;
+      const isCustom = activeSphere?.shellBoundaryType === 'custom' || activeSphere?.shellBoundaryType === 'relativeMargin';
+      const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
+      const shellRadius = maxDist * shellScale * activeZoom;
 
       // Draw thick outer sphere boundary
       ctx.beginPath();
@@ -270,7 +264,6 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
         shellProj.x,
         shellProj.y - shellRadius - 10
       );
-    }
 
     // 3a. Draw nebula / sargasso cloud shapes (rendered behind all solid bodies)
     // Cloud spans the orbital path, bounding points map to polar coordinates
@@ -358,7 +351,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
 
       // Draw Body (shape-aware) — skipped for cloud types; they are drawn as clouds in pass 3a
       if (obj.type !== 'nebula' && obj.type !== 'sargasso') {
-        drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, bodyFill, bodyStroke, false);
+        drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, bodyFill, bodyStroke, false, activeZoom);
 
         // Star sunburst ring
         if (obj.type === 'star') {

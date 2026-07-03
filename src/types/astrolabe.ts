@@ -1,6 +1,6 @@
 export type CelestialObjectType =
   | 'star' | 'planet' | 'moon' | 'asteroid'
-  | 'station' | 'nebula' | 'sargasso' | 'custom';
+  | 'station' | 'nebula' | 'sargasso' | 'custom' | 'living_world';
 
 export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular';
 export type ElementAffinity = 'fire' | 'water' | 'earth' | 'air' | 'mixed';
@@ -27,13 +27,24 @@ export interface CelestialObject {
   elementAffinity?: ElementAffinity | null;
   /** For nebula/sargasso types: angular arc width in degrees along the orbital path. */
   arcDegrees?: number;
+  /** For living_world types: depth/tiers of branching. */
+  branchLevels?: number;
+  /** For living_world types: branching factor. */
+  branchDensity?: number;
+  /** For living_world types: how far branches extend in AU. */
+  branchExtent?: number;
+  /** For living_world types: whether to draw leaves at the tips. */
+  hasLeaves?: boolean;
+  /** For living_world types: how much the branches bend at nodes. */
+  branchBend?: number;
 }
 
 export interface CrystalSphere {
   sphereName: string;
   currentCampaignDate: string;
   currentSystemDate: number; // elapsed days from start epoch
-  shellBoundaryType?: 'double' | 'relativeMargin'; // 'double' = maxDist * 2, 'relativeMargin' = maxDist * 1.2
+  shellBoundaryType?: 'double' | 'relativeMargin' | 'custom'; // 'double' = maxDist * 2, 'relativeMargin' = maxDist * 1.2, 'custom' = uses shellCustomScale
+  shellCustomScale?: number;
   objects: CelestialObject[];
 }
 

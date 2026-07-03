@@ -1,0 +1,52 @@
+{
+  "sphereName": "Bugspace",
+  "currentCampaignDate": "2026-07-03",
+  "currentSystemDate": 0,
+  "objects": [
+    {
+      "name": "World Tree",
+      "type": "living_world",
+      "size": 40,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 0,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 0,
+      "arcDegrees": 30,
+      "isStationary": true,
+      "worldShape": "cluster",
+      "elementAffinity": "earth",
+      "branchLevels": 4,
+      "branchDensity": 10,
+      "branchExtent": 28,
+      "hasLeaves": true,
+      "branchBend": 0.5
+    },
+    {
+      "name": "Toroid Sea",
+      "type": "nebula",
+      "size": 50,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 28,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 0,
+      "worldShape": "sphere",
+      "elementAffinity": "water",
+      "arcDegrees": 360,
+      "isStationary": true
+    },
+    {
+      "name": "Fish Sun",
+      "type": "star",
+      "size": 60,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "World Tree",
+      "distanceOrbited": 28,
+      "initialAngle": 270,
+      "orbitalPeriodDays": 360,
+      "elementAffinity": "fire"
+    }
+  ],
+  "shellBoundaryType": "relativeMargin"
+}

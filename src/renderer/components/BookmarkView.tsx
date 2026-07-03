@@ -47,7 +47,10 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
     : [];
 
   // Furthest planetary distance
-  const maxDistance = planetaryObjects.reduce((max, obj) => Math.max(max, obj.distanceOrbited), 0.1);
+  const maxDistance = planetaryObjects.reduce((max, obj) => {
+    const reach = obj.type === 'living_world' ? obj.distanceOrbited + (obj.branchExtent || 0) : obj.distanceOrbited;
+    return Math.max(max, reach);
+  }, 0.1);
 
   // Unified Draw Function for rendering on both Screen and Export canvas
   const drawBookmark = (
@@ -74,8 +77,9 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
     const centerX = width / 2;
     const centerY = height - bottomMargin; // True center is slightly above bottom edge
 
-    const isRelative = activeSphere?.shellBoundaryType === 'relativeMargin';
-    const shellDistance = showShell ? (isRelative ? maxDistance * 1.2 : maxDistance * 2) : maxDistance;
+    const isCustom = activeSphere?.shellBoundaryType === 'custom' || activeSphere?.shellBoundaryType === 'relativeMargin';
+    const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
+    const shellDistance = showShell ? maxDistance * shellScale : maxDistance;
 
     // Helper: translate distance into pixel radius
     const getPixelRadius = (distance: number) => {
@@ -198,7 +202,14 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
         ctx.restore();
       } else {
         const { bodyFill, bodyStroke } = getBodyColors(obj, !isDark, colorBg, colorStroke, '#e2b34a');
-        drawSolidBody(ctx, centerX, objY, obj, objSize, bodyFill, bodyStroke, false);
+        const isRelative = activeSphere?.shellBoundaryType === 'relativeMargin';
+        const shellScale = isRelative ? 1.2 : 2.0;
+        
+        // Calculate true pixels per AU
+        const scaleHeight = height - (showShell ? 15 : 45) - bottomMargin;
+        const pixelsPerAU = shellDistance > 0 ? scaleHeight / shellDistance : 1;
+        
+        drawSolidBody(ctx, centerX, objY, obj, objSize, bodyFill, bodyStroke, false, pixelsPerAU);
       }
 
       // --- Motion indicator suffix (◆ = fixed, ↺ = retrograde) ---
