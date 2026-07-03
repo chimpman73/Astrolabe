@@ -43,8 +43,13 @@ The application saves and loads system states via JSON configuration files store
     },
     "shellBoundaryType": {
       "type": "string",
-      "enum": ["double", "relativeMargin"],
+      "enum": ["double", "relativeMargin", "custom"],
       "description": "Configures how far the crystal shell is placed relative to the furthest orbit. Defaults to double."
+    },
+    "shellCustomScale": {
+      "type": "number",
+      "minimum": 1.0,
+      "description": "The exact multiplier used for the Crystal Shell distance when shellBoundaryType is set to 'custom' or 'relativeMargin'. Defaults to 1.2."
     },
     "objects": {
       "type": "array",
