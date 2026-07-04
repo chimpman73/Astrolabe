@@ -124,7 +124,7 @@ export class LivingWorldRenderer extends BaseRenderer {
       const maxLevelsSum = (1 - Math.pow(0.75, levels)) / (1 - 0.75);
       const unscaledInitial = 1 / maxLevelsSum; // Run with a normalized target length of 1
       
-      const radiusTracker = { value: 1 };
+      const radiusTracker = { value: 0 };
       traverseTree(0, 0, 0, unscaledInitial, 1, baseSeed, radiusTracker);
       
       LivingWorldRenderer.geometryCache.set(baseSeed, {
