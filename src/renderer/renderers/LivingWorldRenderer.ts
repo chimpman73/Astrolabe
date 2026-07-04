@@ -32,8 +32,10 @@ export class LivingWorldRenderer extends BaseRenderer {
     const branchLengthPixels = extentAU * zoom;
     const baseSeed = obj.name + (obj.orbitedObjectName || '');
     
+    const cacheKey = `${baseSeed}_${levels}_${density}_${extentAU}_${bendFactor}_${obj.hasLeaves}`;
+    
     // Generate normalized geometry (scale = 1) if not cached
-    if (!LivingWorldRenderer.geometryCache.has(baseSeed)) {
+    if (!LivingWorldRenderer.geometryCache.has(cacheKey)) {
       const branchPaths: Record<number, Path2D> = {};
       const leavesData: {x: number, y: number, rand: number}[] = [];
       
@@ -125,7 +127,7 @@ export class LivingWorldRenderer extends BaseRenderer {
       const radiusTracker = { value: 0 };
       traverseTree(0, 0, 0, unscaledInitial, 1, baseSeed, radiusTracker);
       
-      LivingWorldRenderer.geometryCache.set(baseSeed, {
+      LivingWorldRenderer.geometryCache.set(cacheKey, {
         branches: branchPaths,
         leavesData: leavesData,
         maxRadius: radiusTracker.value
@@ -133,7 +135,7 @@ export class LivingWorldRenderer extends BaseRenderer {
     }
     
     // Retrieve cached geometry
-    const cachedGeometry = LivingWorldRenderer.geometryCache.get(baseSeed)!;
+    const cachedGeometry = LivingWorldRenderer.geometryCache.get(cacheKey)!;
     
     // Calculate the scale required to match the target pixels on screen
     const scale = branchLengthPixels / cachedGeometry.maxRadius;
