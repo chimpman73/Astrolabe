@@ -69,6 +69,45 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
           <div className="text-[10px] font-semibold hidden md:inline">
             Epoch: <span className="font-mono text-xs text-[var(--color-accent-red)]">{Math.round(currentSystemDate)}</span> Days
           </div>
+
+          <div className="flex items-center gap-1 ml-3">
+            <button
+              onClick={() => setIsPlaying(!isPlaying)}
+              className="p-1 rounded bg-[var(--color-border-parchment)] hover:bg-[var(--color-accent-gold)] transition-colors text-[var(--color-text-main)]"
+              title={isPlaying ? 'Pause Animation' : 'Play Animation'}
+            >
+              {isPlaying ? <Pause className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current" />}
+            </button>
+            <button
+              onClick={() => advanceSystemDate(10)}
+              className="p-1 rounded bg-[var(--color-bg-base)] hover:bg-[var(--color-border-parchment)] transition-colors"
+              title="Forward 10 Days"
+            >
+              <FastForward className="w-3 h-3" />
+            </button>
+            <button
+              onClick={() => setCurrentSystemDate(0)}
+              className="p-1 rounded bg-[var(--color-bg-base)] hover:bg-[var(--color-border-parchment)] transition-colors"
+              title="Reset Timeline"
+            >
+              <RotateCcw className="w-3 h-3" />
+            </button>
+
+            <div className="flex items-center gap-1 ml-2 shrink-0">
+              <span className="text-[9px] font-semibold text-[var(--color-text-muted)]">SPEED:</span>
+              <select
+                value={playSpeed}
+                onChange={(e) => setPlaySpeed(Number(e.target.value))}
+                className="p-0.5 text-[10px] bg-[var(--color-bg-base)] scroll-border"
+              >
+                <option value={0.1}>0.1x</option>
+                <option value={0.5}>0.5x</option>
+                <option value={1}>1.0x</option>
+                <option value={5}>5.0x</option>
+                <option value={10}>10.0x</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* Map navigation and theme items */}
@@ -122,67 +161,6 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
       {/* Map Canvas Component */}
       <NavChartCanvas ref={canvasRef} mapTheme={mapTheme} />
 
-      {/* Animation Scrubber / Control Timeline */}
-      <div className="p-4 border-t border-[var(--color-border-parchment)] bg-[var(--color-bg-panel)] flex flex-col sm:flex-row gap-4 items-center shrink-0">
-        
-        {/* Scrubber Playback Controls */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="p-2 rounded bg-[var(--color-border-parchment)] hover:bg-[var(--color-accent-gold)] transition-colors text-[var(--color-text-main)]"
-            title={isPlaying ? 'Pause Animation' : 'Play Animation'}
-          >
-            {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
-          </button>
-          <button
-            onClick={() => advanceSystemDate(10)}
-            className="p-2 rounded bg-[var(--color-bg-base)] hover:bg-[var(--color-border-parchment)] transition-colors"
-            title="Forward 10 Days"
-          >
-            <FastForward className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setCurrentSystemDate(0)}
-            className="p-2 rounded bg-[var(--color-bg-base)] hover:bg-[var(--color-border-parchment)] transition-colors"
-            title="Reset Timeline"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Scrubber Slider */}
-        <div className="flex-1 flex flex-col w-full">
-          <div className="flex justify-between text-[10px] text-[var(--color-text-muted)] font-medium mb-1">
-            <span>Day 0</span>
-            <span>Timeline Scrubber</span>
-            <span>Day 1000+</span>
-          </div>
-          <input
-            type="range"
-            min={0}
-            max={1000}
-            value={Math.min(1000, currentSystemDate)}
-            onChange={(e) => setCurrentSystemDate(Number(e.target.value))}
-            className="w-full h-2 bg-[var(--color-border-parchment)] rounded-lg appearance-none cursor-pointer accent-[var(--color-accent-gold)]"
-          />
-        </div>
-
-        {/* Speed settings */}
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[10px] font-semibold text-[var(--color-text-muted)]">SPEED:</span>
-          <select
-            value={playSpeed}
-            onChange={(e) => setPlaySpeed(Number(e.target.value))}
-            className="p-1 text-xs bg-[var(--color-bg-base)] scroll-border"
-          >
-            <option value={0.1}>0.1 Day/frame</option>
-            <option value={0.5}>0.5 Day/frame</option>
-            <option value={1}>1.0 Day/frame</option>
-            <option value={5}>5.0 Days/frame</option>
-            <option value={10}>10.0 Days/frame</option>
-          </select>
-        </div>
-      </div>
     </div>
   );
 };
