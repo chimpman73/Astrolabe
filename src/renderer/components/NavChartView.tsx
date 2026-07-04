@@ -45,7 +45,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
   }, [isPlaying, playSpeed, advanceSystemDate]);
 
   return (
-    <div className="navchart-view-content flex flex-col h-full w-full">
+    <div className="navchart-view-content flex-1 flex flex-col h-full w-full">
       
       {/* Toolbar Overlay */}
       <div className="save-manager-header w-full">
@@ -159,7 +159,9 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
       </div>
 
       {/* Map Canvas Component */}
-      <NavChartCanvas ref={canvasRef} mapTheme={mapTheme} />
+      <div className="flex-1 w-full relative min-h-0 overflow-hidden">
+        <NavChartCanvas ref={canvasRef} mapTheme={mapTheme} />
+      </div>
 
     </div>
   );
