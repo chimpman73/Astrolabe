@@ -28,7 +28,7 @@ interface SystemState {
   reorderCelestialObjects: (sourceIndex: number, destinationIndex: number) => void;
   addCelestialObject: (object: CelestialObject) => void;
   removeCelestialObject: (index: number) => void;
-  updateActiveSphereMeta: (meta: { sphereName?: string; currentCampaignDate?: string; shellBoundaryType?: 'double' | 'relativeMargin' }) => void;
+  updateActiveSphereMeta: (meta: Partial<Omit<CrystalSphere, 'objects'>>) => void;
   setSphere: (sphere: CrystalSphere) => void;
   setToastMessage: (toast: { type: 'success' | 'error'; text: string } | null) => void;
 }
@@ -55,22 +55,34 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     if (!saveDirectory) return;
 
     if (window.astrolabeAPI) {
-      const res = await window.astrolabeAPI.listSavesDirectory(saveDirectory);
-      if (res.success && res.data) {
-        set({ savesList: res.data });
+      try {
+        const res = await window.astrolabeAPI.listSavesDirectory(saveDirectory);
+        if (res.success && res.data) {
+          set({ savesList: res.data });
+        } else {
+          get().setToastMessage({ type: 'error', text: res.error || 'Failed to list directory' });
+        }
+      } catch (err: any) {
+        get().setToastMessage({ type: 'error', text: err.message || 'Error accessing directory' });
       }
     }
   },
 
   loadSphere: async (filePath: string) => {
     if (window.astrolabeAPI) {
-      const res = await window.astrolabeAPI.loadJsonFile(filePath);
-      if (res.success && res.data) {
-        set({
-          activeSphere: res.data,
-          currentSystemDate: res.data.currentSystemDate || 0,
-        });
-        return true;
+      try {
+        const res = await window.astrolabeAPI.loadJsonFile(filePath);
+        if (res.success && res.data) {
+          set({
+            activeSphere: res.data,
+            currentSystemDate: res.data.currentSystemDate || 0,
+          });
+          return true;
+        } else {
+          get().setToastMessage({ type: 'error', text: res.error || 'Failed to load system' });
+        }
+      } catch (err: any) {
+        get().setToastMessage({ type: 'error', text: err.message || 'Error loading file' });
       }
     }
     return false;
@@ -92,11 +104,17 @@ export const useSystemStore = create<SystemState>((set, get) => ({
       : fileName; // Fallback path
 
     if (window.astrolabeAPI) {
-      const res = await window.astrolabeAPI.saveJsonFile(filePath, dataToSave);
-      if (res.success) {
-        // Refresh saves directory to show updated state
-        await get().loadSavesList();
-        return true;
+      try {
+        const res = await window.astrolabeAPI.saveJsonFile(filePath, dataToSave);
+        if (res.success) {
+          // Refresh saves directory to show updated state
+          await get().loadSavesList();
+          return true;
+        } else {
+          get().setToastMessage({ type: 'error', text: res.error || 'Failed to save system' });
+        }
+      } catch (err: any) {
+        get().setToastMessage({ type: 'error', text: err.message || 'Error saving file' });
       }
     }
     return false;

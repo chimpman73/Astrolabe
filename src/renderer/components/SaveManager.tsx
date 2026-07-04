@@ -12,7 +12,6 @@ import {
   Settings,
   Compass,
   Cloud,
-  Wind,
   TreeDeciduous,
   Eye,
   EyeOff,

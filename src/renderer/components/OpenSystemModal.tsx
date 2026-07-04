@@ -13,13 +13,20 @@ export const OpenSystemModal: React.FC<OpenSystemModalProps> = ({ onClose }) => 
     saveDirectory,
     loadSphere,
     setSaveDirectory,
+    setToastMessage,
   } = useSystemStore();
 
   const handleSelectDirectory = async () => {
     if (!window.astrolabeAPI) return;
-    const res = await window.astrolabeAPI.selectSaveDirectory();
-    if (res.success && res.data) {
-      await setSaveDirectory(res.data);
+    try {
+      const res = await window.astrolabeAPI.selectSaveDirectory();
+      if (res.success && res.data) {
+        await setSaveDirectory(res.data);
+      } else if (!res.success && res.error) {
+        setToastMessage({ type: 'error', text: res.error || 'Failed to select directory' });
+      }
+    } catch (err: any) {
+      setToastMessage({ type: 'error', text: err.message || 'Error selecting directory' });
     }
   };
 
