@@ -543,7 +543,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
 
 
   return (
-    <div ref={containerRef} className="w-full h-full overflow-hidden relative">
+    <div ref={containerRef} className="flex-1 w-full relative min-h-0 overflow-hidden">
       <canvas
         ref={canvasRef}
         width={dimensions.width}

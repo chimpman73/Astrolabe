@@ -159,9 +159,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
       </div>
 
       {/* Map Canvas Component */}
-      <div className="flex-1 w-full relative min-h-0 overflow-hidden">
-        <NavChartCanvas ref={canvasRef} mapTheme={mapTheme} />
-      </div>
+      <NavChartCanvas ref={canvasRef} mapTheme={mapTheme} />
 
     </div>
   );
