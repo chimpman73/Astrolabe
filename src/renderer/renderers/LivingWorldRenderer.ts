@@ -125,22 +125,20 @@ export class LivingWorldRenderer extends BaseRenderer {
       }
     };
     
-    const maxLevelsSum = (1 - Math.pow(0.75, levels)) / (1 - 0.75);
-    const unscaledInitial = branchLengthPixels / maxLevelsSum;
-    
-    // Step 1: Cache the max radius to avoid re-running the dry run every frame
-    let maxTreeRadius = LivingWorldRenderer.maxRadiusCache.get(baseSeed);
-    if (maxTreeRadius === undefined) {
+    // Step 1: Cache the normalized max radius to avoid re-running the dry run every frame
+    let normalizedMaxRadius = LivingWorldRenderer.maxRadiusCache.get(baseSeed);
+    if (normalizedMaxRadius === undefined) {
       const radiusTracker = { value: 1 };
-      traverseTree(0, 0, 0, unscaledInitial, 1, baseSeed, true, radiusTracker);
-      maxTreeRadius = radiusTracker.value;
-      LivingWorldRenderer.maxRadiusCache.set(baseSeed, maxTreeRadius);
+      // Run the dry run with a fixed initial segment length of 1 to calculate the normalized geometric boundary
+      traverseTree(0, 0, 0, 1, 1, baseSeed, true, radiusTracker);
+      normalizedMaxRadius = radiusTracker.value;
+      LivingWorldRenderer.maxRadiusCache.set(baseSeed, normalizedMaxRadius);
     }
     
-    const treeScale = branchLengthPixels / maxTreeRadius;
-    const initialSegmentLength = unscaledInitial * treeScale;
+    // Step 2: Scale the actual tree proportional to the zoom
+    const initialSegmentLength = branchLengthPixels / normalizedMaxRadius;
     
-    // Step 2 & 3: Traverse and build Path2Ds (Megapaths)
+    // Step 3: Traverse and build Path2Ds (Megapaths)
     traverseTree(x, y, 0, initialSegmentLength, 1, baseSeed, false, { value: 1 });
     
     // Stroke all branches grouped by thickness
