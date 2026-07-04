@@ -19,6 +19,8 @@ function hashString(str: string) {
 }
 
 export class LivingWorldRenderer extends BaseRenderer {
+  private static maxRadiusCache = new Map<string, number>();
+
   public draw(context: RenderContext): void {
     const { ctx, x, y, obj, size, bodyFill, bodyStroke, zoom = 1 } = context;
     const levels = obj.branchLevels ?? 2;
@@ -29,15 +31,23 @@ export class LivingWorldRenderer extends BaseRenderer {
     // Convert AU to pixel length by multiplying by zoom factor
     const branchLengthPixels = extentAU * zoom;
     const baseSeed = obj.name + (obj.orbitedObjectName || '');
-    let maxTreeRadius = 1;
     
+    const branchPaths: Record<number, Path2D> = {};
+    const leavesPath = new Path2D();
+    
+    const getBranchPath = (thickness: number) => {
+      if (!branchPaths[thickness]) branchPaths[thickness] = new Path2D();
+      return branchPaths[thickness];
+    };
+
     const traverseTree = (
       startX: number, startY: number, 
       baseAngle: number, 
       totalLength: number, 
       currentLevel: number,
       pathSeed: string,
-      dryRun: boolean
+      dryRun: boolean,
+      currentMaxRadius: { value: number }
     ) => {
       if (currentLevel > levels) return;
       
@@ -65,6 +75,7 @@ export class LivingWorldRenderer extends BaseRenderer {
         
         const branchLen = totalLength * (0.6 + bRand() * 0.4);
         const thickness = 1.0 + (levels - currentLevel) * 1.5;
+        const pathThickness = Math.max(1, thickness);
         
         const numNodes = 3 + Math.floor(bRand() * 4); // 3 to 6 segments
         const actualSegLen = branchLen / numNodes;
@@ -73,9 +84,10 @@ export class LivingWorldRenderer extends BaseRenderer {
         let cy = startY;
         let cAngle = branchAngle;
         
+        let bPath: Path2D | null = null;
         if (!dryRun) {
-          ctx.beginPath();
-          ctx.moveTo(cx, cy);
+          bPath = getBranchPath(pathThickness);
+          bPath.moveTo(cx, cy);
         }
         
         const nodes: {x: number, y: number, angle: number}[] = [];
@@ -84,38 +96,31 @@ export class LivingWorldRenderer extends BaseRenderer {
           cAngle += (bRand() - 0.5) * bendFactor; 
           cx += Math.cos(cAngle) * actualSegLen;
           cy += Math.sin(cAngle) * actualSegLen;
-          if (!dryRun) ctx.lineTo(cx, cy);
+          if (!dryRun && bPath) bPath.lineTo(cx, cy);
           nodes.push({ x: cx, y: cy, angle: cAngle });
-        }
-        
-        if (!dryRun) {
-          ctx.lineWidth = Math.max(1, thickness);
-          ctx.strokeStyle = bodyStroke;
-          ctx.stroke();
         }
         
         if (dryRun) {
           const dist = Math.sqrt(cx * cx + cy * cy);
-          if (dist > maxTreeRadius) maxTreeRadius = dist;
+          if (dist > currentMaxRadius.value) currentMaxRadius.value = dist;
         }
         
         if (currentLevel < levels) {
-          traverseTree(cx, cy, cAngle, branchLen * 0.75, currentLevel + 1, branchSeed + '_tip', dryRun);
+          traverseTree(cx, cy, cAngle, branchLen * 0.75, currentLevel + 1, branchSeed + '_tip', dryRun, currentMaxRadius);
           
           const doSide = currentLevel === 1 || bRand() > 0.4;
           if (nodes.length > 1 && doSide) {
             const rNodeIdx = Math.floor(bRand() * (nodes.length - 1));
             const rNode = nodes[rNodeIdx];
             const sideAngleOff = (bRand() > 0.5 ? 0.8 : -0.8) * (bendFactor > 0 ? 1 : 0);
-            traverseTree(rNode.x, rNode.y, rNode.angle + sideAngleOff, branchLen * 0.6, currentLevel + 1, branchSeed + '_side', dryRun);
+            traverseTree(rNode.x, rNode.y, rNode.angle + sideAngleOff, branchLen * 0.6, currentLevel + 1, branchSeed + '_side', dryRun, currentMaxRadius);
           }
         }
         
         if (!dryRun && currentLevel === levels && (obj.hasLeaves !== false)) {
-          ctx.beginPath();
-          ctx.arc(cx, cy, 3 + bRand() * 3, 0, 2 * Math.PI);
-          ctx.fillStyle = '#2ea84b';
-          ctx.fill();
+          const leafR = 3 + bRand() * 3;
+          leavesPath.moveTo(cx + leafR, cy);
+          leavesPath.arc(cx, cy, leafR, 0, 2 * Math.PI);
         }
       }
     };
@@ -123,13 +128,35 @@ export class LivingWorldRenderer extends BaseRenderer {
     const maxLevelsSum = (1 - Math.pow(0.75, levels)) / (1 - 0.75);
     const unscaledInitial = branchLengthPixels / maxLevelsSum;
     
-    traverseTree(0, 0, 0, unscaledInitial, 1, baseSeed, true);
+    // Step 1: Cache the max radius to avoid re-running the dry run every frame
+    let maxTreeRadius = LivingWorldRenderer.maxRadiusCache.get(baseSeed);
+    if (maxTreeRadius === undefined) {
+      const radiusTracker = { value: 1 };
+      traverseTree(0, 0, 0, unscaledInitial, 1, baseSeed, true, radiusTracker);
+      maxTreeRadius = radiusTracker.value;
+      LivingWorldRenderer.maxRadiusCache.set(baseSeed, maxTreeRadius);
+    }
     
     const treeScale = branchLengthPixels / maxTreeRadius;
     const initialSegmentLength = unscaledInitial * treeScale;
     
-    traverseTree(x, y, 0, initialSegmentLength, 1, baseSeed, false);
+    // Step 2 & 3: Traverse and build Path2Ds (Megapaths)
+    traverseTree(x, y, 0, initialSegmentLength, 1, baseSeed, false, { value: 1 });
     
+    // Stroke all branches grouped by thickness
+    for (const [thicknessStr, path] of Object.entries(branchPaths)) {
+      ctx.lineWidth = parseFloat(thicknessStr);
+      ctx.strokeStyle = bodyStroke;
+      ctx.stroke(path);
+    }
+    
+    // Fill all leaves in a single draw call
+    if (obj.hasLeaves !== false) {
+      ctx.fillStyle = '#2ea84b';
+      ctx.fill(leavesPath);
+    }
+    
+    // Central ball (trunk)
     ctx.beginPath();
     ctx.arc(x, y, size, 0, 2 * Math.PI);
     ctx.fillStyle = bodyFill;
