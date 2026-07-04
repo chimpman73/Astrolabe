@@ -89,8 +89,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
     
     // The Crystal Sphere Shell is drawn at shellScale * maxDist. We want it to fit comfortably inside the canvas viewport.
-    const minSize = Math.min(dimensions.width, dimensions.height);
-    const targetZoom = (minSize * (0.5 / shellScale)) / maxDist;
+    const targetZoom = (dimensions.height * (0.5 / shellScale)) / maxDist;
     
     setZoom(targetZoom);
     setPan({ x: dimensions.width / 2, y: dimensions.height / 2 });
