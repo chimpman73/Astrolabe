@@ -16,19 +16,19 @@ class FileService {
       });
 
       if (result.canceled || result.filePaths.length === 0) {
-        return { success: false, error: 'User canceled directory selection.' };
+        return { success: false, error: 'User canceled directory selection.', code: 'ERR_USER_CANCELED' };
       }
 
       return { success: true, data: result.filePaths[0] };
     } catch (err) {
-      return { success: false, error: err.message };
+      return { success: false, error: err.message, code: 'ERR_UNKNOWN_DIALOG' };
     }
   }
 
   async listSavesDirectory(dirPath) {
     try {
       if (!dirPath || !fs.existsSync(dirPath)) {
-        return { success: false, error: 'Directory does not exist.' };
+        return { success: false, error: 'Directory does not exist.', code: 'ERR_DIR_NOT_FOUND' };
       }
 
       const files = fs.readdirSync(dirPath);
@@ -59,21 +59,21 @@ class FileService {
 
       return { success: true, data: jsonFiles };
     } catch (err) {
-      return { success: false, error: err.message };
+      return { success: false, error: err.message, code: 'ERR_DIR_READ_FAILED' };
     }
   }
 
   async loadJsonFile(filePath) {
     try {
       if (!fs.existsSync(filePath)) {
-        return { success: false, error: 'File does not exist.' };
+        return { success: false, error: 'File does not exist.', code: 'ERR_FILE_NOT_FOUND' };
       }
 
       const content = fs.readFileSync(filePath, 'utf8');
       const data = JSON.parse(content);
       return { success: true, data };
     } catch (err) {
-      return { success: false, error: err.message };
+      return { success: false, error: err.message, code: 'ERR_FILE_READ_FAILED' };
     }
   }
 
@@ -83,7 +83,7 @@ class FileService {
       fs.writeFileSync(filePath, formattedData, 'utf8');
       return { success: true };
     } catch (err) {
-      return { success: false, error: err.message };
+      return { success: false, error: err.message, code: 'ERR_FILE_WRITE_FAILED' };
     }
   }
 
@@ -99,7 +99,7 @@ class FileService {
       });
 
       if (result.canceled || !result.filePath) {
-        return { success: false, error: 'User canceled export.' };
+        return { success: false, error: 'User canceled export.', code: 'ERR_USER_CANCELED' };
       }
 
       // Extract base64 representation of PNG data
@@ -109,7 +109,7 @@ class FileService {
       fs.writeFileSync(result.filePath, buffer);
       return { success: true, data: result.filePath };
     } catch (err) {
-      return { success: false, error: err.message };
+      return { success: false, error: err.message, code: 'ERR_EXPORT_FAILED' };
     }
   }
 
@@ -122,7 +122,7 @@ class FileService {
       }
       return { success: true, data: defaultPath };
     } catch (err) {
-      return { success: false, error: err.message };
+      return { success: false, error: err.message, code: 'ERR_GET_DEFAULT_SAVE_DIR_FAILED' };
     }
   }
 }

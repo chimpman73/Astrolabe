@@ -7,4 +7,7 @@ contextBridge.exposeInMainWorld('astrolabeAPI', {
   saveJsonFile: (filePath, data) => ipcRenderer.invoke('save-json-file', { filePath, data }),
   exportPngFile: (dataUrl, defaultName) => ipcRenderer.invoke('export-png-file', { dataUrl, defaultName }),
   getDefaultSaveDirectory: () => ipcRenderer.invoke('get-default-save-directory'),
+  onBackendError: (callback) => {
+    ipcRenderer.on('backend-error', (event, data) => callback(data));
+  },
 });

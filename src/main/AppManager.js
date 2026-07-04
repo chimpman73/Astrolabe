@@ -8,6 +8,8 @@ class AppManager {
   }
 
   init() {
+    this.setupGlobalErrorHandlers();
+
     app.whenReady().then(() => {
       this.createWindow();
 
@@ -48,6 +50,27 @@ class AppManager {
 
   getMainWindow() {
     return this.mainWindow;
+  }
+
+  setupGlobalErrorHandlers() {
+    const sendErrorToFrontend = (type, error) => {
+      if (this.mainWindow) {
+        this.mainWindow.webContents.send('backend-error', {
+          type,
+          message: error.message || String(error),
+          stack: error.stack
+        });
+      }
+      console.error(`[${type}]`, error);
+    };
+
+    process.on('uncaughtException', (error) => {
+      sendErrorToFrontend('UncaughtException', error);
+    });
+
+    process.on('unhandledRejection', (reason, promise) => {
+      sendErrorToFrontend('UnhandledRejection', reason);
+    });
   }
 }
 

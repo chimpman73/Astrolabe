@@ -43,6 +43,18 @@ const App: React.FC = () => {
     initDir();
   }, [setSaveDirectory]);
 
+  // Listen for global backend errors
+  useEffect(() => {
+    if (window.astrolabeAPI?.onBackendError) {
+      window.astrolabeAPI.onBackendError((data) => {
+        useSystemStore.getState().setToastMessage({
+          type: 'error',
+          text: `[${data.type}] ${data.message}`
+        });
+      });
+    }
+  }, []);
+
   // Auto-load first file if directory is selected and no sphere is active
   useEffect(() => {
     if (savesList.length > 0 && !activeSphere) {

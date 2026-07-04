@@ -81,6 +81,7 @@ export interface IAstrolabeAPI {
   saveJsonFile: (filePath: string, data: CrystalSphere) => Promise<IpcResponse<void>>;
   exportPngFile: (dataUrl: string, defaultName: string) => Promise<IpcResponse<string>>;
   getDefaultSaveDirectory: () => Promise<IpcResponse<string>>;
+  onBackendError: (callback: (data: { type: string; message: string; stack?: string }) => void) => void;
 }
 
 declare global {
