@@ -75,8 +75,12 @@ The application saves and loads system states via JSON configuration files store
         },
         "type": {
           "type": "string",
-          "enum": ["star", "planet", "moon", "asteroid", "station", "custom", "nebula", "sargasso", "living_world"],
+          "enum": ["star", "planet", "moon", "asteroid", "station", "custom", "cloud", "living_world"],
           "description": "Category of the celestial body."
+        },
+        "isHidden": {
+          "type": "boolean",
+          "description": "If true, the object is completely hidden from map canvases (but still affects boundary calculations)."
         },
         "size": {
           "type": "number",
@@ -106,6 +110,24 @@ The application saves and loads system states via JSON configuration files store
           "type": "number",
           "minimum": 0.1,
           "description": "Optional override for orbital period in days. If omitted, it is calculated automatically from orbital distance."
+        },
+        "arcDegrees": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 360,
+          "description": "For cloud types: angular arc width in degrees along the orbital path."
+        },
+        "cloudTransparency": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "For cloud types: alpha transparency of the cloud."
+        },
+        "cloudiness": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "For cloud types: bumpiness of the cloud edges (0.0 is smooth, 1.0 is max cloudy)."
         },
         "branchLevels": {
           "type": "integer",
@@ -212,6 +234,8 @@ Three quick-access buttons are directly available in the top navbar:
 #### Panel 1: System Editor (Left Pane)
 A vertical panel of width 360px.
 * **Inline Form/Card Editor**: Form fields that load and display active celestial config parameters. Uses a scroll wrapper (`overflow-y: auto`) that provides scrollbar visibility and native mouse-wheel scrolling.
+* **Drag-and-Drop Reordering**: Users can drag and drop celestial object cards to reorder the internal array, which directly dictates the Z-index rendering order on the canvases (objects lower in the list are drawn on top).
+* **Visibility Toggles**: A hide/show button on each card controls the `isHidden` property to exclude objects from canvas views (while retaining them in system scale boundaries).
 * **On-the-fly Validation**: Parses input dynamically. Shows details of JSON syntax errors or schema validation warnings in a red alert banner.
 * **Apply & Save**: Commits edits directly to the local save folder.
 

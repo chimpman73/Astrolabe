@@ -20,21 +20,26 @@
       "branchDensity": 10,
       "branchExtent": 28,
       "hasLeaves": true,
-      "branchBend": 0.5
+      "branchBend": 0.5,
+      "isHidden": false
     },
     {
       "name": "Toroid Sea",
-      "type": "nebula",
+      "type": "cloud",
       "size": 50,
       "description": "A newly added planetary body.",
       "orbitedObjectName": null,
-      "distanceOrbited": 28,
+      "distanceOrbited": 14,
       "initialAngle": 0,
       "orbitalPeriodDays": 0,
       "worldShape": "sphere",
       "elementAffinity": "water",
       "arcDegrees": 360,
-      "isStationary": true
+      "isStationary": true,
+      "isHidden": false,
+      "cloudTransparency": 1,
+      "cloudiness": 0,
+      "orbitDirection": "retrograde"
     },
     {
       "name": "Fish Sun",
@@ -42,11 +47,15 @@
       "size": 60,
       "description": "A newly added planetary body.",
       "orbitedObjectName": "World Tree",
-      "distanceOrbited": 28,
+      "distanceOrbited": 14,
       "initialAngle": 270,
       "orbitalPeriodDays": 360,
-      "elementAffinity": "fire"
+      "elementAffinity": "fire",
+      "isHidden": false,
+      "isStationary": false,
+      "orbitDirection": "retrograde"
     }
   ],
-  "shellBoundaryType": "relativeMargin"
+  "shellBoundaryType": "relativeMargin",
+  "shellCustomScale": 1.05
 }

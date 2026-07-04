@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useSystemStore } from '../store/useSystemStore';
 import { ChevronLeft } from 'lucide-react';
 import { saveCanvasExport } from '../utils/exportHelper';
-import { drawSolidBody, getMotionSuffix, getBodyColors } from '../utils/canvasRenderer';
+import { drawSolidBody, getMotionSuffix, getBodyColors, getElementColor } from '../utils/canvasRenderer';
 
 interface BookmarkViewProps {
   onCollapse?: () => void;
@@ -42,15 +42,19 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
   // Filter objects to only those that orbit the central point (0,0) or orbit a body at (0,0)
   const planetaryObjects = activeSphere
     ? activeSphere.objects.filter((obj) => 
-        obj.distanceOrbited >= 0 && isPrimary(obj)
+        obj.distanceOrbited >= 0 && isPrimary(obj) && !obj.isHidden
       )
     : [];
 
-  // Furthest planetary distance
-  const maxDistance = planetaryObjects.reduce((max, obj) => {
-    const reach = obj.type === 'living_world' ? obj.distanceOrbited + (obj.branchExtent || 0) : obj.distanceOrbited;
-    return Math.max(max, reach);
-  }, 0.1);
+  // Furthest planetary distance (calculated across ALL primary objects to maintain constant shell size)
+  const maxDistance = activeSphere 
+    ? activeSphere.objects
+        .filter((obj) => obj.distanceOrbited >= 0 && isPrimary(obj))
+        .reduce((max, obj) => {
+          const reach = obj.type === 'living_world' ? obj.distanceOrbited + (obj.branchExtent || 0) : obj.distanceOrbited;
+          return Math.max(max, reach);
+        }, 0.1)
+    : 0.1;
 
   // Unified Draw Function for rendering on both Screen and Export canvas
   const drawBookmark = (
@@ -141,7 +145,7 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
       const objSize = Math.max(4, obj.size * 0.6 * sizeMultiplier);
 
       // --- Nebula / Sargasso: cloud shape following the orbital contour ---
-      if (obj.type === 'nebula' || obj.type === 'sargasso') {
+      if (obj.type === 'cloud') {
         const arcDegrees = obj.arcDegrees ?? 30;
         const arcFrac = Math.min(1.0, arcDegrees / 360);
         // Width spans the entire orbital period for 360 degrees
@@ -154,14 +158,15 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
         const safeR = Math.max(1, r);
         const halfAngle = halfW >= safeR ? Math.PI : Math.asin(halfW / safeR);
         
-        const cloudFill = obj.type === 'nebula' ? '#6699ff' : '#44bb77';
+        const cloudFill = getElementColor(obj.elementAffinity) || (isDark ? '#a0a0a0' : '#808080');
 
         const isFullRing = arcDegrees >= 359;
         const numBumps = Math.max(3, Math.floor(arcDegrees / 20));
         const numSegments = Math.max(100, Math.floor(cloudW)); // higher resolution for smooth bumps
+        const amp = (obj.cloudiness ?? 0.5) * 0.4;
 
         ctx.save();
-        ctx.globalAlpha = 0.35;
+        ctx.globalAlpha = obj.cloudTransparency ?? 0.35;
         ctx.fillStyle = cloudFill;
         ctx.beginPath();
         
@@ -170,8 +175,8 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
           const t = i / numSegments;
           const nx = -1 + 2 * t;
           const envelope = isFullRing ? 1 : (1 - nx * nx);
-          // 40% amplitude creates distinct, puffy cloud bumps instead of a flat line
-          const bump = 0.6 + 0.4 * Math.cos(nx * Math.PI * numBumps);
+          // Amplitude creates distinct, puffy cloud bumps instead of a flat line
+          const bump = (1 - amp) + amp * Math.cos(nx * Math.PI * numBumps);
           
           const alpha = 1.5 * Math.PI + nx * halfAngle;
           const currentR = r + halfH * envelope * bump;
@@ -187,7 +192,7 @@ export const BookmarkView: React.FC<BookmarkViewProps> = ({ onCollapse }) => {
           const t = i / numSegments;
           const nx = -1 + 2 * t;
           const envelope = isFullRing ? 1 : (1 - nx * nx);
-          const bump = 0.6 + 0.4 * Math.cos(nx * Math.PI * numBumps);
+          const bump = (1 - amp) + amp * Math.cos(nx * Math.PI * numBumps);
           
           const alpha = 1.5 * Math.PI + nx * halfAngle;
           const currentR = Math.max(0, r - halfH * envelope * bump);

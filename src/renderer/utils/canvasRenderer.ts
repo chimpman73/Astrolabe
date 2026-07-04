@@ -165,45 +165,58 @@ export const drawSolidBody = (
     return;
   }
   
-  ctx.beginPath();
-  switch (shape) {
-    case 'disc':
-      ctx.ellipse(x, y, size, size * 0.35, 0, 0, 2 * Math.PI);
-      break;
-    case 'pyramid':
-      ctx.moveTo(x, y - size * 1.2);
-      ctx.lineTo(x + size, y + size * 0.7);
-      ctx.lineTo(x - size, y + size * 0.7);
-      ctx.closePath();
-      break;
-    case 'cluster': {
-      // Adjust offset for cluster based on size
-      const offs = size * 0.55; 
-      ctx.arc(x - offs, y + offs * 0.4, size * 0.65, 0, 2 * Math.PI);
-      ctx.moveTo(x + offs + size * 0.65, y + offs * 0.4);
-      ctx.arc(x + offs, y + offs * 0.4, size * 0.65, 0, 2 * Math.PI);
-      ctx.moveTo(x + size * 0.65, y - offs * 0.6);
-      ctx.arc(x, y - offs * 0.6, size * 0.65, 0, 2 * Math.PI);
-      break;
+  const drawShapePath = (s: number) => {
+    ctx.beginPath();
+    switch (shape) {
+      case 'disc':
+        ctx.ellipse(x, y, s, s * 0.35, 0, 0, 2 * Math.PI);
+        break;
+      case 'pyramid':
+        ctx.moveTo(x, y - s * 1.2);
+        ctx.lineTo(x + s, y + s * 0.7);
+        ctx.lineTo(x - s, y + s * 0.7);
+        ctx.closePath();
+        break;
+      case 'cluster': {
+        const offs = s * 0.55; 
+        ctx.arc(x - offs, y + offs * 0.4, s * 0.65, 0, 2 * Math.PI);
+        ctx.moveTo(x + offs + s * 0.65, y + offs * 0.4);
+        ctx.arc(x + offs, y + offs * 0.4, s * 0.65, 0, 2 * Math.PI);
+        ctx.moveTo(x + s * 0.65, y - offs * 0.6);
+        ctx.arc(x, y - offs * 0.6, s * 0.65, 0, 2 * Math.PI);
+        break;
+      }
+      case 'irregular': {
+        const ipts: [number, number][] = [
+          [0, -1.0], [0.55, -0.65], [1.0, -0.05], [0.7, 0.65],
+          [-0.1, 0.88], [-0.65, 0.55], [-0.95, 0.0], [-0.55, -0.7],
+        ];
+        const iradii = [1.0, 0.82, 0.95, 0.78, 0.88, 0.75, 0.92, 0.80];
+        ipts.forEach(([dx, dy], i) => {
+          const ir = s * iradii[i];
+          if (i === 0) ctx.moveTo(x + dx * ir, y + dy * ir);
+          else ctx.lineTo(x + dx * ir, y + dy * ir);
+        });
+        ctx.closePath();
+        break;
+      }
+      default: // sphere
+        ctx.arc(x, y, s, 0, 2 * Math.PI);
     }
-    case 'irregular': {
-      const ipts: [number, number][] = [
-        [0, -1.0], [0.55, -0.65], [1.0, -0.05], [0.7, 0.65],
-        [-0.1, 0.88], [-0.65, 0.55], [-0.95, 0.0], [-0.55, -0.7],
-      ];
-      const iradii = [1.0, 0.82, 0.95, 0.78, 0.88, 0.75, 0.92, 0.80];
-      ipts.forEach(([dx, dy], i) => {
-        const ir = size * iradii[i];
-        if (i === 0) ctx.moveTo(x + dx * ir, y + dy * ir);
-        else ctx.lineTo(x + dx * ir, y + dy * ir);
-      });
-      ctx.closePath();
-      break;
-    }
-    default: // sphere
-      ctx.arc(x, y, size, 0, 2 * Math.PI);
+  };
+
+  if (obj.type === 'star') {
+    const cSize = obj.coronaSize ?? 1.5;
+    const cAlpha = obj.coronaAlpha ?? 0.3;
+    ctx.save();
+    drawShapePath(size * cSize);
+    ctx.fillStyle = bodyFill;
+    ctx.globalAlpha = cAlpha;
+    ctx.fill();
+    ctx.restore();
   }
-  
+
+  drawShapePath(size);
   ctx.fillStyle = bodyFill;
   ctx.fill();
   ctx.lineWidth = obj.type === 'star' ? 2 : 1.5;
@@ -248,12 +261,9 @@ export const getBodyColors = (
     bodyStroke = defaultStroke;
   } else if (obj.type === 'moon') {
     bodyFill = elemColor || (isParchment ? '#dcd2b9' : '#555866');
-  } else if (obj.type === 'nebula') {
-    bodyFill = elemColor || (isParchment ? 'rgba(80,110,200,0.5)' : 'rgba(100,150,255,0.6)');
-    bodyStroke = isParchment ? '#5070c8' : '#8aabff';
-  } else if (obj.type === 'sargasso') {
-    bodyFill = elemColor || (isParchment ? 'rgba(50,140,80,0.5)' : 'rgba(60,190,100,0.6)');
-    bodyStroke = isParchment ? '#2a7840' : '#55cc80';
+  } else if (obj.type === 'cloud') {
+    bodyFill = elemColor || (isParchment ? '#808080' : '#a0a0a0');
+    bodyStroke = isParchment ? '#505050' : '#d0d0d0';
   } else if (obj.type === 'living_world') {
     bodyFill = elemColor || (isParchment ? '#7c8e6b' : '#3d5c34');
     bodyStroke = isParchment ? '#4a3d31' : '#6b5443';

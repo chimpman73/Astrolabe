@@ -3,7 +3,7 @@ import { useSystemStore } from '../store/useSystemStore';
 import { calculateSystemPositions } from '../utils/orbitMath';
 import { Play, Pause, FastForward, RotateCcw, Download, ZoomIn, ZoomOut, Maximize, ChevronLeft } from 'lucide-react';
 import { saveCanvasExport } from '../utils/exportHelper';
-import { drawSolidBody, drawStationaryIndicator, getMotionSuffix, getBodyColors } from '../utils/canvasRenderer';
+import { drawSolidBody, drawStationaryIndicator, getMotionSuffix, getBodyColors, getElementColor } from '../utils/canvasRenderer';
 
 interface NavChartViewProps {
   onCollapse?: () => void;
@@ -64,6 +64,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
   const [mapTheme, setMapTheme] = useState<'parchment' | 'space'>('parchment');
 
   const objects = activeSphere?.objects || [];
+  const visibleObjects = objects.filter(o => !o.isHidden);
   
   // Central body is implicitly (0,0).
 
@@ -91,7 +92,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
   }, [isPlaying, playSpeed, advanceSystemDate]);
 
   const handleAutoFit = () => {
-    if (objects.length === 0) return;
+    if (visibleObjects.length === 0) return;
     
     let maxDist = 0.1;
     objects.forEach(o => {
@@ -197,7 +198,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     };
 
     // 1. Draw orbits (back-to-front)
-    objects.forEach((obj) => {
+    visibleObjects.forEach((obj) => {
       // Find parent coordinate in model space
       let px = 0;
       let py = 0;
@@ -217,7 +218,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
         ctx.arc(parentProj.x, parentProj.y, orbitRadius, 0, 2 * Math.PI);
         const isPrimary = (o: any) => {
           if (!o.orbitedObjectName) return true;
-          const parent = objects.find((p) => p.name === o.orbitedObjectName);
+          const parent = visibleObjects.find((p) => p.name === o.orbitedObjectName);
           if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
           return false;
         };
@@ -265,13 +266,10 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
         shellProj.y - shellRadius - 10
       );
 
-    // 3a. Draw nebula / sargasso cloud shapes (rendered behind all solid bodies)
-    // Cloud spans the orbital path, bounding points map to polar coordinates
-    objects.forEach((obj) => {
-      if (obj.type !== 'nebula' && obj.type !== 'sargasso') return;
-
+    // 3. Draw bodies (nebulas, sargassos, and solid bodies) in array order (z-index)
+    visibleObjects.forEach((obj) => {
       const pos = positions[obj.name];
-      if (!pos || obj.distanceOrbited <= 0) return;
+      if (!pos) return;
 
       // Resolve parent canvas position
       let px = 0, py = 0;
@@ -280,104 +278,90 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
         if (parentPos) { px = parentPos.x; py = parentPos.y; }
       }
       const parentProj = project(px, py);
-
-      const orbitR = obj.distanceOrbited * activeZoom;
-      const arcDegrees = obj.arcDegrees ?? 30;
-      const arcHalf = (arcDegrees / 2) * (Math.PI / 180);
-      const centerAngle = pos.angle * (Math.PI / 180);
-
-      // Match the planet render scale to ensure clouds have proportional thickness (radial depth)
-      const renderSize = Math.max(3, (obj.size / 100) * 20);
-      const halfH = Math.max(8, renderSize * 1.5);
-
-      const isNebula = obj.type === 'nebula';
-      const cloudFill = isParchment
-        ? (isNebula ? 'rgba(80,110,200,0.4)' : 'rgba(50,150,80,0.4)')
-        : (isNebula ? 'rgba(100,150,255,0.45)' : 'rgba(60,200,100,0.45)');
-
-      const isFullRing = arcDegrees >= 359;
-      const numBumps = Math.max(3, Math.floor(arcDegrees / 20));
-      const numSegments = Math.max(40, Math.floor(arcDegrees * 1.5));
-
-      ctx.save();
-      ctx.beginPath();
-      
-      // Outer edge
-      for (let i = 0; i <= numSegments; i++) {
-        const t = i / numSegments;
-        const nx = -1 + 2 * t; // -1 to 1
-        const envelope = isFullRing ? 1 : (1 - nx * nx);
-        const bump = 0.85 + 0.15 * Math.cos(nx * Math.PI * numBumps);
-        
-        const angle = centerAngle + nx * arcHalf;
-        const rOuter = orbitR + halfH * envelope * bump;
-        
-        const x = parentProj.x + rOuter * Math.cos(angle);
-        const y = parentProj.y + rOuter * Math.sin(angle);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      
-      // Inner edge
-      for (let i = numSegments; i >= 0; i--) {
-        const t = i / numSegments;
-        const nx = -1 + 2 * t;
-        const envelope = isFullRing ? 1 : (1 - nx * nx);
-        const bump = 0.85 + 0.15 * Math.cos(nx * Math.PI * numBumps);
-        
-        const angle = centerAngle + nx * arcHalf;
-        const rInner = orbitR - halfH * envelope * bump;
-        
-        const x = parentProj.x + rInner * Math.cos(angle);
-        const y = parentProj.y + rInner * Math.sin(angle);
-        ctx.lineTo(x, y);
-      }
-      
-      ctx.closePath();
-      ctx.fillStyle = cloudFill;
-      ctx.fill();
-      ctx.restore();
-    });
-
-    // 3b. Draw solid bodies and labels (front-to-back)
-    objects.forEach((obj) => {
-      const pos = positions[obj.name];
-      if (!pos) return;
-
       const proj = project(pos.x, pos.y);
       const renderSize = Math.max(3, (obj.size / 100) * 20);
 
-      const { bodyFill, bodyStroke } = getBodyColors(obj, isParchment, colorBg, colorStroke, colorGold);
+      if (obj.type === 'cloud') {
+        if (obj.distanceOrbited <= 0) return;
+        
+        const orbitR = obj.distanceOrbited * activeZoom;
+        const arcDegrees = obj.arcDegrees ?? 30;
+        const arcHalf = (arcDegrees / 2) * (Math.PI / 180);
+        const centerAngle = pos.angle * (Math.PI / 180);
 
-      // Draw Body (shape-aware) — skipped for cloud types; they are drawn as clouds in pass 3a
-      if (obj.type !== 'nebula' && obj.type !== 'sargasso') {
+        // Match the planet render scale to ensure clouds have proportional thickness (radial depth)
+        const halfH = Math.max(8, renderSize * 1.5);
+
+        const cloudFill = getElementColor(obj.elementAffinity) || (isParchment ? '#808080' : '#a0a0a0');
+
+        const isFullRing = arcDegrees >= 359;
+        const numBumps = Math.max(3, Math.floor(arcDegrees / 20));
+        const numSegments = Math.max(40, Math.floor(arcDegrees * 1.5));
+        const amp = (obj.cloudiness ?? 0.5) * 0.3;
+
+        ctx.save();
+        ctx.globalAlpha = obj.cloudTransparency ?? 0.45;
+        ctx.beginPath();
+        
+        // Outer edge
+        for (let i = 0; i <= numSegments; i++) {
+          const t = i / numSegments;
+          const nx = -1 + 2 * t; // -1 to 1
+          const envelope = isFullRing ? 1 : (1 - nx * nx);
+          const bump = (1 - amp) + amp * Math.cos(nx * Math.PI * numBumps);
+          
+          const angle = centerAngle + nx * arcHalf;
+          const rOuter = orbitR + halfH * envelope * bump;
+          
+          const x = parentProj.x + rOuter * Math.cos(angle);
+          const y = parentProj.y + rOuter * Math.sin(angle);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        
+        // Inner edge
+        for (let i = numSegments; i >= 0; i--) {
+          const t = i / numSegments;
+          const nx = -1 + 2 * t;
+          const envelope = isFullRing ? 1 : (1 - nx * nx);
+          const bump = (1 - amp) + amp * Math.cos(nx * Math.PI * numBumps);
+          
+          const angle = centerAngle + nx * arcHalf;
+          const rInner = orbitR - halfH * envelope * bump;
+          
+          const x = parentProj.x + rInner * Math.cos(angle);
+          const y = parentProj.y + rInner * Math.sin(angle);
+          ctx.lineTo(x, y);
+        }
+        
+        ctx.closePath();
+        ctx.fillStyle = cloudFill;
+        ctx.fill();
+        ctx.restore();
+      } else {
+        // Solid body drawing
+        const { bodyFill, bodyStroke } = getBodyColors(obj, isParchment, colorBg, colorStroke, colorGold);
+
         drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, bodyFill, bodyStroke, false, activeZoom);
 
-        // Star sunburst ring
-        if (obj.type === 'star') {
-          ctx.beginPath();
-          ctx.arc(proj.x, proj.y, renderSize + 4, 0, 2 * Math.PI);
-          ctx.strokeStyle = colorMuted;
-          ctx.lineWidth = 0.5;
-          ctx.stroke();
-        }
-      }
+        // Star sunburst ring removed because it is now drawn as a corona inside drawSolidBody
 
-      // --- Stationary diamond ring indicator ---
-      if (obj.isStationary && obj.type !== 'star') {
-        drawStationaryIndicator(ctx, proj.x, proj.y, renderSize, colorMuted);
+        // --- Stationary diamond ring indicator ---
+        if (obj.isStationary && obj.type !== 'star') {
+          drawStationaryIndicator(ctx, proj.x, proj.y, renderSize, colorMuted);
+        }
       }
 
       // Label (with motion indicator suffix)
       const shouldLabel = obj.type !== 'moon' || activeZoom > 150;
       if (shouldLabel) {
-        const motionTag = getMotionSuffix(obj.isStationary, obj.orbitDirection);
-        ctx.font = obj.type === 'star'
-          ? `bold 12px 'Elan', 'Cinzel', serif`
-          : `500 10px 'Elan', 'Outfit', sans-serif`;
-        ctx.fillStyle = colorStroke;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
+          const motionTag = getMotionSuffix(obj.isStationary, obj.orbitDirection);
+          ctx.font = obj.type === 'star'
+            ? `bold 12px 'Elan', 'Cinzel', serif`
+            : `500 10px 'Elan', 'Outfit', sans-serif`;
+          ctx.fillStyle = colorStroke;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
         ctx.fillText(obj.name + motionTag, proj.x, proj.y + renderSize + 5);
       }
     });
@@ -541,11 +525,11 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     // Render primary planets
     const isPrimaryLabel = (obj: any) => {
       if (!obj.orbitedObjectName) return true;
-      const parent = objects.find((p) => p.name === obj.orbitedObjectName);
+      const parent = visibleObjects.find((p) => p.name === obj.orbitedObjectName);
       if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
       return false;
     };
-    const primaries = objects.filter((o) => 
+    const primaries = visibleObjects.filter((o) => 
       o.type === 'star' || isPrimaryLabel(o)
     );
     
@@ -599,7 +583,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
       ctx.fillText(line, 200, descY);
 
       // Check moons under this planet
-      const moons = objects.filter((m) => m.orbitedObjectName === obj.name);
+      const moons = visibleObjects.filter((m) => m.orbitedObjectName === obj.name);
       if (moons.length > 0) {
         ctx.font = "bold 22px 'Mephisto', 'Outfit', sans-serif";
         ctx.fillStyle = isParchment ? '#8f3224' : '#4480e6';

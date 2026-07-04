@@ -25,6 +25,7 @@ interface SystemState {
   setCurrentSystemDate: (date: number) => void;
   advanceSystemDate: (days: number) => void;
   updateCelestialObject: (index: number, updated: Partial<CelestialObject>) => void;
+  reorderCelestialObjects: (sourceIndex: number, destinationIndex: number) => void;
   addCelestialObject: (object: CelestialObject) => void;
   removeCelestialObject: (index: number) => void;
   updateActiveSphereMeta: (meta: { sphereName?: string; currentCampaignDate?: string; shellBoundaryType?: 'double' | 'relativeMargin' }) => void;
@@ -153,6 +154,19 @@ export const useSystemStore = create<SystemState>((set, get) => ({
 
     const objects = [...activeSphere.objects];
     objects[index] = { ...objects[index], ...updated };
+
+    set({
+      activeSphere: { ...activeSphere, objects },
+    });
+  },
+
+  reorderCelestialObjects: (sourceIndex, destinationIndex) => {
+    const { activeSphere } = get();
+    if (!activeSphere) return;
+
+    const objects = [...activeSphere.objects];
+    const [movedItem] = objects.splice(sourceIndex, 1);
+    objects.splice(destinationIndex, 0, movedItem);
 
     set({
       activeSphere: { ...activeSphere, objects },

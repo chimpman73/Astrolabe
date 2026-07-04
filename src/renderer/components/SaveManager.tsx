@@ -14,6 +14,8 @@ import {
   Cloud,
   Wind,
   TreeDeciduous,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { CelestialObject, CelestialObjectType, WorldShape, ElementAffinity } from '../../types/astrolabe';
 
@@ -26,12 +28,15 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
     activeSphere,
     updateActiveSphereMeta,
     updateCelestialObject,
+    reorderCelestialObjects,
     addCelestialObject,
     removeCelestialObject,
     setToastMessage,
   } = useSystemStore();
 
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   // If no active sphere is loaded
   if (!activeSphere) {
@@ -69,9 +74,11 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
       updated.orbitalPeriodDays = 1;
     }
     // If changing type to a cloud object, ensure a default arc width exists
-    if (updated.type === 'nebula' || updated.type === 'sargasso') {
+    if (updated.type === 'cloud') {
       const current = activeSphere!.objects[index];
       updated.arcDegrees = updated.arcDegrees ?? current.arcDegrees ?? 30;
+      updated.cloudTransparency = updated.cloudTransparency ?? current.cloudTransparency ?? 0.45;
+      updated.cloudiness = updated.cloudiness ?? current.cloudiness ?? 0.5;
     }
     if (updated.type === 'living_world') {
       const current = activeSphere!.objects[index];
@@ -122,10 +129,8 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
         return <Sun className="w-3.5 h-3.5 text-yellow-600 dark:text-yellow-400" />;
       case 'moon':
         return <Moon className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />;
-      case 'nebula':
+      case 'cloud':
         return <Cloud className="w-3.5 h-3.5 text-blue-400" />;
-      case 'sargasso':
-        return <Wind className="w-3.5 h-3.5 text-green-500" />;
       case 'living_world':
         return <TreeDeciduous className="w-3.5 h-3.5 text-green-600 dark:text-green-500" />;
       default:
@@ -244,14 +249,53 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
             const isExpanded = expandedIndex === index;
             
             return (
-              <div key={index} className="editor-card">
+              <div 
+                key={obj.name + '-' + index} 
+                className={`editor-card ${draggedIndex === index ? 'opacity-50' : ''} ${
+                  dragOverIndex === index 
+                    ? (draggedIndex !== null && draggedIndex < index 
+                        ? 'border-b-2 border-b-[var(--color-accent-gold)]' 
+                        : 'border-t-2 border-t-[var(--color-accent-gold)]') 
+                    : ''
+                }`}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'move';
+                  if (dragOverIndex !== index) {
+                    setDragOverIndex(index);
+                  }
+                }}
+                onDragLeave={() => {
+                  if (dragOverIndex === index) {
+                    setDragOverIndex(null);
+                  }
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  if (draggedIndex !== null && draggedIndex !== index) {
+                    reorderCelestialObjects(draggedIndex, index);
+                  }
+                  setDraggedIndex(null);
+                  setDragOverIndex(null);
+                }}
+              >
                 
                 {/* Accordion Card Header */}
                 <div 
                   onClick={() => setExpandedIndex(isExpanded ? null : index)}
                   className="editor-card-header"
+                  draggable
+                  onDragStart={(e) => {
+                    setExpandedIndex(null);
+                    setDraggedIndex(index);
+                    e.dataTransfer.effectAllowed = 'move';
+                  }}
+                  onDragEnd={() => {
+                    setDraggedIndex(null);
+                    setDragOverIndex(null);
+                  }}
                 >
-                  <div className="editor-card-title">
+                  <div className={`editor-card-title ${obj.isHidden ? 'opacity-40' : ''}`}>
                     {renderTypeIcon(obj.type)}
                     <span className="editor-card-name">{obj.name}</span>
                     <span className="editor-card-type-label">
@@ -260,6 +304,13 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                   </div>
                   
                   <div className="editor-card-actions" onClick={e => e.stopPropagation()}>
+                    <button
+                      onClick={() => handleUpdateObject(index, { isHidden: !obj.isHidden })}
+                      className="editor-card-delete-btn"
+                      title={obj.isHidden ? `Show ${obj.name}` : `Hide ${obj.name}`}
+                    >
+                      {obj.isHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
                     <button
                       onClick={() => handleDeleteObject(index, obj.name)}
                       className="editor-card-delete-btn"
@@ -299,8 +350,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                         <option value="moon">🌕 Moon</option>
                         <option value="asteroid">☄️ Asteroid</option>
                         <option value="station">🏙️ Station</option>
-                        <option value="nebula">☁️ Nebula</option>
-                        <option value="sargasso">🌿 Sargasso</option>
+                        <option value="cloud">☁️ Cloud</option>
                         <option value="living_world">🌳 Living World</option>
                         <option value="custom">✨ Custom</option>
                       </select>
@@ -397,7 +447,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                         </div>
 
                         {/* World Shape (not shown for cloud-type objects) */}
-                        {obj.type !== 'nebula' && obj.type !== 'sargasso' && obj.type !== 'living_world' && (
+                        {obj.type !== 'cloud' && obj.type !== 'living_world' && (
                           <div className="editor-form-group">
                             <label>World Shape</label>
                             <select
@@ -431,20 +481,75 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                           </select>
                         </div>
 
-                        {/* Arc Width — nebula/sargasso only */}
-                        {(obj.type === 'nebula' || obj.type === 'sargasso') && (
-                          <div className="editor-form-group">
-                            <label>Arc Width (°)</label>
-                            <input
-                              type="number"
-                              step="1"
-                              min="1"
-                              max="359"
-                              className="editor-input"
-                              value={obj.arcDegrees ?? 30}
-                              onChange={e => handleUpdateObject(index, { arcDegrees: parseFloat(e.target.value) || 30 })}
-                            />
-                          </div>
+                        {/* Star only properties */}
+                        {(obj.type === 'star') && (
+                          <>
+                            <div className="editor-form-group">
+                              <label>Corona Size (x)</label>
+                              <input
+                                type="number"
+                                step="0.1"
+                                min="1.0"
+                                className="editor-input"
+                                value={obj.coronaSize ?? 1.5}
+                                onChange={e => handleUpdateObject(index, { coronaSize: parseFloat(e.target.value) || 1.5 })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Corona Alpha (0-1)</label>
+                              <input
+                                type="number"
+                                step="0.05"
+                                min="0.0"
+                                max="1.0"
+                                className="editor-input"
+                                value={obj.coronaAlpha ?? 0.3}
+                                onChange={e => handleUpdateObject(index, { coronaAlpha: parseFloat(e.target.value) || 0.3 })}
+                              />
+                            </div>
+                          </>
+                        )}
+
+                        {/* Cloud only properties */}
+                        {(obj.type === 'cloud') && (
+                          <>
+                            <div className="editor-form-group">
+                              <label>Arc Width (°)</label>
+                              <input
+                                type="number"
+                                step="1"
+                                min="1"
+                                max="359"
+                                className="editor-input"
+                                value={obj.arcDegrees ?? 30}
+                                onChange={e => handleUpdateObject(index, { arcDegrees: parseFloat(e.target.value) || 30 })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Transparency (0-1)</label>
+                              <input
+                                type="number"
+                                step="0.05"
+                                min="0"
+                                max="1"
+                                className="editor-input"
+                                value={obj.cloudTransparency ?? 0.45}
+                                onChange={e => handleUpdateObject(index, { cloudTransparency: parseFloat(e.target.value) || 0 })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Cloudiness (0-1)</label>
+                              <input
+                                type="number"
+                                step="0.05"
+                                min="0"
+                                max="1"
+                                className="editor-input"
+                                value={obj.cloudiness ?? 0.5}
+                                onChange={e => handleUpdateObject(index, { cloudiness: parseFloat(e.target.value) || 0 })}
+                              />
+                            </div>
+                          </>
                         )}
 
                         {/* Living World Config */}

@@ -1,6 +1,6 @@
 export type CelestialObjectType =
   | 'star' | 'planet' | 'moon' | 'asteroid'
-  | 'station' | 'nebula' | 'sargasso' | 'custom' | 'living_world';
+  | 'station' | 'cloud' | 'custom' | 'living_world';
 
 export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular';
 export type ElementAffinity = 'fire' | 'water' | 'earth' | 'air' | 'mixed';
@@ -17,6 +17,8 @@ export interface CelestialObject {
   orbitalPeriodDays?: number; // optional orbital override
 
   // --- Fantasy Extensions ---
+  /** If true, the object is completely hidden from map canvases. */
+  isHidden?: boolean;
   /** If true, the object remains fixed at initialAngle and does not advance with time. */
   isStationary?: boolean;
   /** Direction of orbital travel. Retrograde moves clockwise (negative angular velocity). Defaults to prograde. */
@@ -25,8 +27,12 @@ export interface CelestialObject {
   worldShape?: WorldShape;
   /** Elemental association for fantasy worlds. */
   elementAffinity?: ElementAffinity | null;
-  /** For nebula/sargasso types: angular arc width in degrees along the orbital path. */
+  /** For cloud types: angular arc width in degrees along the orbital path. */
   arcDegrees?: number;
+  /** For cloud types: alpha transparency of the cloud (0.0 to 1.0). */
+  cloudTransparency?: number;
+  /** For cloud types: bumpiness of the cloud edges (0.0 is smooth, 1.0 is max cloudy). */
+  cloudiness?: number;
   /** For living_world types: depth/tiers of branching. */
   branchLevels?: number;
   /** For living_world types: branching factor. */
@@ -37,6 +43,10 @@ export interface CelestialObject {
   hasLeaves?: boolean;
   /** For living_world types: how much the branches bend at nodes. */
   branchBend?: number;
+  /** For star types: multiplier for the corona size (default 1.5). */
+  coronaSize?: number;
+  /** For star types: alpha transparency of the corona (0.0 to 1.0, default 0.3). */
+  coronaAlpha?: number;
 }
 
 export interface CrystalSphere {
