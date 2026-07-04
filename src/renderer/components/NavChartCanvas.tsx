@@ -66,6 +66,13 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   const objects = activeSphere?.objects || [];
   const visibleObjects = objects.filter(o => !o.isHidden);
   
+  const isPrimary = (obj: any) => {
+    if (!obj.orbitedObjectName) return true;
+    const parent = objects.find((p) => p.name === obj.orbitedObjectName);
+    if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
+    return false;
+  };
+  
   // Central body is implicitly (0,0).
 
   // Resolve positions
@@ -78,10 +85,9 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     
     let maxDist = 0.1;
     objects.forEach(o => {
-      const pos = positions[o.name];
-      if (!pos) return;
-      const dist = Math.sqrt(pos.x * pos.x + pos.y * pos.y);
-      const reach = o.type === 'living_world' ? dist + (o.branchExtent || 0) : dist;
+      if (!isPrimary(o)) return;
+      const dist = o.distanceOrbited;
+      const reach = o.type === 'living_world' ? dist + (o.branchExtent ?? 2.5) : dist;
       if (reach > maxDist) maxDist = reach;
     });
     
@@ -89,7 +95,8 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
     
     // The Crystal Sphere Shell is drawn at shellScale * maxDist. We want it to fit comfortably inside the canvas viewport.
-    const targetZoom = (dimensions.height * (0.5 / shellScale)) / maxDist;
+    const minDim = Math.min(dimensions.width, dimensions.height);
+    const targetZoom = (minDim * (0.45 / shellScale)) / maxDist;
     
     setZoom(targetZoom);
     setPan({ x: dimensions.width / 2, y: dimensions.height / 2 });
@@ -102,13 +109,19 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   }));
 
   // Set default zoom based on max distance and active dimensions
+  const lastDimensions = useRef({ width: 0, height: 0 });
   const lastFitSphere = useRef<string | null>(null);
 
   useEffect(() => {
     if (dimensions.width > 0 && dimensions.height > 0) {
-      if (lastFitSphere.current !== activeSphere?.sphereName) {
+      if (
+        lastFitSphere.current !== activeSphere?.sphereName ||
+        lastDimensions.current.width !== dimensions.width ||
+        lastDimensions.current.height !== dimensions.height
+      ) {
         handleAutoFit();
         lastFitSphere.current = activeSphere?.sphereName || null;
+        lastDimensions.current = dimensions;
       }
     }
   }, [activeSphere?.sphereName, dimensions.width, dimensions.height]);
@@ -203,12 +216,6 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
       if (orbitRadius > 0) {
         ctx.beginPath();
         ctx.arc(parentProj.x, parentProj.y, orbitRadius, 0, 2 * Math.PI);
-        const isPrimary = (o: any) => {
-          if (!o.orbitedObjectName) return true;
-          const parent = visibleObjects.find((p) => p.name === o.orbitedObjectName);
-          if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
-          return false;
-        };
         const isPrimaryOrbit = isPrimary(obj);
         ctx.lineWidth = isPrimaryOrbit ? 1.2 : 0.75;
         ctx.strokeStyle = isPrimaryOrbit ? colorOrbit : colorOrbitDash;
@@ -219,10 +226,9 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     // 2. Draw outer Crystal Sphere Shell boundary if max planet exists
       let maxDist = 0.1;
       objects.forEach(o => {
-        const pos = positions[o.name];
-        if (!pos) return;
-        const dist = Math.sqrt(pos.x * pos.x + pos.y * pos.y);
-        const reach = o.type === 'living_world' ? dist + (o.branchExtent || 0) : dist;
+        if (!isPrimary(o)) return;
+        const dist = o.distanceOrbited;
+        const reach = o.type === 'living_world' ? dist + (o.branchExtent ?? 2.5) : dist;
         if (reach > maxDist) maxDist = reach;
       });
       const shellProj = project(0, 0);
@@ -418,19 +424,18 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     const mapCtx = mapCanvas.getContext('2d');
     
     if (mapCtx) {
-      const isPrimaryExp = (obj: any) => {
-        if (!obj.orbitedObjectName) return true;
-        const parent = objects.find((p) => p.name === obj.orbitedObjectName);
-        if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
-        return false;
-      };
       const primaryObjects = objects.filter((o) => 
-        o.distanceOrbited > 0 && isPrimaryExp(o)
+        o.distanceOrbited >= 0 && isPrimary(o)
       );
-      const maxDist = primaryObjects.reduce((max, o) => Math.max(max, o.distanceOrbited), 0.1);
-      const isRelative = activeSphere?.shellBoundaryType === 'relativeMargin';
-      const shellScale = isRelative ? 1.2 : 2.0;
-      const exportZoom = (mapW * (0.8 / shellScale)) / maxDist;
+      let maxDist = 0.1;
+      primaryObjects.forEach(o => {
+        const reach = o.type === 'living_world' ? o.distanceOrbited + (o.branchExtent ?? 2.5) : o.distanceOrbited;
+        if (reach > maxDist) maxDist = reach;
+      });
+      const isCustom = activeSphere?.shellBoundaryType === 'custom' || activeSphere?.shellBoundaryType === 'relativeMargin';
+      const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
+      const minDim = Math.min(mapW, mapH);
+      const exportZoom = (minDim * (0.45 / shellScale)) / maxDist;
       const exportPan = { x: mapW / 2, y: mapH / 2 };
 
       drawMap(mapCtx, mapW, mapH, mapTheme, exportZoom, exportPan);
@@ -461,14 +466,8 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     let curY = 320;
 
     // Render primary planets
-    const isPrimaryLabel = (obj: any) => {
-      if (!obj.orbitedObjectName) return true;
-      const parent = visibleObjects.find((p) => p.name === obj.orbitedObjectName);
-      if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
-      return false;
-    };
     const primaries = visibleObjects.filter((o) => 
-      o.type === 'star' || isPrimaryLabel(o)
+      o.type === 'star' || isPrimary(o)
     );
     
     primaries.forEach((obj) => {
@@ -543,7 +542,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
 
 
   return (
-    <div ref={containerRef} className="flex-1 w-full relative min-h-0 overflow-hidden">
+    <div ref={containerRef} className="navchart-canvas-container">
       <canvas
         ref={canvasRef}
         width={dimensions.width}
@@ -553,8 +552,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
         onMouseUp={handleMouseUpOrLeave}
         onMouseLeave={handleMouseUpOrLeave}
         onWheel={handleWheel}
-        className="w-full h-full cursor-grab active:cursor-grabbing"
-        style={{ display: 'block' }}
+        className="navchart-canvas"
       />
     </div>
   );

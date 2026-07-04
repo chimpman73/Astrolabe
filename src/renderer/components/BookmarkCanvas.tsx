@@ -47,7 +47,7 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
     ? activeSphere.objects
         .filter((obj) => obj.distanceOrbited >= 0 && isPrimary(obj))
         .reduce((max, obj) => {
-          const reach = obj.type === 'living_world' ? obj.distanceOrbited + (obj.branchExtent || 0) : obj.distanceOrbited;
+          const reach = obj.type === 'living_world' ? obj.distanceOrbited + (obj.branchExtent ?? 2.5) : obj.distanceOrbited;
           return Math.max(max, reach);
         }, 0.1)
     : 0.1;
