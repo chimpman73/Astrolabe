@@ -1,7 +1,7 @@
 {
   "sphereName": "Bugspace",
   "currentCampaignDate": "2026-07-03",
-  "currentSystemDate": 72,
+  "currentSystemDate": 0,
   "objects": [
     {
       "name": "World Tree",
@@ -17,11 +17,41 @@
       "worldShape": "cluster",
       "elementAffinity": "earth",
       "branchLevels": 4,
-      "branchDensity": 10,
+      "branchDensity": 9,
       "branchExtent": 28,
       "hasLeaves": true,
       "branchBend": 0.5,
       "isHidden": false
+    },
+    {
+      "name": "SteamCloud1",
+      "type": "cloud",
+      "size": 200,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 16,
+      "initialAngle": 270,
+      "orbitalPeriodDays": 365,
+      "arcDegrees": 30,
+      "cloudTransparency": 0.45,
+      "cloudiness": 0.5,
+      "elementAffinity": "water",
+      "isStationary": false,
+      "orbitDirection": "prograde"
+    },
+    {
+      "name": "SteamCloud2",
+      "type": "cloud",
+      "size": 250,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 11,
+      "initialAngle": 270,
+      "orbitalPeriodDays": 365,
+      "arcDegrees": 30,
+      "cloudTransparency": 0.45,
+      "cloudiness": 0.5,
+      "elementAffinity": "water"
     },
     {
       "name": "Toroid Sea",
@@ -49,11 +79,11 @@
       "orbitedObjectName": "World Tree",
       "distanceOrbited": 14,
       "initialAngle": 270,
-      "orbitalPeriodDays": 360,
+      "orbitalPeriodDays": 365,
       "elementAffinity": "fire",
       "isHidden": false,
       "isStationary": false,
-      "orbitDirection": "retrograde"
+      "orbitDirection": "prograde"
     }
   ],
   "shellBoundaryType": "relativeMargin",

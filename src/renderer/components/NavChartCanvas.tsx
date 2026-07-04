@@ -238,13 +238,13 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
 
       // Draw thick outer sphere boundary
       ctx.beginPath();
-      ctx.arc(shellProj.x, shellProj.y, shellRadius, 0, 2 * Math.PI);
+      ctx.arc(shellProj.x, shellProj.y, Math.max(0, shellRadius), 0, 2 * Math.PI);
       ctx.strokeStyle = colorStroke;
       ctx.lineWidth = 3;
       ctx.stroke();
       
       ctx.beginPath();
-      ctx.arc(shellProj.x, shellProj.y, shellRadius - 5, 0, 2 * Math.PI);
+      ctx.arc(shellProj.x, shellProj.y, Math.max(0, shellRadius - 5), 0, 2 * Math.PI);
       ctx.lineWidth = 0.75;
       ctx.stroke();
 
@@ -272,7 +272,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
       }
       const parentProj = project(px, py);
       const proj = project(pos.x, pos.y);
-      const renderSize = Math.max(3, (obj.size / 100) * 20);
+      const renderSize = Math.max(3, (obj.size / 100) * (10 + activeZoom * 0.4));
 
       if (obj.type === 'cloud') {
         if (obj.distanceOrbited <= 0) return;

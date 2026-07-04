@@ -153,7 +153,7 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
         const pixelsPerAU = shellDistance > 0 ? scaleHeight / shellDistance : 1;
         const zoomEquiv = pixelsPerAU; // For branch scaling on living worlds
 
-        drawSolidBody(ctx, centerX, objY, obj, objSize, bodyFill, bodyStroke, true, zoomEquiv);
+        drawSolidBody(ctx, centerX, objY, obj, objSize, bodyFill, bodyStroke, false, zoomEquiv);
       }
 
       // --- Motion indicator suffix (◆ = fixed, ↺ = retrograde) ---

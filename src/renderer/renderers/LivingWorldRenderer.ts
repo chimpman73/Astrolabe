@@ -146,19 +146,21 @@ export class LivingWorldRenderer extends BaseRenderer {
     ctx.scale(scale, scale);
     
     // Stroke all branches grouped by thickness
+    const sizeScale = Math.max(1, size / 12);
     for (const [thicknessStr, path] of Object.entries(cachedGeometry.branches)) {
-      // Counter-act the canvas scale to maintain precise pixel thickness on screen
-      ctx.lineWidth = parseFloat(thicknessStr) / scale;
+      // Counter-act the canvas scale but apply sizeScale to grow thickness when zoomed in
+      ctx.lineWidth = (parseFloat(thicknessStr) * sizeScale) / scale;
       ctx.strokeStyle = bodyStroke;
       ctx.stroke(path);
     }
     
-    // Fill all leaves in a single draw call, counter-scaling so they stay a fixed physical pixel size!
+    // Fill all leaves in a single draw call, scaling them relative to the trunk size
     if (obj.hasLeaves !== false) {
       ctx.fillStyle = '#2ea84b';
       ctx.beginPath();
       for (const leaf of cachedGeometry.leavesData) {
-        const leafRadiusScaled = (3 + leaf.rand * 3) / scale;
+        const targetPixelSize = Math.max(2, size * (0.15 + leaf.rand * 0.2));
+        const leafRadiusScaled = targetPixelSize / scale;
         ctx.moveTo(leaf.x + leafRadiusScaled, leaf.y);
         ctx.arc(leaf.x, leaf.y, leafRadiusScaled, 0, 2 * Math.PI);
       }
