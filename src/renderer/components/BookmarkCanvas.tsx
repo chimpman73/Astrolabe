@@ -140,74 +140,20 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
       const sizeMultiplier = width / 300;
       const objSize = Math.max(4, obj.size * 0.6 * sizeMultiplier);
 
-      // --- Nebula / Sargasso: cloud shape following the orbital contour ---
       if (obj.type === 'cloud') {
-        const arcDegrees = obj.arcDegrees ?? 30;
-        const arcFrac = Math.min(1.0, arcDegrees / 360);
-        // Width spans the entire orbital period for 360 degrees
-        const cloudW = width * arcFrac;
-        // Size value controls how far the cloud expands away from the orbital line
-        const halfH = Math.max(8, objSize * 1.5); 
-        
-        // Calculate the angle required to match the target horizontal width (cloudW)
-        const halfW = cloudW / 2;
-        const safeR = Math.max(1, r);
-        const halfAngle = halfW >= safeR ? Math.PI : Math.asin(halfW / safeR);
-        
         const cloudFill = getElementColor(obj.elementAffinity || null) || (isDark ? '#a0a0a0' : '#808080');
-
-        const isFullRing = arcDegrees >= 359;
-        const numBumps = Math.max(3, Math.floor(arcDegrees / 20));
-        const numSegments = Math.max(100, Math.floor(cloudW)); // higher resolution for smooth bumps
-        const amp = (obj.cloudiness ?? 0.5) * 0.4;
-
-        ctx.save();
-        ctx.globalAlpha = obj.cloudTransparency ?? 0.35;
-        ctx.fillStyle = cloudFill;
-        ctx.beginPath();
-        
-        // Outer edge (top/outer radius)
-        for (let i = 0; i <= numSegments; i++) {
-          const t = i / numSegments;
-          const nx = -1 + 2 * t;
-          const envelope = isFullRing ? 1 : (1 - nx * nx);
-          // Amplitude creates distinct, puffy cloud bumps instead of a flat line
-          const bump = (1 - amp) + amp * Math.cos(nx * Math.PI * numBumps);
-          
-          const alpha = 1.5 * Math.PI + nx * halfAngle;
-          const currentR = r + halfH * envelope * bump;
-          const x = centerX + currentR * Math.cos(alpha);
-          const y = centerY + currentR * Math.sin(alpha);
-          
-          if (i === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        
-        // Inner edge (bottom/inner radius)
-        for (let i = numSegments; i >= 0; i--) {
-          const t = i / numSegments;
-          const nx = -1 + 2 * t;
-          const envelope = isFullRing ? 1 : (1 - nx * nx);
-          const bump = (1 - amp) + amp * Math.cos(nx * Math.PI * numBumps);
-          
-          const alpha = 1.5 * Math.PI + nx * halfAngle;
-          const currentR = Math.max(0, r - halfH * envelope * bump);
-          const x = centerX + currentR * Math.cos(alpha);
-          const y = centerY + currentR * Math.sin(alpha);
-          
-          ctx.lineTo(x, y);
-        }
-        
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
+        drawSolidBody(ctx, centerX, centerY, obj, objSize, cloudFill, '#505050', false, 1, 
+          true, centerX, centerY, undefined, undefined, width, r, centerY
+        );
       } else {
         const { bodyFill, bodyStroke } = getBodyColors(obj, !isDark, colorBg, colorStroke, '#e2b34a');
+        
         // Calculate true pixels per AU
         const scaleHeight = height - (showShell ? 15 : 45) - bottomMargin;
         const pixelsPerAU = shellDistance > 0 ? scaleHeight / shellDistance : 1;
-        
-        drawSolidBody(ctx, centerX, objY, obj, objSize, bodyFill, bodyStroke, false, pixelsPerAU);
+        const zoomEquiv = pixelsPerAU; // For branch scaling on living worlds
+
+        drawSolidBody(ctx, centerX, objY, obj, objSize, bodyFill, bodyStroke, true, zoomEquiv);
       }
 
       // --- Motion indicator suffix (◆ = fixed, ↺ = retrograde) ---

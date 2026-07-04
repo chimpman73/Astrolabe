@@ -271,61 +271,12 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
 
       if (obj.type === 'cloud') {
         if (obj.distanceOrbited <= 0) return;
-        
         const orbitR = obj.distanceOrbited * activeZoom;
-        const arcDegrees = obj.arcDegrees ?? 30;
-        const arcHalf = (arcDegrees / 2) * (Math.PI / 180);
-        const centerAngle = pos.angle * (Math.PI / 180);
-
-        // Match the planet render scale to ensure clouds have proportional thickness (radial depth)
-        const halfH = Math.max(8, renderSize * 1.5);
-
         const cloudFill = getElementColor(obj.elementAffinity || null) || (isParchment ? '#808080' : '#a0a0a0');
-
-        const isFullRing = arcDegrees >= 359;
-        const numBumps = Math.max(3, Math.floor(arcDegrees / 20));
-        const numSegments = Math.max(40, Math.floor(arcDegrees * 1.5));
-        const amp = (obj.cloudiness ?? 0.5) * 0.3;
-
-        ctx.save();
-        ctx.globalAlpha = obj.cloudTransparency ?? 0.45;
-        ctx.beginPath();
         
-        // Outer edge
-        for (let i = 0; i <= numSegments; i++) {
-          const t = i / numSegments;
-          const nx = -1 + 2 * t; // -1 to 1
-          const envelope = isFullRing ? 1 : (1 - nx * nx);
-          const bump = (1 - amp) + amp * Math.cos(nx * Math.PI * numBumps);
-          
-          const angle = centerAngle + nx * arcHalf;
-          const rOuter = orbitR + halfH * envelope * bump;
-          
-          const x = parentProj.x + rOuter * Math.cos(angle);
-          const y = parentProj.y + rOuter * Math.sin(angle);
-          if (i === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        
-        // Inner edge
-        for (let i = numSegments; i >= 0; i--) {
-          const t = i / numSegments;
-          const nx = -1 + 2 * t;
-          const envelope = isFullRing ? 1 : (1 - nx * nx);
-          const bump = (1 - amp) + amp * Math.cos(nx * Math.PI * numBumps);
-          
-          const angle = centerAngle + nx * arcHalf;
-          const rInner = orbitR - halfH * envelope * bump;
-          
-          const x = parentProj.x + rInner * Math.cos(angle);
-          const y = parentProj.y + rInner * Math.sin(angle);
-          ctx.lineTo(x, y);
-        }
-        
-        ctx.closePath();
-        ctx.fillStyle = cloudFill;
-        ctx.fill();
-        ctx.restore();
+        drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, cloudFill, '#505050', false, activeZoom,
+          false, parentProj.x, parentProj.y, orbitR, pos.angle
+        );
       } else {
         // Solid body drawing
         const { bodyFill, bodyStroke } = getBodyColors(obj, isParchment, colorBg, colorStroke, colorGold);
