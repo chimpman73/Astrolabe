@@ -249,7 +249,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
             
             return (
               <div 
-                key={obj.name + '-' + index} 
+                key={'celestial-obj-' + index} 
                 className={`editor-card ${draggedIndex === index ? 'opacity-50' : ''} ${
                   dragOverIndex === index 
                     ? (draggedIndex !== null && draggedIndex < index 
