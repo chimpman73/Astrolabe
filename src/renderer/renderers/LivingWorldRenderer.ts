@@ -19,7 +19,7 @@ function hashString(str: string) {
 }
 
 export class LivingWorldRenderer extends BaseRenderer {
-  private static geometryCache = new Map<string, { branches: Record<number, Path2D>, leaves: Path2D, maxRadius: number }>();
+  private static geometryCache = new Map<string, { branches: Record<number, Path2D>, leavesData: {x: number, y: number, rand: number}[], maxRadius: number }>();
 
   public draw(context: RenderContext): void {
     const { ctx, x, y, obj, size, bodyFill, bodyStroke, zoom = 1 } = context;
@@ -35,7 +35,7 @@ export class LivingWorldRenderer extends BaseRenderer {
     // Generate normalized geometry (scale = 1) if not cached
     if (!LivingWorldRenderer.geometryCache.has(baseSeed)) {
       const branchPaths: Record<number, Path2D> = {};
-      const leavesPath = new Path2D();
+      const leavesData: {x: number, y: number, rand: number}[] = [];
       
       const getBranchPath = (thickness: number) => {
         if (!branchPaths[thickness]) branchPaths[thickness] = new Path2D();
@@ -114,9 +114,7 @@ export class LivingWorldRenderer extends BaseRenderer {
           }
           
           if (currentLevel === levels && (obj.hasLeaves !== false)) {
-            const leafR = (0.05 + bRand() * 0.05);
-            leavesPath.moveTo(cx + leafR, cy);
-            leavesPath.arc(cx, cy, leafR, 0, 2 * Math.PI);
+            leavesData.push({ x: cx, y: cy, rand: bRand() });
           }
         }
       };
@@ -129,7 +127,7 @@ export class LivingWorldRenderer extends BaseRenderer {
       
       LivingWorldRenderer.geometryCache.set(baseSeed, {
         branches: branchPaths,
-        leaves: leavesPath,
+        leavesData: leavesData,
         maxRadius: radiusTracker.value
       });
     }
@@ -153,10 +151,16 @@ export class LivingWorldRenderer extends BaseRenderer {
       ctx.stroke(path);
     }
     
-    // Fill all leaves in a single draw call
+    // Fill all leaves in a single draw call, counter-scaling so they stay a fixed physical pixel size!
     if (obj.hasLeaves !== false) {
       ctx.fillStyle = '#2ea84b';
-      ctx.fill(cachedGeometry.leaves);
+      ctx.beginPath();
+      for (const leaf of cachedGeometry.leavesData) {
+        const leafRadiusScaled = (3 + leaf.rand * 3) / scale;
+        ctx.moveTo(leaf.x + leafRadiusScaled, leaf.y);
+        ctx.arc(leaf.x, leaf.y, leafRadiusScaled, 0, 2 * Math.PI);
+      }
+      ctx.fill();
     }
     
     ctx.restore();
