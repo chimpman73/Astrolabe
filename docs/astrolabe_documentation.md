@@ -78,6 +78,11 @@ The application saves and loads system states via JSON configuration files store
           "enum": ["star", "planet", "moon", "asteroid", "station", "custom", "cloud", "living_world"],
           "description": "Category of the celestial body."
         },
+        "worldShape": {
+          "type": "string",
+          "enum": ["sphere", "disc", "pyramid", "cluster", "irregular", "elliptical", "ring", "cylinder", "ship"],
+          "description": "The visual shape to render. (Ring, cylinder, and ship are intended for stations)."
+        },
         "isHidden": {
           "type": "boolean",
           "description": "If true, the object is completely hidden from map canvases (but still affects boundary calculations)."
@@ -255,6 +260,8 @@ A vertical panel of width 360px.
 * **Inline Form/Card Editor**: Form fields that load and display active celestial config parameters. Uses a scroll wrapper (`overflow-y: auto`) that provides scrollbar visibility and native mouse-wheel scrolling.
 * **Drag-and-Drop Reordering**: Users can drag and drop celestial object cards to reorder the internal array, which directly dictates the Z-index rendering order on the canvases (objects lower in the list are drawn on top).
 * **Visibility Toggles**: A hide/show button on each card controls the `isHidden` property to exclude objects from canvas views (while retaining them in system scale boundaries).
+* **Boundary Toggles**: A secondary toggle allows users to define whether an object `affectsShellBoundary`, controlling if it is included when calculating the Crystal Sphere's outer radius.
+* **Shape Customization**: Users can select the `worldShape` (e.g. Sphere, Cluster, Elliptical). If the object is a "Station", the dropdown conditionally updates to show station-exclusive shapes (Ring, Cylinder, Ship).
 * **On-the-fly Validation**: Parses input dynamically. Shows details of JSON syntax errors or schema validation warnings in a red alert banner.
 * **Apply & Save**: Commits edits directly to the local save folder.
 

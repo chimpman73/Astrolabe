@@ -72,6 +72,33 @@ export abstract class BaseRenderer {
       case 'elliptical':
         ctx.ellipse(x, y, s, s * 0.65, 0, 0, 2 * Math.PI);
         break;
+      case 'ring':
+        ctx.arc(x, y, s, 0, 2 * Math.PI, false);
+        ctx.moveTo(x + s * 0.6, y);
+        ctx.arc(x, y, s * 0.6, 0, 2 * Math.PI, true);
+        break;
+      case 'cylinder': {
+        const r = s * 0.5;
+        const L = s * 0.8;
+        const angle = Math.PI / 4;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.moveTo(-L, -r);
+        ctx.lineTo(L, -r);
+        ctx.arc(L, 0, r, -Math.PI / 2, Math.PI / 2);
+        ctx.lineTo(-L, r);
+        ctx.arc(-L, 0, r, Math.PI / 2, -Math.PI / 2);
+        ctx.restore();
+        break;
+      }
+      case 'ship':
+        ctx.moveTo(x, y - s * 1.2);
+        ctx.quadraticCurveTo(x + s * 0.4, y - s * 0.2, x + s * 0.8, y + s * 0.4);
+        ctx.lineTo(x, y + s * 0.8);
+        ctx.lineTo(x - s * 0.8, y + s * 0.4);
+        ctx.quadraticCurveTo(x - s * 0.4, y - s * 0.2, x, y - s * 1.2);
+        break;
       default: // sphere
         ctx.arc(x, y, s, 0, 2 * Math.PI);
     }

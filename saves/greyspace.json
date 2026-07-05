@@ -1,7 +1,7 @@
 {
   "sphereName": "Greyspace",
   "currentCampaignDate": "2026-07-04",
-  "currentSystemDate": 0,
+  "currentSystemDate": 777,
   "objects": [
     {
       "name": "Oerth",
@@ -151,7 +151,61 @@
       "initialAngle": 166,
       "orbitalPeriodDays": 13500,
       "worldShape": "disc",
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "affectsShellBoundary": true
+    },
+    {
+      "name": "Sister's Sargasso",
+      "type": "cloud",
+      "size": 20,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Oerth",
+      "distanceOrbited": 75,
+      "initialAngle": 203,
+      "orbitalPeriodDays": 12000,
+      "arcDegrees": 5,
+      "cloudTransparency": 0.45,
+      "cloudiness": 0.5,
+      "affectsShellBoundary": false,
+      "cloudObjectSize": 1.5
+    },
+    {
+      "name": "The Sisters",
+      "type": "planet",
+      "size": 20,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Oerth",
+      "distanceOrbited": 75,
+      "initialAngle": 203,
+      "orbitalPeriodDays": 12000,
+      "worldShape": "cluster",
+      "affectsShellBoundary": false
+    },
+    {
+      "name": "Great Sargasso",
+      "type": "cloud",
+      "size": 150,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 60,
+      "initialAngle": 144,
+      "orbitalPeriodDays": 16000,
+      "affectsShellBoundary": false,
+      "arcDegrees": 30,
+      "cloudTransparency": 0.45,
+      "cloudiness": 0.5
+    },
+    {
+      "name": "The Habitat",
+      "type": "station",
+      "size": 10,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Oerth",
+      "distanceOrbited": 70,
+      "initialAngle": 43,
+      "orbitalPeriodDays": 16000,
+      "affectsShellBoundary": false,
+      "worldShape": "ship"
     }
   ]
 }

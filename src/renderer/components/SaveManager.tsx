@@ -355,7 +355,20 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                       <select 
                         className="editor-select"
                         value={obj.type}
-                        onChange={e => handleUpdateObject(index, { type: e.target.value as CelestialObjectType })}
+                        onChange={e => {
+                          const newType = e.target.value as CelestialObjectType;
+                          const updates: Partial<CelestialObject> = { type: newType };
+                          if (newType === 'station') {
+                            if (!['ring', 'cylinder', 'ship'].includes(obj.worldShape || '')) {
+                              updates.worldShape = 'ring';
+                            }
+                          } else {
+                            if (['ring', 'cylinder', 'ship'].includes(obj.worldShape || '')) {
+                              updates.worldShape = 'sphere';
+                            }
+                          }
+                          handleUpdateObject(index, updates);
+                        }}
                       >
                         <option value="star">⭐ Star</option>
                         <option value="planet">🌍 Planet</option>
@@ -473,18 +486,30 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                         {obj.type !== 'cloud' && obj.type !== 'living_world' && (
                           <div className="editor-form-group">
                             <label>World Shape</label>
-                            <select
-                              className="editor-select"
-                              value={obj.worldShape ?? 'sphere'}
-                              onChange={e => handleUpdateObject(index, { worldShape: e.target.value as WorldShape })}
-                            >
-                              <option value="sphere">● Sphere (Default)</option>
-                              <option value="disc">⬡ Disc World</option>
-                              <option value="pyramid">△ Pyramid World</option>
-                              <option value="cluster">⊛ Cluster World</option>
-                              <option value="irregular">✦ Irregular</option>
-                              <option value="elliptical">⬭ Elliptical</option>
-                            </select>
+                            {obj.type === 'station' ? (
+                              <select
+                                className="editor-select"
+                                value={obj.worldShape ?? 'ring'}
+                                onChange={e => handleUpdateObject(index, { worldShape: e.target.value as WorldShape })}
+                              >
+                                <option value="ring">◎ Ring</option>
+                                <option value="cylinder">▱ Cylinder</option>
+                                <option value="ship">⬖ Ship</option>
+                              </select>
+                            ) : (
+                              <select
+                                className="editor-select"
+                                value={obj.worldShape ?? 'sphere'}
+                                onChange={e => handleUpdateObject(index, { worldShape: e.target.value as WorldShape })}
+                              >
+                                <option value="sphere">● Sphere (Default)</option>
+                                <option value="disc">⬡ Disc World</option>
+                                <option value="pyramid">△ Pyramid World</option>
+                                <option value="cluster">⊛ Cluster World</option>
+                                <option value="irregular">✦ Irregular</option>
+                                <option value="elliptical">⬭ Elliptical</option>
+                              </select>
+                            )}
                           </div>
                         )}
 
