@@ -31,6 +31,8 @@ interface SystemState {
   updateActiveSphereMeta: (meta: Partial<Omit<CrystalSphere, 'objects'>>) => void;
   setSphere: (sphere: CrystalSphere) => void;
   setToastMessage: (toast: { type: 'success' | 'error'; text: string } | null) => void;
+  viewMode: 'PC' | 'DM';
+  setViewMode: (mode: 'PC' | 'DM') => void;
 }
 
 export const useSystemStore = create<SystemState>((set, get) => ({
@@ -43,6 +45,9 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   bookmarkShowShell: true,
   bookmarkShowDistance: true,
   toastMessage: null,
+  viewMode: 'PC',
+
+  setViewMode: (mode) => set({ viewMode: mode }),
 
   setSaveDirectory: async (path: string) => {
     set({ saveDirectory: path });

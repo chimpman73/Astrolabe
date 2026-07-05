@@ -14,6 +14,7 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
     bookmarkShowShell,
     bookmarkShowDistance,
     setToastMessage,
+    viewMode,
   } = useSystemStore();
 
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -38,7 +39,7 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
   // Filter objects to only those that orbit the central point (0,0) or orbit a body at (0,0)
   const planetaryObjects = activeSphere
     ? activeSphere.objects.filter((obj) => 
-        obj.distanceOrbited >= 0 && isPrimary(obj) && !obj.isHidden
+        obj.distanceOrbited >= 0 && isPrimary(obj) && !obj.isHidden && (viewMode === 'DM' || !obj.isDMOnly)
       )
     : [];
 
@@ -59,6 +60,11 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
           return Math.max(max, reach);
         }, 0.1)
     : 0.1;
+
+  const visibleMaxDistance = planetaryObjects.reduce((max, obj) => {
+    const reach = obj.type === 'living_world' ? obj.distanceOrbited + (obj.branchExtent ?? 2.5) : obj.distanceOrbited;
+    return Math.max(max, reach);
+  }, 0.1);
 
   // Unified Draw Function for rendering on both Screen and Export canvas
   const drawBookmark = (
@@ -87,10 +93,12 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
 
     const isCustom = activeSphere?.shellBoundaryType === 'custom' || activeSphere?.shellBoundaryType === 'relativeMargin';
     const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
-    const shellDistance = showShell ? shellBasisDistance * shellScale : shellBasisDistance;
+    const shellDistance = shellBasisDistance * shellScale;
     
     // Determine the furthest point that needs to be drawn on the canvas
-    const canvasBoundary = Math.max(absoluteMaxDistance, shellDistance);
+    const canvasBoundary = showShell 
+      ? Math.max(absoluteMaxDistance, shellDistance)
+      : visibleMaxDistance;
 
     // Helper: translate distance into pixel radius
     const getPixelRadius = (distance: number) => {
@@ -131,18 +139,20 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
       ctx.arc(centerX, centerY, shellR - 8, Math.PI, 2 * Math.PI);
       ctx.lineWidth = 1;
       ctx.stroke();
-
-      // Shell label at the top center
-      ctx.font = `bold ${Math.max(10, width * 0.035) * 1.5}px 'Elan', 'Cinzel', serif`;
-      ctx.fillStyle = colorStroke;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      ctx.fillText(
-        (activeSphere?.sphereName || 'CRYSTAL SHELL').toUpperCase() + ' SHELL',
-        centerX,
-        32
-      );
     }
+
+    // Title label at the top center
+    ctx.font = `bold ${Math.max(10, width * 0.035) * 1.5}px 'Elan', 'Cinzel', serif`;
+    ctx.fillStyle = colorStroke;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(
+      showShell 
+        ? (activeSphere?.sphereName || 'CRYSTAL SHELL').toUpperCase() + ' SHELL'
+        : (activeSphere?.sphereName || 'UNTITLED SYSTEM').toUpperCase(),
+      centerX,
+      showShell ? 32 : 12
+    );
 
     // Draw objects and labels along the center line
     planetaryObjects.forEach((obj) => {
@@ -161,7 +171,7 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
         
         // Calculate true pixels per AU
         const scaleHeight = height - (showShell ? 15 : 45) - bottomMargin;
-        const pixelsPerAU = shellDistance > 0 ? scaleHeight / shellDistance : 1;
+        const pixelsPerAU = canvasBoundary > 0 ? scaleHeight / canvasBoundary : 1;
         const zoomEquiv = pixelsPerAU; // For branch scaling on living worlds
 
         drawSolidBody(ctx, centerX, objY, obj, objSize, bodyFill, bodyStroke, false, zoomEquiv);

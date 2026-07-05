@@ -80,8 +80,8 @@ The application saves and loads system states via JSON configuration files store
         },
         "worldShape": {
           "type": "string",
-          "enum": ["sphere", "disc", "pyramid", "cluster", "irregular", "elliptical", "ring", "cylinder", "ship", "rectangular"],
-          "description": "The visual shape to render. (Ring, cylinder, and ship are intended for stations)."
+          "enum": ["sphere", "disc", "pyramid", "cluster", "irregular", "elliptical", "ring", "cylinder", "ship", "rectangular", "castle", "skull"],
+          "description": "The visual shape to render. (Ring, cylinder, ship, castle, and skull are intended for stations)."
         },
         "isHidden": {
           "type": "boolean",
@@ -90,6 +90,10 @@ The application saves and loads system states via JSON configuration files store
         "affectsShellBoundary": {
           "type": "boolean",
           "description": "If false, the object is ignored when calculating the system's Crystal Sphere shell bounds. Defaults to true."
+        },
+        "isDMOnly": {
+          "type": "boolean",
+          "description": "If true, the object is considered a DM-only object and hidden from PC views. Defaults to false (PC object)."
         },
         "size": {
           "type": "number",

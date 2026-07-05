@@ -20,6 +20,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     activeSphere,
     currentSystemDate,
     setToastMessage,
+    viewMode,
   } = useSystemStore();
 
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -64,7 +65,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   // Map theme (space vs parchment) is now a prop
 
   const objects = activeSphere?.objects || [];
-  const visibleObjects = objects.filter(o => !o.isHidden);
+  const visibleObjects = objects.filter(o => !o.isHidden && (viewMode === 'DM' || !o.isDMOnly));
   
   const isPrimary = (obj: any) => {
     if (!obj.orbitedObjectName) return true;

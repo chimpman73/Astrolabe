@@ -1,7 +1,7 @@
 {
   "sphereName": "Realmspace",
   "currentCampaignDate": "2026-07-05",
-  "currentSystemDate": 0,
+  "currentSystemDate": 9597,
   "objects": [
     {
       "name": "Sol",
@@ -28,7 +28,8 @@
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
-      "affectsShellBoundary": true
+      "affectsShellBoundary": true,
+      "isDMOnly": true
     },
     {
       "name": "Sargasso 2",
@@ -43,7 +44,8 @@
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
       "isStationary": false,
-      "orbitDirection": "prograde"
+      "orbitDirection": "prograde",
+      "isDMOnly": true
     },
     {
       "name": "Sargasso 3",
@@ -69,7 +71,8 @@
       "orbitalPeriodDays": 3650,
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
-      "cloudiness": 0.5
+      "cloudiness": 0.5,
+      "isDMOnly": true
     },
     {
       "name": "Sargasso 5",
@@ -82,7 +85,8 @@
       "orbitalPeriodDays": 3650,
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
-      "cloudiness": 0.5
+      "cloudiness": 0.5,
+      "isDMOnly": true
     },
     {
       "name": "Sargasso 6",
@@ -95,7 +99,8 @@
       "orbitalPeriodDays": 3650,
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
-      "cloudiness": 0.5
+      "cloudiness": 0.5,
+      "isDMOnly": true
     },
     {
       "name": "Sargasso 7",
@@ -108,7 +113,8 @@
       "orbitalPeriodDays": 3649,
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
-      "cloudiness": 0.5
+      "cloudiness": 0.5,
+      "isDMOnly": true
     },
     {
       "name": "Sargasso 8",
@@ -121,7 +127,8 @@
       "orbitalPeriodDays": 3650,
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
-      "cloudiness": 0.5
+      "cloudiness": 0.5,
+      "isDMOnly": true
     },
     {
       "name": "Sargasso 9",
@@ -134,7 +141,8 @@
       "orbitalPeriodDays": 3650,
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
-      "cloudiness": 0.5
+      "cloudiness": 0.5,
+      "isDMOnly": true
     },
     {
       "name": "Sargasso 10",
@@ -147,7 +155,8 @@
       "orbitalPeriodDays": 3650,
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
-      "cloudiness": 0.5
+      "cloudiness": 0.5,
+      "isDMOnly": true
     },
     {
       "name": "Sargasso 11",
@@ -160,7 +169,8 @@
       "orbitalPeriodDays": 3650,
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
-      "cloudiness": 0.5
+      "cloudiness": 0.5,
+      "isDMOnly": true
     },
     {
       "name": "Sargasso 12",
@@ -173,7 +183,8 @@
       "orbitalPeriodDays": 3650,
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
-      "cloudiness": 0.5
+      "cloudiness": 0.5,
+      "isDMOnly": true
     },
     {
       "name": "Anadia",
@@ -182,7 +193,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Sol",
       "distanceOrbited": 0.5,
-      "initialAngle": 0,
+      "initialAngle": 151,
       "orbitalPeriodDays": 30,
       "elementAffinity": "earth"
     },
@@ -193,7 +204,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": null,
       "distanceOrbited": 1,
-      "initialAngle": 0,
+      "initialAngle": 261,
       "orbitalPeriodDays": 240,
       "elementAffinity": "air"
     },
@@ -204,7 +215,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": null,
       "distanceOrbited": 2,
-      "initialAngle": 0,
+      "initialAngle": 224,
       "orbitalPeriodDays": 365,
       "elementAffinity": "mixed"
     },
@@ -241,7 +252,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Sol",
       "distanceOrbited": 3,
-      "initialAngle": 0,
+      "initialAngle": 90,
       "orbitalPeriodDays": 650,
       "elementAffinity": "water"
     },
@@ -252,7 +263,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Sol",
       "distanceOrbited": 4,
-      "initialAngle": 0,
+      "initialAngle": 296,
       "orbitalPeriodDays": 2010,
       "elementAffinity": "water"
     },
@@ -263,7 +274,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": null,
       "distanceOrbited": 10,
-      "initialAngle": 0,
+      "initialAngle": 212,
       "orbitalPeriodDays": 10800,
       "elementAffinity": "earth"
     },
@@ -289,7 +300,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Glyth",
       "distanceOrbited": 0.4,
-      "initialAngle": 0,
+      "initialAngle": 84,
       "orbitalPeriodDays": 365,
       "worldShape": "elliptical",
       "elementAffinity": "earth"
@@ -315,8 +326,8 @@
       "size": 10,
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Glyth",
-      "distanceOrbited": 1,
-      "initialAngle": 0,
+      "distanceOrbited": 0.8,
+      "initialAngle": 344,
       "orbitalPeriodDays": 450,
       "elementAffinity": "earth"
     },
@@ -327,7 +338,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Mingabwe",
       "distanceOrbited": 0.15,
-      "initialAngle": 0,
+      "initialAngle": 296,
       "orbitalPeriodDays": 60,
       "worldShape": "irregular"
     },
@@ -338,7 +349,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": null,
       "distanceOrbited": 12,
-      "initialAngle": 0,
+      "initialAngle": 307,
       "orbitalPeriodDays": 30660,
       "branchLevels": 2,
       "branchDensity": 9,
@@ -353,7 +364,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.3,
-      "initialAngle": 0,
+      "initialAngle": 178,
       "orbitalPeriodDays": 30,
       "worldShape": "elliptical",
       "elementAffinity": "earth"
@@ -365,7 +376,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.35,
-      "initialAngle": 0,
+      "initialAngle": 322,
       "orbitalPeriodDays": 50,
       "elementAffinity": "earth"
     },
@@ -376,7 +387,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.4,
-      "initialAngle": 0,
+      "initialAngle": 111,
       "orbitalPeriodDays": 90,
       "elementAffinity": "earth",
       "worldShape": "disc"
@@ -388,7 +399,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.45,
-      "initialAngle": 0,
+      "initialAngle": 223,
       "orbitalPeriodDays": 130,
       "elementAffinity": "earth"
     },
@@ -399,8 +410,8 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.5,
-      "initialAngle": 0,
-      "orbitalPeriodDays": 365,
+      "initialAngle": 285,
+      "orbitalPeriodDays": 150,
       "worldShape": "irregular",
       "elementAffinity": "earth"
     },
@@ -411,8 +422,8 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.55,
-      "initialAngle": 0,
-      "orbitalPeriodDays": 365,
+      "initialAngle": 329,
+      "orbitalPeriodDays": 190,
       "elementAffinity": "earth",
       "worldShape": "elliptical"
     },
@@ -423,59 +434,182 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.6,
-      "initialAngle": 0,
-      "orbitalPeriodDays": 365,
+      "initialAngle": 285,
+      "orbitalPeriodDays": 240,
+      "elementAffinity": "earth",
+      "worldShape": "rectangular"
+    },
+    {
+      "name": "Dragon Rock",
+      "type": "moon",
+      "size": 3,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Garden",
+      "distanceOrbited": 0.65,
+      "initialAngle": 292,
+      "orbitalPeriodDays": 300,
+      "worldShape": "irregular",
       "elementAffinity": "earth"
     },
     {
-      "name": "New Body 35",
-      "type": "planet",
-      "size": 10,
+      "name": "Knurl",
+      "type": "moon",
+      "size": 2,
       "description": "A newly added planetary body.",
-      "orbitedObjectName": null,
-      "distanceOrbited": 1,
-      "initialAngle": 0,
-      "orbitalPeriodDays": 365
+      "orbitedObjectName": "Garden",
+      "distanceOrbited": 0.7,
+      "initialAngle": 174,
+      "orbitalPeriodDays": 350,
+      "elementAffinity": "earth"
     },
     {
-      "name": "New Body 36",
-      "type": "planet",
-      "size": 10,
+      "name": "Sunson",
+      "type": "moon",
+      "size": 3,
       "description": "A newly added planetary body.",
-      "orbitedObjectName": null,
-      "distanceOrbited": 1,
-      "initialAngle": 0,
-      "orbitalPeriodDays": 365
+      "orbitedObjectName": "Garden",
+      "distanceOrbited": 0.75,
+      "initialAngle": 323,
+      "orbitalPeriodDays": 390,
+      "elementAffinity": "fire"
     },
     {
-      "name": "New Body 37",
-      "type": "planet",
-      "size": 10,
+      "name": "Templar",
+      "type": "moon",
+      "size": 2,
       "description": "A newly added planetary body.",
-      "orbitedObjectName": null,
-      "distanceOrbited": 1,
-      "initialAngle": 0,
-      "orbitalPeriodDays": 365
+      "orbitedObjectName": "Garden",
+      "distanceOrbited": 0.8,
+      "initialAngle": 78,
+      "orbitalPeriodDays": 430,
+      "worldShape": "disc",
+      "elementAffinity": "earth"
     },
     {
-      "name": "New Body 38",
-      "type": "planet",
-      "size": 10,
+      "name": "Farworld",
+      "type": "moon",
+      "size": 2,
       "description": "A newly added planetary body.",
-      "orbitedObjectName": null,
-      "distanceOrbited": 1,
-      "initialAngle": 0,
-      "orbitalPeriodDays": 365
+      "orbitedObjectName": "Garden",
+      "distanceOrbited": 0.85,
+      "initialAngle": 15,
+      "orbitalPeriodDays": 470,
+      "elementAffinity": "earth"
     },
     {
-      "name": "New Body 39",
+      "name": "H'Catha",
       "type": "planet",
-      "size": 10,
+      "size": 25,
       "description": "A newly added planetary body.",
       "orbitedObjectName": null,
+      "distanceOrbited": 16,
+      "initialAngle": 344,
+      "orbitalPeriodDays": 60119,
+      "worldShape": "disc",
+      "elementAffinity": "water"
+    },
+    {
+      "name": "Turnbetl",
+      "type": "moon",
+      "size": 2,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "H'Catha",
+      "distanceOrbited": 0.4,
+      "initialAngle": 95,
+      "orbitalPeriodDays": 240,
+      "elementAffinity": "air"
+    },
+    {
+      "name": "Lumbe",
+      "type": "station",
+      "size": 2,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "H'Catha",
+      "distanceOrbited": 0.8,
+      "initialAngle": 186,
+      "orbitalPeriodDays": 365,
+      "worldShape": "cylinder"
+    },
+    {
+      "name": "Caer Windlauer",
+      "type": "station",
+      "size": 3,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Sol",
+      "distanceOrbited": 2.5,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 365,
+      "worldShape": "castle",
+      "elementAffinity": "earth",
+      "isDMOnly": true
+    },
+    {
+      "name": "Colorspray Nebula",
+      "type": "cloud",
+      "size": 50,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Sol",
+      "distanceOrbited": 25,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 120000,
+      "arcDegrees": 15,
+      "cloudTransparency": 0.45,
+      "cloudiness": 0.5,
+      "affectsShellBoundary": false,
+      "isDMOnly": true
+    },
+    {
+      "name": "Galleon Nebula",
+      "type": "cloud",
+      "size": 50,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Sol",
+      "distanceOrbited": 25,
+      "initialAngle": 180,
+      "orbitalPeriodDays": 120000,
+      "arcDegrees": 15,
+      "cloudTransparency": 0.45,
+      "cloudiness": 0.5,
+      "affectsShellBoundary": false,
+      "isDMOnly": true
+    },
+    {
+      "name": "K'Thoutek",
+      "type": "asteroid",
+      "size": 1,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Sol",
+      "distanceOrbited": 20,
+      "initialAngle": 111,
+      "orbitalPeriodDays": 60000,
+      "affectsShellBoundary": false,
+      "worldShape": "irregular",
+      "isDMOnly": true
+    },
+    {
+      "name": "King Killer Star",
+      "type": "asteroid",
+      "size": 1,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Sol",
       "distanceOrbited": 1,
       "initialAngle": 0,
-      "orbitalPeriodDays": 365
+      "orbitalPeriodDays": 50000,
+      "affectsShellBoundary": false,
+      "isDMOnly": true
+    },
+    {
+      "name": "Skull of the Void",
+      "type": "station",
+      "size": 3,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 30,
+      "initialAngle": 254,
+      "orbitalPeriodDays": 365,
+      "affectsShellBoundary": false,
+      "worldShape": "skull",
+      "isDMOnly": true
     }
   ]
 }

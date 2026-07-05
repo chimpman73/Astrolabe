@@ -327,17 +327,32 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                 {isExpanded && (
                   <div className="editor-card-body">
                     
-                    <div className="flex items-center gap-2 mb-3 cursor-pointer">
-                      <input 
-                        type="checkbox"
-                        id={`boundary-check-${index}`}
-                        checked={obj.affectsShellBoundary ?? true}
-                        onChange={e => handleUpdateObject(index, { affectsShellBoundary: e.target.checked })}
-                        className="cursor-pointer"
-                      />
-                      <label htmlFor={`boundary-check-${index}`} className="text-[var(--color-text-muted)] text-sm cursor-pointer select-none">
-                        ⛶ Affects Shell Boundary
-                      </label>
+                    <div className="flex items-center gap-4 mb-3">
+                      <div className="flex items-center gap-2 cursor-pointer">
+                        <input 
+                          type="checkbox"
+                          id={`boundary-check-${index}`}
+                          checked={obj.affectsShellBoundary ?? true}
+                          onChange={e => handleUpdateObject(index, { affectsShellBoundary: e.target.checked })}
+                          className="cursor-pointer"
+                        />
+                        <label htmlFor={`boundary-check-${index}`} className="text-[var(--color-text-muted)] text-sm cursor-pointer select-none">
+                          ⛶ Affects Shell Boundary
+                        </label>
+                      </div>
+
+                      <div className="flex items-center gap-2 cursor-pointer border-l border-[var(--color-border-parchment)] pl-4">
+                        <input 
+                          type="checkbox"
+                          id={`dm-only-check-${index}`}
+                          checked={obj.isDMOnly ?? false}
+                          onChange={e => handleUpdateObject(index, { isDMOnly: e.target.checked })}
+                          className="cursor-pointer"
+                        />
+                        <label htmlFor={`dm-only-check-${index}`} className="text-[var(--color-text-muted)] text-sm cursor-pointer select-none" title="If checked, this object is hidden from Player views.">
+                          👁️ DM Only
+                        </label>
+                      </div>
                     </div>
 
                     <div className="editor-form-group">
@@ -359,11 +374,11 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                           const newType = e.target.value as CelestialObjectType;
                           const updates: Partial<CelestialObject> = { type: newType };
                           if (newType === 'station') {
-                            if (!['ring', 'cylinder', 'ship'].includes(obj.worldShape || '')) {
+                            if (!['ring', 'cylinder', 'ship', 'castle', 'skull'].includes(obj.worldShape || '')) {
                               updates.worldShape = 'ring';
                             }
                           } else {
-                            if (['ring', 'cylinder', 'ship'].includes(obj.worldShape || '')) {
+                            if (['ring', 'cylinder', 'ship', 'castle', 'skull'].includes(obj.worldShape || '')) {
                               updates.worldShape = 'sphere';
                             }
                           }
@@ -495,6 +510,8 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 <option value="ring">◎ Ring</option>
                                 <option value="cylinder">▱ Cylinder</option>
                                 <option value="ship">⬖ Ship</option>
+                                <option value="castle">🏰 Castle</option>
+                                <option value="skull">💀 Skull</option>
                               </select>
                             ) : (
                               <select

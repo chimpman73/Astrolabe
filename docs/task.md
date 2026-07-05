@@ -28,6 +28,12 @@ This file tracks the design, development, and integration tasks for the Astrolab
 | **AST-020** | Elemental Affinity Icons | Medium | `Done` | Add `elementAffinity` field; render color-coded element badges on body sprites in both views. |
 | **AST-021** | Nebula & Sargasso Cloud Objects | High | `Done` | Add `nebula`/`sargasso` types and `arcDegrees` field; render as arc-wedge smears in Nav Chart and horizontal cloud ellipses in Bookmark. |
 | **AST-022** | Fantasy Extension Documentation | Low | `Done` | Update `astrolabe_documentation.md` schema and math sections; update `task.md`. |
+| **AST-023** | Castle Station Shape | Medium | `Done` | Add `castle` to worldShape; implement custom rendering logic and editor UI. |
+| **AST-024** | Skull Station Shape | Medium | `Done` | Add `skull` to worldShape; implement custom rendering logic with cutout eye sockets. |
+| **AST-025** | PC/DM Visibility Toggle | High | `Done` | Add `isDMOnly` field and editor checkbox to hide specific objects from PC views. |
+| **AST-026** | PC/DM Global View Toggle | High | `Done` | Add global UI toggle to switch between PC/DM modes; filter map views accordingly. |
+| **AST-027** | Bookmark Dynamic Scaling | Medium | `Done` | Scale Bookmark view dynamically to outermost visible object when shell is hidden. |
+| **AST-028** | Bookmark Titles | Low | `Done` | Display system name without 'SHELL' suffix when shell boundary is hidden. |
 
 ---
 
@@ -123,3 +129,33 @@ This file tracks the design, development, and integration tasks for the Astrolab
 - [x] **AST-022: Fantasy Extension Documentation**
   * Updated `astrolabe_documentation.md` schema section (5 new JSON fields)
   * Updated `task.md` with new tasks AST-018 through AST-022
+
+- [x] **AST-023: Castle Station Shape**
+  * Added `castle` enum value to `WorldShape` type.
+  * Implemented path drawing logic in `BaseRenderer` for a castle silhouette.
+  * Updated System Editor dropdown to include Castle for station objects.
+  * Updated JSON schema documentation.
+
+- [x] **AST-024: Skull Station Shape**
+  * Added `skull` enum value to `WorldShape` type.
+  * Implemented path drawing logic in `BaseRenderer` for a skull with counter-clockwise cutouts for eyes and nose.
+  * Updated System Editor dropdown to include Skull for station objects.
+  * Updated JSON schema documentation.
+
+- [x] **AST-025: PC/DM Visibility Toggle**
+  * Added `isDMOnly` boolean field to `CelestialObject` interface.
+  * Added "👁️ DM Only" toggle checkbox next to the boundary checkbox in the System Editor UI.
+  * Updated JSON schema documentation.
+
+- [x] **AST-026: PC/DM Global View Toggle**
+  * Added `viewMode` state ('PC' | 'DM') to Zustand store.
+  * Added global toggle buttons to the main application header.
+  * Filtered objects in NavChart and Bookmark views based on `isDMOnly` and `viewMode`, without affecting system scale.
+
+- [x] **AST-027: Bookmark Dynamic Scaling**
+  * Modified Bookmark view to calculate `visibleMaxDistance` from filtered `planetaryObjects`.
+  * Used `visibleMaxDistance` to scale canvas when the shell outline is hidden.
+
+- [x] **AST-028: Bookmark Titles**
+  * Display the system name without 'SHELL' suffix when the shell boundary is hidden.
+  * Adjusted vertical position of the label to y=12 for a cleaner layout above the top object.

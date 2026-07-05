@@ -2,7 +2,7 @@ export type CelestialObjectType =
   | 'star' | 'planet' | 'moon' | 'asteroid'
   | 'station' | 'cloud' | 'custom' | 'living_world';
 
-export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular' | 'elliptical' | 'ring' | 'cylinder' | 'ship' | 'rectangular';
+export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular' | 'elliptical' | 'ring' | 'cylinder' | 'ship' | 'rectangular' | 'castle' | 'skull';
 export type ElementAffinity = 'fire' | 'water' | 'earth' | 'air' | 'mixed';
 export type OrbitDirection = 'prograde' | 'retrograde';
 
@@ -21,6 +21,8 @@ export interface CelestialObject {
   isHidden?: boolean;
   /** If false, the object is ignored when calculating the system's Crystal Sphere shell bounds. Defaults to true. */
   affectsShellBoundary?: boolean;
+  /** If true, the object is only visible to the DM (not a PC object). By default, everything is a PC object (false). */
+  isDMOnly?: boolean;
   /** If true, the object remains fixed at initialAngle and does not advance with time. */
   isStationary?: boolean;
   /** Direction of orbital travel. Retrograde moves clockwise (negative angular velocity). Defaults to prograde. */

@@ -102,6 +102,48 @@ export abstract class BaseRenderer {
       case 'rectangular':
         ctx.rect(x - s, y - s * 0.75, s * 2, s * 1.5);
         break;
+      case 'castle':
+        ctx.moveTo(x - s, y + s);
+        ctx.lineTo(x - s, y - s);
+        ctx.lineTo(x - s * 0.5, y - s);
+        ctx.lineTo(x - s * 0.5, y - s * 0.3);
+        ctx.lineTo(x - s * 0.2, y - s * 0.3);
+        ctx.lineTo(x - s * 0.2, y - s * 0.8);
+        ctx.lineTo(x + s * 0.2, y - s * 0.8);
+        ctx.lineTo(x + s * 0.2, y - s * 0.3);
+        ctx.lineTo(x + s * 0.5, y - s * 0.3);
+        ctx.lineTo(x + s * 0.5, y - s);
+        ctx.lineTo(x + s, y - s);
+        ctx.lineTo(x + s, y + s);
+        ctx.closePath();
+        break;
+      case 'skull':
+        // Outer skull silhouette
+        ctx.moveTo(x - s * 0.7, y - s * 0.2);
+        ctx.bezierCurveTo(x - s * 0.7, y - s, x + s * 0.7, y - s, x + s * 0.7, y - s * 0.2);
+        ctx.bezierCurveTo(x + s * 0.7, y + s * 0.3, x + s * 0.5, y + s * 0.4, x + s * 0.4, y + s * 0.4);
+        ctx.lineTo(x + s * 0.3, y + s * 0.9);
+        ctx.lineTo(x - s * 0.3, y + s * 0.9);
+        ctx.lineTo(x - s * 0.4, y + s * 0.4);
+        ctx.bezierCurveTo(x - s * 0.5, y + s * 0.4, x - s * 0.7, y + s * 0.3, x - s * 0.7, y - s * 0.2);
+        ctx.closePath();
+
+        // Left eye socket (drawn backwards for cutout)
+        ctx.moveTo(x - s * 0.4, y - s * 0.1);
+        ctx.bezierCurveTo(x - s * 0.1, y - s * 0.1, x - s * 0.1, y + s * 0.2, x - s * 0.4, y + s * 0.2);
+        ctx.bezierCurveTo(x - s * 0.6, y + s * 0.2, x - s * 0.6, y - s * 0.1, x - s * 0.4, y - s * 0.1);
+
+        // Right eye socket (drawn backwards for cutout)
+        ctx.moveTo(x + s * 0.4, y - s * 0.1);
+        ctx.bezierCurveTo(x + s * 0.6, y - s * 0.1, x + s * 0.6, y + s * 0.2, x + s * 0.4, y + s * 0.2);
+        ctx.bezierCurveTo(x + s * 0.1, y + s * 0.2, x + s * 0.1, y - s * 0.1, x + s * 0.4, y - s * 0.1);
+        
+        // Nose hole (triangle)
+        ctx.moveTo(x, y + s * 0.2);
+        ctx.lineTo(x + s * 0.1, y + s * 0.4);
+        ctx.lineTo(x - s * 0.1, y + s * 0.4);
+        ctx.closePath();
+        break;
       default: // sphere
         ctx.arc(x, y, s, 0, 2 * Math.PI);
     }

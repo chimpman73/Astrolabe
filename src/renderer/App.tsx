@@ -16,6 +16,8 @@ const App: React.FC = () => {
     saveCurrentSphere,
     toastMessage,
     setToastMessage,
+    viewMode,
+    setViewMode,
   } = useSystemStore();
 
   // Dialog overlays state
@@ -146,6 +148,24 @@ const App: React.FC = () => {
             >
               Save As
             </button>
+
+            {/* Global PC/DM View Toggle */}
+            <div className="flex items-center bg-[var(--color-bg-base)] border border-[var(--color-border-parchment)] ml-4 rounded overflow-hidden">
+              <button
+                onClick={() => setViewMode('PC')}
+                className={`px-3 py-1 text-[10px] font-bold ${viewMode === 'PC' ? 'bg-[var(--color-accent-gold)] text-[#2b2316]' : 'text-[var(--color-text-muted)] hover:bg-[var(--color-border-parchment)]'}`}
+                title="PC View: Hides DM-only objects"
+              >
+                PC VIEW
+              </button>
+              <button
+                onClick={() => setViewMode('DM')}
+                className={`px-3 py-1 text-[10px] font-bold border-l border-[var(--color-border-parchment)] ${viewMode === 'DM' ? 'bg-[var(--color-accent-gold)] text-[#2b2316]' : 'text-[var(--color-text-muted)] hover:bg-[var(--color-border-parchment)]'}`}
+                title="DM View: Shows all objects"
+              >
+                DM VIEW
+              </button>
+            </div>
           </div>
         </div>
 
