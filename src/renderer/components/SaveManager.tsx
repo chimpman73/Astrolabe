@@ -396,13 +396,24 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
 
                         <div className="editor-form-group">
                           <label>Initial Angle (Deg)</label>
-                          <input 
-                            type="number" 
-                            step="any"
-                            className="editor-input"
-                            value={obj.initialAngle}
-                            onChange={e => handleUpdateObject(index, { initialAngle: parseFloat(e.target.value) || 0 })}
-                          />
+                          <div className="flex gap-1">
+                            <input 
+                              type="number" 
+                              step="any"
+                              className="editor-input"
+                              style={{ flex: 1 }}
+                              value={obj.initialAngle}
+                              onChange={e => handleUpdateObject(index, { initialAngle: parseFloat(e.target.value) || 0 })}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateObject(index, { initialAngle: Math.floor(Math.random() * 360) })}
+                              className="px-2 text-xs bg-transparent border border-[var(--color-border-parchment)] text-[var(--color-text-muted)] hover:bg-[var(--color-accent-gold)] hover:text-[#2b2316] transition-colors"
+                              title="Randomize Angle"
+                            >
+                              🎲
+                            </button>
+                          </div>
                         </div>
 
                         <div className="editor-form-group">

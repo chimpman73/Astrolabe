@@ -22,7 +22,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 0.08,
-      "initialAngle": 0,
+      "initialAngle": 252,
       "orbitalPeriodDays": 91,
       "elementAffinity": "earth"
     },
@@ -33,7 +33,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 0.29,
-      "initialAngle": 0,
+      "initialAngle": 113,
       "orbitalPeriodDays": 28,
       "elementAffinity": "water"
     },
@@ -44,7 +44,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 1,
-      "initialAngle": 0,
+      "initialAngle": 125,
       "orbitalPeriodDays": 364,
       "elementAffinity": "fire",
       "isStationary": false,
@@ -57,7 +57,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 2,
-      "initialAngle": 0,
+      "initialAngle": 83,
       "orbitalPeriodDays": 720,
       "arcDegrees": 360,
       "cloudTransparency": 0,
@@ -74,7 +74,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 4,
-      "initialAngle": 0,
+      "initialAngle": 241,
       "orbitalPeriodDays": 480,
       "elementAffinity": "air"
     },
@@ -85,7 +85,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 6,
-      "initialAngle": 0,
+      "initialAngle": 324,
       "orbitalPeriodDays": 1920,
       "elementAffinity": "air"
     },
@@ -96,7 +96,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 10,
-      "initialAngle": 0,
+      "initialAngle": 44,
       "orbitalPeriodDays": 3600,
       "elementAffinity": "water",
       "worldShape": "elliptical"
@@ -108,7 +108,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 15,
-      "initialAngle": 0,
+      "initialAngle": 106,
       "orbitalPeriodDays": 5400,
       "worldShape": "irregular",
       "elementAffinity": "earth"
@@ -120,8 +120,8 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 20,
-      "initialAngle": 0,
-      "orbitalPeriodDays": 720,
+      "initialAngle": 296,
+      "orbitalPeriodDays": 7200,
       "arcDegrees": 3,
       "cloudTransparency": 0,
       "cloudiness": 0,
@@ -136,8 +136,22 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 30,
-      "initialAngle": 0,
-      "orbitalPeriodDays": 10800
+      "initialAngle": 335,
+      "orbitalPeriodDays": 10800,
+      "worldShape": "cluster",
+      "elementAffinity": "earth"
+    },
+    {
+      "name": "The Spectre",
+      "type": "planet",
+      "size": 15,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Oerth",
+      "distanceOrbited": 40,
+      "initialAngle": 166,
+      "orbitalPeriodDays": 13500,
+      "worldShape": "disc",
+      "elementAffinity": "earth"
     }
   ]
 }
