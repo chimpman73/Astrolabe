@@ -2,7 +2,7 @@ export type CelestialObjectType =
   | 'star' | 'planet' | 'moon' | 'asteroid'
   | 'station' | 'cloud' | 'custom' | 'living_world';
 
-export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular' | 'elliptical' | 'ring' | 'cylinder' | 'ship';
+export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular' | 'elliptical' | 'ring' | 'cylinder' | 'ship' | 'rectangular';
 export type ElementAffinity = 'fire' | 'water' | 'earth' | 'air' | 'mixed';
 export type OrbitDirection = 'prograde' | 'retrograde';
 

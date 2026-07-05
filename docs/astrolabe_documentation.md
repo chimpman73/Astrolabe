@@ -80,7 +80,7 @@ The application saves and loads system states via JSON configuration files store
         },
         "worldShape": {
           "type": "string",
-          "enum": ["sphere", "disc", "pyramid", "cluster", "irregular", "elliptical", "ring", "cylinder", "ship"],
+          "enum": ["sphere", "disc", "pyramid", "cluster", "irregular", "elliptical", "ring", "cylinder", "ship", "rectangular"],
           "description": "The visual shape to render. (Ring, cylinder, and ship are intended for stations)."
         },
         "isHidden": {

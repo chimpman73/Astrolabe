@@ -508,6 +508,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 <option value="cluster">⊛ Cluster World</option>
                                 <option value="irregular">✦ Irregular</option>
                                 <option value="elliptical">⬭ Elliptical</option>
+                                <option value="rectangular">▭ Rectangular</option>
                               </select>
                             )}
                           </div>

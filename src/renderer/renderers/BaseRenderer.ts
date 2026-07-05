@@ -99,6 +99,9 @@ export abstract class BaseRenderer {
         ctx.lineTo(x - s * 0.8, y + s * 0.4);
         ctx.quadraticCurveTo(x - s * 0.4, y - s * 0.2, x, y - s * 1.2);
         break;
+      case 'rectangular':
+        ctx.rect(x - s, y - s * 0.75, s * 2, s * 1.5);
+        break;
       default: // sphere
         ctx.arc(x, y, s, 0, 2 * Math.PI);
     }

@@ -1,7 +1,7 @@
 {
   "sphereName": "Greyspace",
   "currentCampaignDate": "2026-07-04",
-  "currentSystemDate": 777,
+  "currentSystemDate": 0,
   "objects": [
     {
       "name": "Oerth",
@@ -206,6 +206,39 @@
       "orbitalPeriodDays": 16000,
       "affectsShellBoundary": false,
       "worldShape": "ship"
+    },
+    {
+      "name": "Dark Star 1",
+      "type": "planet",
+      "size": 5,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Oerth",
+      "distanceOrbited": 65,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 25000,
+      "affectsShellBoundary": false
+    },
+    {
+      "name": "Dark Star 2",
+      "type": "planet",
+      "size": 5,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Oerth",
+      "distanceOrbited": 65,
+      "initialAngle": 151,
+      "orbitalPeriodDays": 8000,
+      "affectsShellBoundary": false
+    },
+    {
+      "name": "Dark Star 3",
+      "type": "planet",
+      "size": 5,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Oerth",
+      "distanceOrbited": 65,
+      "initialAngle": 235,
+      "orbitalPeriodDays": 1200,
+      "affectsShellBoundary": false
     }
   ]
 }
