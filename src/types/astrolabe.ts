@@ -2,7 +2,7 @@ export type CelestialObjectType =
   | 'star' | 'planet' | 'moon' | 'asteroid'
   | 'station' | 'cloud' | 'custom' | 'living_world';
 
-export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular';
+export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular' | 'elliptical';
 export type ElementAffinity = 'fire' | 'water' | 'earth' | 'air' | 'mixed';
 export type OrbitDirection = 'prograde' | 'retrograde';
 
@@ -33,6 +33,12 @@ export interface CelestialObject {
   cloudTransparency?: number;
   /** For cloud types: bumpiness of the cloud edges (0.0 is smooth, 1.0 is max cloudy). */
   cloudiness?: number;
+  /** For cloud types: shape of objects drawn inside the cloud. */
+  cloudObjectShape?: WorldShape;
+  /** For cloud types: size of objects drawn inside the cloud. */
+  cloudObjectSize?: number;
+  /** For cloud types: density (or count) of objects drawn inside the cloud. */
+  cloudObjectDensity?: number;
   /** For living_world types: depth/tiers of branching. */
   branchLevels?: number;
   /** For living_world types: branching factor. */

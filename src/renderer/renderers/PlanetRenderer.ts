@@ -7,8 +7,8 @@ export class PlanetRenderer extends BaseRenderer {
 
     this.drawBaseSolid(context);
 
-    // Equatorial detail line for sphere/disc
-    if (drawEquatorialDetail && (shape === 'sphere' || shape === 'disc') && (obj.type === 'planet' || size > 8)) {
+    // Equatorial detail line for sphere/disc/elliptical
+    if (drawEquatorialDetail && (shape === 'sphere' || shape === 'disc' || shape === 'elliptical' || shape === 'eliptical') && (obj.type === 'planet' || size > 8)) {
       ctx.beginPath();
       ctx.moveTo(x - size, y);
       ctx.lineTo(x + size, y);

@@ -60,6 +60,10 @@ export abstract class BaseRenderer {
         ctx.closePath();
         break;
       }
+      case 'eliptical':
+      case 'elliptical':
+        ctx.ellipse(x, y, s, s * 0.65, 0, 0, 2 * Math.PI);
+        break;
       default: // sphere
         ctx.arc(x, y, s, 0, 2 * Math.PI);
     }

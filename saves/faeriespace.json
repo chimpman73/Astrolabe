@@ -1,8 +1,26 @@
 {
   "sphereName": "Faeriespace",
   "currentCampaignDate": "2026-07-04",
-  "currentSystemDate": 545,
+  "currentSystemDate": 0,
   "objects": [
+    {
+      "name": "Roots",
+      "type": "living_world",
+      "size": 50,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "The Great Tree",
+      "distanceOrbited": 0,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 0,
+      "branchLevels": 3,
+      "branchDensity": 8,
+      "branchExtent": 2,
+      "hasLeaves": false,
+      "branchBend": 0.5,
+      "isStationary": true,
+      "elementAffinity": "earth",
+      "isHidden": false
+    },
     {
       "name": "The Great Tree",
       "type": "living_world",
@@ -17,7 +35,8 @@
       "branchExtent": 6,
       "hasLeaves": true,
       "branchBend": 0.5,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "isHidden": false
     },
     {
       "name": "S1",
@@ -231,7 +250,8 @@
       "initialAngle": 220,
       "orbitalPeriodDays": 0,
       "isStationary": true,
-      "elementAffinity": "air"
+      "elementAffinity": "air",
+      "isHidden": false
     },
     {
       "name": "Freemore",
@@ -243,7 +263,8 @@
       "initialAngle": 325,
       "orbitalPeriodDays": 0,
       "isStationary": true,
-      "elementAffinity": "mixed"
+      "elementAffinity": "mixed",
+      "isHidden": false
     },
     {
       "name": "Agron",
@@ -255,7 +276,8 @@
       "initialAngle": 70,
       "orbitalPeriodDays": 365,
       "isStationary": true,
-      "elementAffinity": "mixed"
+      "elementAffinity": "mixed",
+      "isHidden": false
     },
     {
       "name": "Tiqua",
@@ -267,7 +289,8 @@
       "initialAngle": 125,
       "orbitalPeriodDays": 0,
       "elementAffinity": "water",
-      "isStationary": true
+      "isStationary": true,
+      "isHidden": false
     },
     {
       "name": "Morath",
@@ -279,7 +302,8 @@
       "initialAngle": 135,
       "orbitalPeriodDays": 0,
       "elementAffinity": "earth",
-      "isStationary": true
+      "isStationary": true,
+      "isHidden": false
     },
     {
       "name": "Krag",
@@ -291,7 +315,8 @@
       "initialAngle": 210,
       "orbitalPeriodDays": 0,
       "isStationary": true,
-      "elementAffinity": "mixed"
+      "elementAffinity": "mixed",
+      "isHidden": false
     },
     {
       "name": "Beastra",
@@ -303,7 +328,8 @@
       "initialAngle": 325,
       "orbitalPeriodDays": 0,
       "isStationary": true,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "isHidden": false
     },
     {
       "name": "Mish",
@@ -315,8 +341,10 @@
       "initialAngle": 55,
       "orbitalPeriodDays": 0,
       "isStationary": true,
-      "elementAffinity": "water"
+      "elementAffinity": "water",
+      "isHidden": false
     }
   ],
-  "shellBoundaryType": "custom"
+  "shellBoundaryType": "custom",
+  "shellCustomScale": 1
 }

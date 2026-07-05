@@ -1,5 +1,20 @@
 import { BaseRenderer, RenderContext } from './BaseRenderer';
 
+class PRNG {
+  private seed: number;
+  constructor(str: string) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+    this.seed = h;
+  }
+  next() {
+    let t = this.seed += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+}
+
 export class CloudRenderer extends BaseRenderer {
   public draw(context: RenderContext): void {
     const { 
@@ -100,5 +115,77 @@ export class CloudRenderer extends BaseRenderer {
     ctx.closePath();
     ctx.fill();
     ctx.restore();
+
+    // Draw internal objects
+    const density = obj.cloudObjectDensity || 0;
+    if (density > 0) {
+      const rng = new PRNG(obj.name);
+      const objShape = obj.cloudObjectShape ?? 'sphere';
+      const baseObjSize = obj.cloudObjectSize ?? 2;
+      const arcHalf = (arcDegrees / 2) * (Math.PI / 180);
+      const halfH = Math.max(8, size * 1.5);
+      
+      const scaledBaseSize = (baseObjSize / (obj.size || 10)) * size;
+
+      ctx.save();
+      ctx.fillStyle = bodyFill;
+      ctx.strokeStyle = '#222222';
+      ctx.lineWidth = 1;
+
+      for (let i = 0; i < density; i++) {
+        const rndRot = rng.next() * Math.PI * 2;
+        const rndAngleFrac = (rng.next() * 2) - 1; // -1 to 1
+        const rndRadFrac = (rng.next() * 2) - 1; // -1 to 1
+        
+        const s = Math.max(0.5, scaledBaseSize * (0.7 + rng.next() * 0.6));
+
+        let cx = 0;
+        let cy = 0;
+
+        if (isBookmarkView) {
+          if (bookmarkWidth === undefined || bookmarkCenterY === undefined || bookmarkR === undefined || parentX === undefined) continue;
+          
+          const arcFrac = Math.min(1.0, arcDegrees / 360);
+          const cloudW = bookmarkWidth * arcFrac;
+          const halfW = cloudW / 2;
+          const safeR = Math.max(1, bookmarkR);
+          const halfAngle = halfW >= safeR ? Math.PI : Math.asin(halfW / safeR);
+          
+          const nx = rndAngleFrac;
+          const envelope = isFullRing ? 1 : (1 - nx * nx);
+          const bump = (1 - amp) + amp * Math.cos(nx * Math.PI * numBumps);
+          
+          const alpha = 1.5 * Math.PI + nx * halfAngle;
+          const rDelta = halfH * envelope * bump;
+          const currentR = bookmarkR + rndRadFrac * rDelta;
+          
+          cx = parentX + currentR * Math.cos(alpha);
+          cy = bookmarkCenterY + currentR * Math.sin(alpha);
+
+        } else {
+          if (parentX === undefined || parentY === undefined || orbitRadius === undefined || orbitAngle === undefined) continue;
+          const centerAngle = orbitAngle * (Math.PI / 180);
+          const nx = rndAngleFrac;
+          const envelope = isFullRing ? 1 : (1 - nx * nx);
+          const bump = (1 - amp) + amp * Math.cos(nx * Math.PI * numBumps);
+          
+          const angle = centerAngle + nx * arcHalf;
+          const rDelta = halfH * envelope * bump;
+          const rPos = orbitRadius + rndRadFrac * rDelta;
+          
+          cx = parentX + rPos * Math.cos(angle);
+          cy = parentY + rPos * Math.sin(angle);
+        }
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(rndRot);
+        this.drawShapePath(ctx, objShape, 0, 0, s);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+      ctx.restore();
+    }
   }
 }

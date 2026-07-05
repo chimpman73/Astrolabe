@@ -1,0 +1,117 @@
+{
+  "sphereName": "Greyspace",
+  "currentCampaignDate": "2026-07-04",
+  "currentSystemDate": 0,
+  "objects": [
+    {
+      "name": "Oerth",
+      "type": "planet",
+      "size": 20,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 0,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 0,
+      "isStationary": true,
+      "elementAffinity": "mixed"
+    },
+    {
+      "name": "Kule",
+      "type": "moon",
+      "size": 15,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Oerth",
+      "distanceOrbited": 0.08,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 91,
+      "elementAffinity": "earth"
+    },
+    {
+      "name": "Raenei",
+      "type": "moon",
+      "size": 20,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Oerth",
+      "distanceOrbited": 0.29,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 28,
+      "elementAffinity": "water"
+    },
+    {
+      "name": "Liga",
+      "type": "star",
+      "size": 35,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Oerth",
+      "distanceOrbited": 1,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 364,
+      "elementAffinity": "fire",
+      "isStationary": false,
+      "orbitDirection": "prograde"
+    },
+    {
+      "name": "The Grinder",
+      "type": "cloud",
+      "size": 40,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Oerth",
+      "distanceOrbited": 2,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 720,
+      "arcDegrees": 360,
+      "cloudTransparency": 0,
+      "cloudiness": 0,
+      "cloudObjectShape": "irregular",
+      "cloudObjectDensity": 150,
+      "cloudObjectSize": 7,
+      "elementAffinity": "earth"
+    },
+    {
+      "name": "Edill",
+      "type": "planet",
+      "size": 15,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Oerth",
+      "distanceOrbited": 4,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 480,
+      "elementAffinity": "air"
+    },
+    {
+      "name": "Gnibile",
+      "type": "planet",
+      "size": 25,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Oerth",
+      "distanceOrbited": 6,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 1920,
+      "elementAffinity": "air"
+    },
+    {
+      "name": "Conatha",
+      "type": "planet",
+      "size": 20,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Oerth",
+      "distanceOrbited": 10,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 3600,
+      "elementAffinity": "water",
+      "worldShape": "elliptical"
+    },
+    {
+      "name": "Ginsel",
+      "type": "planet",
+      "size": 20,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Oerth",
+      "distanceOrbited": 15,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 5400,
+      "worldShape": "irregular",
+      "elementAffinity": "earth"
+    }
+  ]
+}

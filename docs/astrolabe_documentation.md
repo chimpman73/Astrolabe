@@ -129,6 +129,21 @@ The application saves and loads system states via JSON configuration files store
           "maximum": 1.0,
           "description": "For cloud types: bumpiness of the cloud edges (0.0 is smooth, 1.0 is max cloudy)."
         },
+        "cloudObjectShape": {
+          "type": "string",
+          "enum": ["sphere", "disc", "pyramid", "cluster", "irregular", "elliptical"],
+          "description": "For cloud types: shape of objects drawn inside the cloud."
+        },
+        "cloudObjectSize": {
+          "type": "number",
+          "minimum": 0,
+          "description": "For cloud types: size of objects drawn inside the cloud."
+        },
+        "cloudObjectDensity": {
+          "type": "number",
+          "minimum": 0,
+          "description": "For cloud types: density (or count) of objects drawn inside the cloud."
+        },
         "branchLevels": {
           "type": "integer",
           "minimum": 1,

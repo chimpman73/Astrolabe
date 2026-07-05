@@ -1,7 +1,7 @@
 {
   "sphereName": "Solar System",
   "currentCampaignDate": "2026-06-30",
-  "currentSystemDate": 394,
+  "currentSystemDate": 3241,
   "objects": [
     {
       "name": "Sol",
@@ -12,7 +12,8 @@
       "distanceOrbited": 0,
       "initialAngle": 0,
       "orbitalPeriodDays": 1,
-      "isStationary": true
+      "isStationary": true,
+      "elementAffinity": "fire"
     },
     {
       "name": "Mercury",
@@ -22,7 +23,8 @@
       "orbitedObjectName": "Sol",
       "distanceOrbited": 0.39,
       "initialAngle": 45,
-      "orbitalPeriodDays": 88
+      "orbitalPeriodDays": 88,
+      "elementAffinity": "earth"
     },
     {
       "name": "Venus",
@@ -32,7 +34,8 @@
       "orbitedObjectName": "Sol",
       "distanceOrbited": 0.72,
       "initialAngle": 120,
-      "orbitalPeriodDays": 225
+      "orbitalPeriodDays": 225,
+      "elementAffinity": "air"
     },
     {
       "name": "Earth",
@@ -42,7 +45,8 @@
       "orbitedObjectName": "Sol",
       "distanceOrbited": 1,
       "initialAngle": 0,
-      "orbitalPeriodDays": 365
+      "orbitalPeriodDays": 365,
+      "elementAffinity": "mixed"
     },
     {
       "name": "Luna",
@@ -62,7 +66,8 @@
       "orbitedObjectName": "Sol",
       "distanceOrbited": 1.52,
       "initialAngle": 220,
-      "orbitalPeriodDays": 687
+      "orbitalPeriodDays": 687,
+      "elementAffinity": "fire"
     },
     {
       "name": "Phobos",
@@ -92,7 +97,25 @@
       "orbitedObjectName": "Sol",
       "distanceOrbited": 2.8,
       "initialAngle": 315,
-      "orbitalPeriodDays": 4333
+      "orbitalPeriodDays": 4333,
+      "elementAffinity": "water"
+    },
+    {
+      "name": "Asteroid Field",
+      "type": "cloud",
+      "size": 25,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 2.1,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 365,
+      "arcDegrees": 360,
+      "cloudTransparency": 0,
+      "cloudiness": 0.5,
+      "cloudObjectShape": "irregular",
+      "cloudObjectSize": 6,
+      "cloudObjectDensity": 50,
+      "elementAffinity": "earth"
     }
   ],
   "shellBoundaryType": "double"

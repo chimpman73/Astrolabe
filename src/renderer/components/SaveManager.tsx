@@ -459,6 +459,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               <option value="pyramid">△ Pyramid World</option>
                               <option value="cluster">⊛ Cluster World</option>
                               <option value="irregular">✦ Irregular</option>
+                              <option value="elliptical">⬭ Elliptical</option>
                             </select>
                           </div>
                         )}
@@ -546,6 +547,43 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 className="editor-input"
                                 value={obj.cloudiness ?? 0.5}
                                 onChange={e => handleUpdateObject(index, { cloudiness: parseFloat(e.target.value) || 0 })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Internal Shape</label>
+                              <select
+                                className="editor-select"
+                                value={obj.cloudObjectShape ?? 'sphere'}
+                                onChange={e => handleUpdateObject(index, { cloudObjectShape: e.target.value as WorldShape })}
+                              >
+                                <option value="sphere">● Sphere (Default)</option>
+                                <option value="disc">⬡ Disc</option>
+                                <option value="pyramid">△ Pyramid</option>
+                                <option value="cluster">⊛ Cluster</option>
+                                <option value="irregular">✦ Irregular</option>
+                                <option value="elliptical">⬭ Elliptical</option>
+                              </select>
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Internal Size</label>
+                              <input
+                                type="number"
+                                step="0.5"
+                                min="0.5"
+                                className="editor-input"
+                                value={obj.cloudObjectSize ?? 2}
+                                onChange={e => handleUpdateObject(index, { cloudObjectSize: parseFloat(e.target.value) || 2 })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Internal Density</label>
+                              <input
+                                type="number"
+                                step="1"
+                                min="0"
+                                className="editor-input"
+                                value={obj.cloudObjectDensity ?? 0}
+                                onChange={e => handleUpdateObject(index, { cloudObjectDensity: parseInt(e.target.value, 10) || 0 })}
                               />
                             </div>
                           </>
