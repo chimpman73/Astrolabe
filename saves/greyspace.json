@@ -112,6 +112,32 @@
       "orbitalPeriodDays": 5400,
       "worldShape": "irregular",
       "elementAffinity": "earth"
+    },
+    {
+      "name": "Borka",
+      "type": "cloud",
+      "size": 20,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Oerth",
+      "distanceOrbited": 20,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 720,
+      "arcDegrees": 3,
+      "cloudTransparency": 0,
+      "cloudiness": 0,
+      "elementAffinity": "earth",
+      "cloudObjectDensity": 20,
+      "cloudObjectSize": 6
+    },
+    {
+      "name": "Greela",
+      "type": "planet",
+      "size": 30,
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "Oerth",
+      "distanceOrbited": 30,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 10800
     }
   ]
 }

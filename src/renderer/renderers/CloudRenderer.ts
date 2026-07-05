@@ -37,12 +37,10 @@ export class CloudRenderer extends BaseRenderer {
     if (isBookmarkView) {
       if (bookmarkWidth === undefined || bookmarkCenterY === undefined || bookmarkR === undefined || parentX === undefined) return;
       
-      const arcFrac = Math.min(1.0, arcDegrees / 360);
-      const cloudW = bookmarkWidth * arcFrac;
       const halfH = Math.max(8, size * 1.5); 
-      const halfW = cloudW / 2;
-      const safeR = Math.max(1, bookmarkR);
-      const halfAngle = halfW >= safeR ? Math.PI : Math.asin(halfW / safeR);
+      // Cap halfAngle at PI/2 so it doesn't draw below the horizon (semicircle)
+      const halfAngle = Math.min(Math.PI / 2, (arcDegrees / 2) * (Math.PI / 180));
+      const cloudW = bookmarkR * halfAngle * 2;
       const numSegments = Math.max(100, Math.floor(cloudW));
 
       for (let i = 0; i <= numSegments; i++) {
@@ -145,11 +143,7 @@ export class CloudRenderer extends BaseRenderer {
         if (isBookmarkView) {
           if (bookmarkWidth === undefined || bookmarkCenterY === undefined || bookmarkR === undefined || parentX === undefined) continue;
           
-          const arcFrac = Math.min(1.0, arcDegrees / 360);
-          const cloudW = bookmarkWidth * arcFrac;
-          const halfW = cloudW / 2;
-          const safeR = Math.max(1, bookmarkR);
-          const halfAngle = halfW >= safeR ? Math.PI : Math.asin(halfW / safeR);
+          const halfAngle = Math.min(Math.PI / 2, (arcDegrees / 2) * (Math.PI / 180));
           
           const nx = rndAngleFrac;
           const envelope = isFullRing ? 1 : (1 - nx * nx);

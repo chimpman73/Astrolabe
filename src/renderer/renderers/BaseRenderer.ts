@@ -38,12 +38,20 @@ export abstract class BaseRenderer {
         ctx.closePath();
         break;
       case 'cluster': {
-        const offs = s * 0.55; 
-        ctx.arc(x - offs, y + offs * 0.4, s * 0.65, 0, 2 * Math.PI);
-        ctx.moveTo(x + offs + s * 0.65, y + offs * 0.4);
-        ctx.arc(x + offs, y + offs * 0.4, s * 0.65, 0, 2 * Math.PI);
-        ctx.moveTo(x + s * 0.65, y - offs * 0.6);
-        ctx.arc(x, y - offs * 0.6, s * 0.65, 0, 2 * Math.PI);
+        const r = s * 0.4;
+        const R = s * 0.55;
+        const dx = R * 0.866;
+        const dy = R * 0.5;
+        
+        // Top circle
+        ctx.moveTo(x + r, y - R);
+        ctx.arc(x, y - R, r, 0, 2 * Math.PI);
+        // Bottom left circle
+        ctx.moveTo(x - dx + r, y + dy);
+        ctx.arc(x - dx, y + dy, r, 0, 2 * Math.PI);
+        // Bottom right circle
+        ctx.moveTo(x + dx + r, y + dy);
+        ctx.arc(x + dx, y + dy, r, 0, 2 * Math.PI);
         break;
       }
       case 'irregular': {
