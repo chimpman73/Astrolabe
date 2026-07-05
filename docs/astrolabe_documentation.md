@@ -82,6 +82,10 @@ The application saves and loads system states via JSON configuration files store
           "type": "boolean",
           "description": "If true, the object is completely hidden from map canvases (but still affects boundary calculations)."
         },
+        "affectsShellBoundary": {
+          "type": "boolean",
+          "description": "If false, the object is ignored when calculating the system's Crystal Sphere shell bounds. Defaults to true."
+        },
         "size": {
           "type": "number",
           "description": "Relative physical size/diameter of the object."

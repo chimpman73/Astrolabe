@@ -84,19 +84,23 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     if (visibleObjects.length === 0) return;
     
     let maxDist = 0.1;
+    let absoluteMaxDist = 0.1;
     objects.forEach(o => {
       if (!isPrimary(o)) return;
       const dist = o.distanceOrbited;
       const reach = o.type === 'living_world' ? dist + (o.branchExtent ?? 2.5) : dist;
-      if (reach > maxDist) maxDist = reach;
+      if (o.affectsShellBoundary !== false && reach > maxDist) maxDist = reach;
+      if (reach > absoluteMaxDist) absoluteMaxDist = reach;
     });
     
     const isCustom = activeSphere?.shellBoundaryType === 'custom' || activeSphere?.shellBoundaryType === 'relativeMargin';
     const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
     
-    // The Crystal Sphere Shell is drawn at shellScale * maxDist. We want it to fit comfortably inside the canvas viewport.
+    const shellRadius = maxDist * shellScale;
+    const viewRadius = Math.max(absoluteMaxDist, shellRadius);
+    
     const minDim = Math.min(dimensions.width, dimensions.height);
-    const targetZoom = (minDim * (0.45 / shellScale)) / maxDist;
+    const targetZoom = (minDim * 0.45) / viewRadius;
     
     setZoom(targetZoom);
     setPan({ x: dimensions.width / 2, y: dimensions.height / 2 });
@@ -226,7 +230,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     // 2. Draw outer Crystal Sphere Shell boundary if max planet exists
       let maxDist = 0.1;
       objects.forEach(o => {
-        if (!isPrimary(o)) return;
+        if (!isPrimary(o) || o.affectsShellBoundary === false) return;
         const dist = o.distanceOrbited;
         const reach = o.type === 'living_world' ? dist + (o.branchExtent ?? 2.5) : dist;
         if (reach > maxDist) maxDist = reach;

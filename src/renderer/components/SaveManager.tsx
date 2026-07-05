@@ -327,6 +327,19 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                 {isExpanded && (
                   <div className="editor-card-body">
                     
+                    <div className="flex items-center gap-2 mb-3 cursor-pointer">
+                      <input 
+                        type="checkbox"
+                        id={`boundary-check-${index}`}
+                        checked={obj.affectsShellBoundary ?? true}
+                        onChange={e => handleUpdateObject(index, { affectsShellBoundary: e.target.checked })}
+                        className="cursor-pointer"
+                      />
+                      <label htmlFor={`boundary-check-${index}`} className="text-[var(--color-text-muted)] text-sm cursor-pointer select-none">
+                        ⛶ Affects Shell Boundary
+                      </label>
+                    </div>
+
                     <div className="editor-form-group">
                       <label>Name</label>
                       <input 

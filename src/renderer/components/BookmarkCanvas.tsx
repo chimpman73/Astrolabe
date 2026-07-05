@@ -42,8 +42,16 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
       )
     : [];
 
-  // Furthest planetary distance (calculated across ALL primary objects to maintain constant shell size)
-  const maxDistance = activeSphere 
+  const shellBasisDistance = activeSphere 
+    ? activeSphere.objects
+        .filter((obj) => obj.distanceOrbited >= 0 && isPrimary(obj) && obj.affectsShellBoundary !== false)
+        .reduce((max, obj) => {
+          const reach = obj.type === 'living_world' ? obj.distanceOrbited + (obj.branchExtent ?? 2.5) : obj.distanceOrbited;
+          return Math.max(max, reach);
+        }, 0.1)
+    : 0.1;
+
+  const absoluteMaxDistance = activeSphere 
     ? activeSphere.objects
         .filter((obj) => obj.distanceOrbited >= 0 && isPrimary(obj))
         .reduce((max, obj) => {
@@ -79,14 +87,17 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
 
     const isCustom = activeSphere?.shellBoundaryType === 'custom' || activeSphere?.shellBoundaryType === 'relativeMargin';
     const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
-    const shellDistance = showShell ? maxDistance * shellScale : maxDistance;
+    const shellDistance = showShell ? shellBasisDistance * shellScale : shellBasisDistance;
+    
+    // Determine the furthest point that needs to be drawn on the canvas
+    const canvasBoundary = Math.max(absoluteMaxDistance, shellDistance);
 
     // Helper: translate distance into pixel radius
     const getPixelRadius = (distance: number) => {
-      if (shellDistance === 0) return 0;
+      if (canvasBoundary === 0) return 0;
       const topMargin = showShell ? 15 : 45;
       const scaleHeight = height - topMargin - bottomMargin;
-      return (distance / shellDistance) * scaleHeight;
+      return (distance / canvasBoundary) * scaleHeight;
     };
 
 

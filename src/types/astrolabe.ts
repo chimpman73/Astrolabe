@@ -17,8 +17,10 @@ export interface CelestialObject {
   orbitalPeriodDays?: number; // optional orbital override
 
   // --- Fantasy Extensions ---
-  /** If true, the object is completely hidden from map canvases. */
+  /** If true, the object is completely hidden from map canvases (but still affects boundary calculations). */
   isHidden?: boolean;
+  /** If false, the object is ignored when calculating the system's Crystal Sphere shell bounds. Defaults to true. */
+  affectsShellBoundary?: boolean;
   /** If true, the object remains fixed at initialAngle and does not advance with time. */
   isStationary?: boolean;
   /** Direction of orbital travel. Retrograde moves clockwise (negative angular velocity). Defaults to prograde. */
