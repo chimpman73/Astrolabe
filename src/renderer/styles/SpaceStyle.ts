@@ -1,4 +1,5 @@
-import { MapStyle, MapStyleContext } from './MapStyle';
+import { MapStyle } from './MapStyle';
+import { MapStyleContext } from '../../types/renderer';
 import { CelestialObject } from '../../types/astrolabe';
 import { drawSolidBody, drawStationaryIndicator, getBodyColors, getElementColor } from '../utils/canvasRenderer';
 import { ScaleManager } from '../utils/ScaleManager';

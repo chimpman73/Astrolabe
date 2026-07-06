@@ -1,4 +1,5 @@
-import { BaseRenderer, RenderContext } from './BaseRenderer';
+import { BaseRenderer } from './BaseRenderer';
+import { RenderContext } from '../../types/renderer';
 
 export class StarRenderer extends BaseRenderer {
   public draw(context: RenderContext): void {

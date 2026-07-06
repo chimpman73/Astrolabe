@@ -1,4 +1,5 @@
-import { MapStyle, MapStyleContext } from './MapStyle';
+import { MapStyle } from './MapStyle';
+import { ParchmentDecoration, MapStyleContext } from '../../types/renderer';
 import { CelestialObject } from '../../types/astrolabe';
 import { drawSolidBody, drawStationaryIndicator, getBodyColors, getElementColor } from '../utils/canvasRenderer';
 import { ScaleManager } from '../utils/ScaleManager';
@@ -53,7 +54,7 @@ export class VellumStyle implements MapStyle {
 
   private getScrollBounds(context: MapStyleContext) {
     let maxDist = 0.1;
-    context.objects.forEach(o => {
+    context.objects.forEach((o: any) => {
       if (!context.isPrimary(o) || o.affectsShellBoundary === false) return;
       const dist = o.distanceOrbited;
       const reach = o.type === 'living_world' ? dist + (o.branchExtent ?? 2.5) : dist;
@@ -177,7 +178,7 @@ export class VellumStyle implements MapStyle {
     // and naturally drops out white backgrounds
     ctx.globalCompositeOperation = 'multiply';
 
-    decorations.forEach(dec => {
+    decorations.forEach((dec: ParchmentDecoration) => {
       const proj = project(dec.x, dec.y);
       let img: HTMLImageElement | null = null;
       if (dec.type === 'ink') img = this.stainInk;

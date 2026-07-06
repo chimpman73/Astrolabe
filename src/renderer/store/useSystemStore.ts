@@ -1,14 +1,6 @@
 import { create } from 'zustand';
 import { CrystalSphere, SaveFileInfo, CelestialObject } from '../../types/astrolabe';
-
-export interface ParchmentDecoration {
-  type: 'ink' | 'coffee' | 'burn';
-  x: number;
-  y: number;
-  rotation: number;
-  scale: number;
-  opacity: number;
-}
+import { ParchmentDecoration } from '../../types/renderer';
 
 interface SystemState {
   saveDirectory: string | null;

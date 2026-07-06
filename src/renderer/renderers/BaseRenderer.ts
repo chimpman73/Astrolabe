@@ -1,26 +1,4 @@
-import { CelestialObject } from '../../types/astrolabe';
-
-export interface RenderContext {
-  ctx: CanvasRenderingContext2D;
-  x: number;
-  y: number;
-  obj: CelestialObject;
-  size: number;
-  bodyFill: string;
-  bodyStroke: string;
-  drawEquatorialDetail?: boolean;
-  zoom?: number;
-  
-  // Advanced context for clouds/rings
-  isBookmarkView?: boolean;
-  parentX?: number;
-  parentY?: number;
-  orbitRadius?: number;
-  orbitAngle?: number;
-  bookmarkWidth?: number; // width in Bookmark view
-  bookmarkR?: number; // distance to center in bookmark view
-  bookmarkCenterY?: number; // y coordinate of center in bookmark view
-}
+import { RenderContext } from '../../types/renderer';
 
 export abstract class BaseRenderer {
   public abstract draw(context: RenderContext): void;

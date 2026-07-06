@@ -21,7 +21,10 @@
       "branchExtent": 28,
       "hasLeaves": true,
       "branchBend": 0.5,
-      "isHidden": false
+      "isHidden": false,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "World Tree2",
@@ -38,7 +41,10 @@
       "hasLeaves": true,
       "branchBend": 0.5,
       "isStationary": true,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "SteamCloud1",
@@ -54,7 +60,10 @@
       "cloudiness": 0.5,
       "elementAffinity": "water",
       "isStationary": false,
-      "orbitDirection": "prograde"
+      "orbitDirection": "prograde",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "SteamCloud2",
@@ -68,7 +77,10 @@
       "arcDegrees": 30,
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
-      "elementAffinity": "water"
+      "elementAffinity": "water",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Toroid Sea",
@@ -77,7 +89,7 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": null,
       "distanceOrbited": 14,
-      "initialAngle": 0,
+      "initialAngle": 270,
       "orbitalPeriodDays": 0,
       "worldShape": "sphere",
       "elementAffinity": "water",
@@ -86,7 +98,10 @@
       "isHidden": false,
       "cloudTransparency": 1,
       "cloudiness": 0,
-      "orbitDirection": "retrograde"
+      "orbitDirection": "retrograde",
+      "sizeClass": "I",
+      "physicalSize": 1000000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Fish Sun",
@@ -100,7 +115,10 @@
       "elementAffinity": "fire",
       "isHidden": false,
       "isStationary": false,
-      "orbitDirection": "prograde"
+      "orbitDirection": "prograde",
+      "sizeClass": "I",
+      "physicalSize": 1000000,
+      "sizeUnit": "miles"
     }
   ],
   "shellBoundaryType": "relativeMargin",

@@ -1,7 +1,7 @@
 {
   "sphereName": "Realmspace",
   "currentCampaignDate": "2026-07-05",
-  "currentSystemDate": 0,
+  "currentSystemDate": 2614,
   "objects": [
     {
       "name": "Sol",
@@ -16,7 +16,7 @@
       "coronaSize": 1.5,
       "isStationary": true,
       "sizeClass": "H",
-      "physicalSize": 900000,
+      "physicalSize": 990000,
       "sizeUnit": "miles"
     },
     {

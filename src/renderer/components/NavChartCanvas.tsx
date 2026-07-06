@@ -6,7 +6,7 @@ import { saveCanvasExport } from '../utils/exportHelper';
 import { ScaleManager } from '../utils/ScaleManager';
 import { VellumStyle } from '../styles/VellumStyle';
 import { SpaceStyle } from '../styles/SpaceStyle';
-import { MapStyleContext } from '../styles/MapStyle';
+import { MapStyleContext } from '../../types/renderer';
 
 export interface NavChartCanvasHandle {
   handleZoom: (factor: number) => void;
