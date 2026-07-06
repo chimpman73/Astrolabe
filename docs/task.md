@@ -36,6 +36,7 @@ This file tracks the design, development, and integration tasks for the Astrolab
 | **AST-028** | Bookmark Titles | Low | `Done` | Display system name without 'SHELL' suffix when shell boundary is hidden. |
 | **AST-029** | Bookmark Dynamic Gap Compression | High | `Done` | Replace linear vertical scaling with a fractional power curve to compress empty space while enforcing minimum padding. |
 | **AST-030** | Bookmark Shared Orbit Grouping | High | `Done` | Group bodies on the same orbit to fan out horizontally along the arc, preventing overlap. Includes smart label alignment. |
+| **AST-031** | Disc Shape 3D Lip | Low | `Done` | Render disc shapes with a 3D lip to visually distinguish them from elliptical shapes. |
 
 ---
 
@@ -175,3 +176,9 @@ This file tracks the design, development, and integration tasks for the Astrolab
   * Sub-grouped by `initialAngle` so identical physical bodies (e.g. cloud + planet) correctly stack exactly on top of one another.
   * Implemented Smart Label Alignment, alternating label sides to point outward.
   * Consolidated to a single distance label on the left edge for the entire shared orbit group.
+
+### Phase 9: Rendering Refinements
+- [x] **AST-031: Disc Shape 3D Lip**
+  * Updated `BaseRenderer.ts` shape path drawing for `disc`.
+  * Transitioned from a flat 2D ellipse to a 3D "coin" cylinder shape.
+  * Included a projected lip thickness to visually distinguish `disc` worlds from standard `elliptical` worlds.

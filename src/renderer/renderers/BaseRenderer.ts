@@ -28,9 +28,17 @@ export abstract class BaseRenderer {
   protected drawShapePath(ctx: CanvasRenderingContext2D, shape: string, x: number, y: number, s: number): void {
     ctx.beginPath();
     switch (shape) {
-      case 'disc':
-        ctx.ellipse(x, y, s, s * 0.35, 0, 0, 2 * Math.PI);
+      case 'disc': {
+        const t = s * 0.15; // thickness of the lip
+        // Top face ellipse
+        ctx.ellipse(x, y - t, s, s * 0.35, 0, 0, 2 * Math.PI);
+        // Lip thickness (left edge, bottom curve, right edge)
+        ctx.moveTo(x - s, y - t);
+        ctx.lineTo(x - s, y + t);
+        ctx.ellipse(x, y + t, s, s * 0.35, 0, Math.PI, 0, true);
+        ctx.lineTo(x + s, y - t);
         break;
+      }
       case 'pyramid':
         ctx.moveTo(x, y - s * 1.2);
         ctx.lineTo(x + s, y + s * 0.7);
