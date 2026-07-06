@@ -30,13 +30,14 @@ export abstract class BaseRenderer {
     switch (shape) {
       case 'disc': {
         const t = s * 0.15; // thickness of the lip
-        // Top face ellipse
+        // Top face ellipse (clockwise)
         ctx.ellipse(x, y - t, s, s * 0.35, 0, 0, 2 * Math.PI);
-        // Lip thickness (left edge, bottom curve, right edge)
-        ctx.moveTo(x - s, y - t);
-        ctx.lineTo(x - s, y + t);
-        ctx.ellipse(x, y + t, s, s * 0.35, 0, Math.PI, 0, true);
-        ctx.lineTo(x + s, y - t);
+        // Lip thickness (clockwise: right edge down, bottom curve right-to-left, left edge up)
+        ctx.moveTo(x + s, y - t);
+        ctx.lineTo(x + s, y + t);
+        // 0 to Math.PI clockwise traces the bottom arc from right to left
+        ctx.ellipse(x, y + t, s, s * 0.35, 0, 0, Math.PI, false);
+        ctx.lineTo(x - s, y - t);
         break;
       }
       case 'pyramid':
