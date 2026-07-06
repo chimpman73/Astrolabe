@@ -5,11 +5,17 @@ export type CelestialObjectType =
 export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular' | 'elliptical' | 'ring' | 'cylinder' | 'ship' | 'rectangular' | 'castle' | 'skull';
 export type ElementAffinity = 'fire' | 'water' | 'earth' | 'air' | 'mixed';
 export type OrbitDirection = 'prograde' | 'retrograde';
+export type SizeClass = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J';
+export type SizeUnit = 'miles' | 'AU';
 
 export interface CelestialObject {
   name: string;
   type: CelestialObjectType;
-  size: number; // visual scale size
+  sizeClass?: SizeClass;
+  physicalSize?: number;
+  sizeUnit?: SizeUnit;
+  /** @deprecated The old visual size property. Use physicalSize instead. */
+  size?: number;
   description: string;
   orbitedObjectName: string | null;
   distanceOrbited: number; // radius from parent in AU or system units

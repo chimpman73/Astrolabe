@@ -1,20 +1,23 @@
 {
   "sphereName": "Realmspace",
   "currentCampaignDate": "2026-07-05",
-  "currentSystemDate": 9597,
+  "currentSystemDate": 9739,
   "objects": [
     {
       "name": "Sol",
       "type": "star",
       "size": 60,
-      "description": "A newly added planetary body.",
+      "description": "The Sun, also known as Sol, is the primary of the crystal sphere known as Realmspace. It is a size H spherical fire body, and is orbited by 8 planets, their satellites and a variety of asteroids, comets and nebulae. Within the Sun's immediate orbit there are twelve sargassos. ",
       "orbitedObjectName": null,
       "distanceOrbited": 0,
       "initialAngle": 0,
       "orbitalPeriodDays": 0,
       "elementAffinity": "fire",
       "coronaSize": 1.5,
-      "isStationary": true
+      "isStationary": true,
+      "sizeClass": "H",
+      "physicalSize": 100000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Sargasso 1",
@@ -29,7 +32,10 @@
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
       "affectsShellBoundary": true,
-      "isDMOnly": true
+      "isDMOnly": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Sargasso 2",
@@ -45,7 +51,10 @@
       "cloudiness": 0.5,
       "isStationary": false,
       "orbitDirection": "prograde",
-      "isDMOnly": true
+      "isDMOnly": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Sargasso 3",
@@ -58,7 +67,11 @@
       "orbitalPeriodDays": 3650,
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
-      "cloudiness": 0.5
+      "cloudiness": 0.5,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles",
+      "isDMOnly": true
     },
     {
       "name": "Sargasso 4",
@@ -72,7 +85,10 @@
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
-      "isDMOnly": true
+      "isDMOnly": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Sargasso 5",
@@ -86,7 +102,10 @@
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
-      "isDMOnly": true
+      "isDMOnly": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Sargasso 6",
@@ -100,7 +119,10 @@
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
-      "isDMOnly": true
+      "isDMOnly": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Sargasso 7",
@@ -114,7 +136,10 @@
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
-      "isDMOnly": true
+      "isDMOnly": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Sargasso 8",
@@ -128,7 +153,10 @@
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
-      "isDMOnly": true
+      "isDMOnly": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Sargasso 9",
@@ -142,7 +170,10 @@
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
-      "isDMOnly": true
+      "isDMOnly": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Sargasso 10",
@@ -156,7 +187,10 @@
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
-      "isDMOnly": true
+      "isDMOnly": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Sargasso 11",
@@ -170,7 +204,10 @@
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
-      "isDMOnly": true
+      "isDMOnly": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Sargasso 12",
@@ -184,40 +221,52 @@
       "arcDegrees": 25,
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
-      "isDMOnly": true
+      "isDMOnly": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Anadia",
       "type": "planet",
       "size": 10,
-      "description": "A newly added planetary body.",
+      "description": "Anadia, referred to as one of the Dawn Heralds by the natives of Toril, is a size B spherical earth body, and is known for its xenophobic natives.",
       "orbitedObjectName": "Sol",
       "distanceOrbited": 0.5,
       "initialAngle": 151,
       "orbitalPeriodDays": 30,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "B",
+      "physicalSize": 99,
+      "sizeUnit": "miles"
     },
     {
       "name": "Coliar",
       "type": "planet",
       "size": 50,
-      "description": "A newly added planetary body.",
-      "orbitedObjectName": null,
+      "description": "Coliar, referred to as one of the Dawn Heralds by the natives of Toril, is a size G spherical air body, and is inhabited by lizardfolk, aarakocra and dragons.",
+      "orbitedObjectName": "Sol",
       "distanceOrbited": 1,
       "initialAngle": 261,
       "orbitalPeriodDays": 240,
-      "elementAffinity": "air"
+      "elementAffinity": "air",
+      "sizeClass": "G",
+      "physicalSize": 90000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Toril",
       "type": "planet",
       "size": 25,
-      "description": "A newly added planetary body.",
-      "orbitedObjectName": null,
+      "description": "Toril is a size E spherical earth body, and is one of the most populous worlds in the system. It is orbited by a single moon, named Selûne, and an asteroid cluster, known as the Tears of Selûne.",
+      "orbitedObjectName": "Sol",
       "distanceOrbited": 2,
       "initialAngle": 224,
       "orbitalPeriodDays": 365,
-      "elementAffinity": "mixed"
+      "elementAffinity": "mixed",
+      "sizeClass": "E",
+      "physicalSize": 9500,
+      "sizeUnit": "miles"
     },
     {
       "name": "Selune",
@@ -227,7 +276,10 @@
       "orbitedObjectName": "Toril",
       "distanceOrbited": 0.18,
       "initialAngle": 0,
-      "orbitalPeriodDays": 30
+      "orbitalPeriodDays": 30,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Tears of Selune",
@@ -243,40 +295,52 @@
       "cloudiness": 0.5,
       "cloudObjectDensity": 11,
       "cloudObjectSize": 1.5,
-      "cloudObjectShape": "sphere"
+      "cloudObjectShape": "sphere",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Karpri",
       "type": "planet",
       "size": 20,
-      "description": "A newly added planetary body.",
+      "description": "Karpri, referred to as one of the Five Wanderers by the natives of Toril, is a size D spherical water body orbited by an artificial elven base.[",
       "orbitedObjectName": "Sol",
       "distanceOrbited": 3,
       "initialAngle": 90,
       "orbitalPeriodDays": 650,
-      "elementAffinity": "water"
+      "elementAffinity": "water",
+      "sizeClass": "D",
+      "physicalSize": 3000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Chandos",
       "type": "planet",
       "size": 35,
-      "description": "A newly added planetary body.",
+      "description": "Chandos, referred to as one of the Five Wanderers by the natives of Toril, is a size F spherical water body with numerous unstable land formations that are prone to collapse or change at a moments notice.",
       "orbitedObjectName": "Sol",
       "distanceOrbited": 4,
       "initialAngle": 296,
       "orbitalPeriodDays": 2010,
-      "elementAffinity": "water"
+      "elementAffinity": "water",
+      "sizeClass": "F",
+      "physicalSize": 30000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Glyth",
       "type": "planet",
       "size": 30,
-      "description": "A newly added planetary body.",
+      "description": "Glyth, referred to as one of the Five Wanderers by the natives of Toril, is a size E spherical earth body and is dominated by mind flayers. It has a large planetary ring system and three moons.",
       "orbitedObjectName": null,
       "distanceOrbited": 10,
       "initialAngle": 212,
       "orbitalPeriodDays": 10800,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "E",
+      "physicalSize": 9000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Rings of Glyth 1",
@@ -291,7 +355,10 @@
       "cloudTransparency": 0.4,
       "cloudiness": 0,
       "cloudObjectDensity": 48,
-      "elementAffinity": "water"
+      "elementAffinity": "water",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Haven",
@@ -303,7 +370,10 @@
       "initialAngle": 84,
       "orbitalPeriodDays": 365,
       "worldShape": "elliptical",
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Rings of Glyth 2",
@@ -318,7 +388,10 @@
       "cloudTransparency": 0.45,
       "cloudiness": 0,
       "cloudObjectDensity": 75,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Mingabwe",
@@ -329,7 +402,10 @@
       "distanceOrbited": 0.8,
       "initialAngle": 344,
       "orbitalPeriodDays": 450,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Polluter",
@@ -340,14 +416,17 @@
       "distanceOrbited": 0.15,
       "initialAngle": 296,
       "orbitalPeriodDays": 60,
-      "worldShape": "irregular"
+      "worldShape": "irregular",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Garden",
       "type": "living_world",
       "size": 15,
-      "description": "A newly added planetary body.",
-      "orbitedObjectName": null,
+      "description": "Garden, referred to as one of the Five Wanderers by the natives of Toril, is a cluster of size A asteroids which share a common atmosphere and are bound together by a colossal plant known as Yggdrasil's Child. Garden is classified as a liveworld by the Shou, and has twelve moons.",
+      "orbitedObjectName": "Sol",
       "distanceOrbited": 12,
       "initialAngle": 307,
       "orbitalPeriodDays": 30660,
@@ -355,158 +434,200 @@
       "branchDensity": 9,
       "branchExtent": 0.3,
       "hasLeaves": false,
-      "branchBend": 2
+      "branchBend": 2,
+      "sizeClass": "D",
+      "physicalSize": 1700,
+      "sizeUnit": "miles"
     },
     {
       "name": "Grandchild",
       "type": "moon",
       "size": 2,
-      "description": "A newly added planetary body.",
+      "description": "Grandchild is a size B elliptical earth body. Its off-white surface is perfectly smooth, without any meteorite pock marks, and reflects the light eerily.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.3,
       "initialAngle": 178,
       "orbitalPeriodDays": 30,
       "worldShape": "elliptical",
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "B",
+      "physicalSize": 10,
+      "sizeUnit": "miles"
     },
     {
       "name": "Yerthad",
       "type": "moon",
       "size": 2,
-      "description": "A newly added planetary body.",
+      "description": "Yerthad is a size C spherical earth body. Its atmospheric envelope extends about 100 miles above its surface, and is extremely toxic as well as caustic. The atmosphere consists primarily of sulfuric acid, which covers the moon's surface in a sea of acid.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.35,
       "initialAngle": 322,
       "orbitalPeriodDays": 50,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "C",
+      "physicalSize": 900,
+      "sizeUnit": "miles"
     },
     {
       "name": "Peaceon",
       "type": "moon",
       "size": 2,
-      "description": "A newly added planetary body.",
+      "description": "Peaceon is a size B planar-shaped earth body. The moon once served as a stopping point for spacefaring elves, but has since long been deserted.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.4,
       "initialAngle": 111,
       "orbitalPeriodDays": 90,
       "elementAffinity": "earth",
-      "worldShape": "disc"
+      "worldShape": "disc",
+      "sizeClass": "B",
+      "physicalSize": 10,
+      "sizeUnit": "miles"
     },
     {
       "name": "Retinae",
       "type": "moon",
       "size": 2,
-      "description": "A newly added planetary body.",
+      "description": "Retinae is a size C spherical earth body. The moon resembles an eye ball: where the pupil would be is a large crater where a rare type of fungus can be found that is useful in the preparation of spells and potions related to the improvement of vision.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.45,
       "initialAngle": 223,
       "orbitalPeriodDays": 130,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "C",
+      "physicalSize": 100,
+      "sizeUnit": "miles"
     },
     {
       "name": "Glorianus",
       "type": "moon",
       "size": 1,
-      "description": "A newly added planetary body.",
+      "description": "Glorianus is a size A crescent-shaped earth body, completely covered with a soft green grass. The human druid who named the moon, Griffon Broadleaf, makes his home there to this day.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.5,
       "initialAngle": 285,
       "orbitalPeriodDays": 150,
       "worldShape": "irregular",
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "A",
+      "physicalSize": 8,
+      "sizeUnit": "miles"
     },
     {
       "name": "Fjord",
       "type": "moon",
       "size": 1,
-      "description": "A newly added planetary body.",
+      "description": "Fjord is a size B spherical earth body. The moon is a voidworld, without an atmosphere, and was once a great mining colony.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.55,
       "initialAngle": 329,
       "orbitalPeriodDays": 190,
       "elementAffinity": "earth",
-      "worldShape": "elliptical"
+      "worldShape": "elliptical",
+      "sizeClass": "B",
+      "physicalSize": 10,
+      "sizeUnit": "miles"
     },
     {
       "name": "Locci",
       "type": "moon",
       "size": 1,
-      "description": "A newly added planetary body.",
+      "description": "Locci is a size A rectangular earth body, and is a voidworld, without an atmosphere. The rectangular moon's edges and corners have been chipped by meteorites.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.6,
       "initialAngle": 285,
       "orbitalPeriodDays": 240,
       "elementAffinity": "earth",
-      "worldShape": "rectangular"
+      "worldShape": "rectangular",
+      "sizeClass": "A",
+      "physicalSize": 9,
+      "sizeUnit": "miles"
     },
     {
       "name": "Dragon Rock",
       "type": "moon",
       "size": 3,
-      "description": "A newly added planetary body.",
+      "description": "Dragon Rock is a size C earth body. Basically a roughly shaped statue of a white dragon, Dragon Rock was created by a mage named Darkon of the Earth’s Depths, while he was delving into the secrets of the planet below. The moon is made entirely of white jade, and has a thin atmosphere that smells faintly of pipe smoke.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.65,
       "initialAngle": 292,
       "orbitalPeriodDays": 300,
       "worldShape": "irregular",
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "C",
+      "physicalSize": 100,
+      "sizeUnit": "miles"
     },
     {
       "name": "Knurl",
       "type": "moon",
       "size": 2,
-      "description": "A newly added planetary body.",
+      "description": "Knurl is a size B spherical earth body. The moon is made entirely of marble swirling with various colors. There are chunks of the surface missing, where liquid marble oozes in a slow stream. This oozing marble can be moulded into sculptures, which harden within days of being removed from the moon.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.7,
       "initialAngle": 174,
       "orbitalPeriodDays": 350,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "B",
+      "physicalSize": 10,
+      "sizeUnit": "miles"
     },
     {
       "name": "Sunson",
       "type": "moon",
       "size": 3,
-      "description": "A newly added planetary body.",
+      "description": "Sunson is a size C spherical fire body which produces enough heat to warm wildspace within 1,000 miles (1,609 kilometres). The fire moon produces enough light to illuminate Garden during the night, and burns almost twice as hot as the Sun.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.75,
       "initialAngle": 323,
       "orbitalPeriodDays": 390,
-      "elementAffinity": "fire"
+      "elementAffinity": "fire",
+      "sizeClass": "C",
+      "physicalSize": 900,
+      "sizeUnit": "miles"
     },
     {
       "name": "Templar",
       "type": "moon",
       "size": 2,
-      "description": "A newly added planetary body.",
+      "description": "Templar is a size B disc-shaped earth body. The moon serves as an outpost for a hundred mages of various disciplines who are studying Garden, hoping to uncover its secrets. They finance their operation by producing and selling magic items.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.8,
       "initialAngle": 78,
       "orbitalPeriodDays": 430,
       "worldShape": "disc",
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "B",
+      "physicalSize": 10,
+      "sizeUnit": "miles"
     },
     {
       "name": "Farworld",
       "type": "moon",
       "size": 2,
-      "description": "A newly added planetary body.",
+      "description": "Farworld is a size C spherical earth body which serves as a trading post. Despite being far away from most inhabited worlds, it does a surprising amount of trade. Almost anything non-magical can be found here for sale.",
       "orbitedObjectName": "Garden",
       "distanceOrbited": 0.85,
       "initialAngle": 15,
       "orbitalPeriodDays": 470,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "C",
+      "physicalSize": 100,
+      "sizeUnit": "miles"
     },
     {
       "name": "H'Catha",
       "type": "planet",
       "size": 25,
-      "description": "A newly added planetary body.",
-      "orbitedObjectName": null,
+      "description": "H'Catha, referred to as one of the Five Wanderers by the natives of Toril, is a size C disk-shaped water world with an enormous mountain jutting out of its central hub. The planet is dominated by a number of beholder nations, and has two moons.",
+      "orbitedObjectName": "Sol",
       "distanceOrbited": 16,
       "initialAngle": 344,
       "orbitalPeriodDays": 60119,
       "worldShape": "disc",
-      "elementAffinity": "water"
+      "elementAffinity": "water",
+      "sizeClass": "G",
+      "physicalSize": 90000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Turnbetl",
@@ -517,7 +638,10 @@
       "distanceOrbited": 0.4,
       "initialAngle": 95,
       "orbitalPeriodDays": 240,
-      "elementAffinity": "air"
+      "elementAffinity": "air",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Lumbe",
@@ -528,7 +652,10 @@
       "distanceOrbited": 0.8,
       "initialAngle": 186,
       "orbitalPeriodDays": 365,
-      "worldShape": "cylinder"
+      "worldShape": "cylinder",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Caer Windlauer",
@@ -541,7 +668,10 @@
       "orbitalPeriodDays": 365,
       "worldShape": "castle",
       "elementAffinity": "earth",
-      "isDMOnly": true
+      "isDMOnly": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Colorspray Nebula",
@@ -556,7 +686,10 @@
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
       "affectsShellBoundary": false,
-      "isDMOnly": true
+      "isDMOnly": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Galleon Nebula",
@@ -571,7 +704,10 @@
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
       "affectsShellBoundary": false,
-      "isDMOnly": true
+      "isDMOnly": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "K'Thoutek",
@@ -584,7 +720,10 @@
       "orbitalPeriodDays": 60000,
       "affectsShellBoundary": false,
       "worldShape": "irregular",
-      "isDMOnly": true
+      "isDMOnly": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "King Killer Star",
@@ -596,7 +735,10 @@
       "initialAngle": 0,
       "orbitalPeriodDays": 50000,
       "affectsShellBoundary": false,
-      "isDMOnly": true
+      "isDMOnly": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Skull of the Void",
@@ -609,7 +751,10 @@
       "orbitalPeriodDays": 365,
       "affectsShellBoundary": false,
       "worldShape": "skull",
-      "isDMOnly": true
+      "isDMOnly": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     }
   ]
 }

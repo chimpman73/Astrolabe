@@ -16,7 +16,8 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
-import { CelestialObject, CelestialObjectType, WorldShape, ElementAffinity } from '../../types/astrolabe';
+import { CelestialObject, CelestialObjectType, WorldShape, ElementAffinity, SizeClass } from '../../types/astrolabe';
+import { ScaleManager } from '../utils/ScaleManager';
 
 interface SaveManagerProps {
   onCollapse?: () => void;
@@ -94,7 +95,9 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
     const newObj: CelestialObject = {
       name: `New Body ${activeSphere.objects.length + 1}`,
       type: 'planet',
-      size: 10,
+      sizeClass: 'D',
+      physicalSize: 1000,
+      sizeUnit: 'miles',
       description: 'A newly added planetary body.',
       orbitedObjectName: null,
       distanceOrbited: 1.0,
@@ -397,15 +400,45 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                     </div>
 
                     <div className="editor-form-group">
-                      <label>Size</label>
+                      <label>Size Class</label>
+                      <select
+                        className="editor-select"
+                        value={obj.sizeClass || 'D'}
+                        onChange={e => {
+                          const newClass = e.target.value as SizeClass;
+                          const newUnit = newClass === 'J' ? 'AU' : 'miles';
+                          handleUpdateObject(index, { sizeClass: newClass, sizeUnit: newUnit });
+                        }}
+                      >
+                        <option value="A">Size A (&lt; 10 mi)</option>
+                        <option value="B">Size B (10 - 100 mi)</option>
+                        <option value="C">Size C (100 - 1k mi)</option>
+                        <option value="D">Size D (1k - 4k mi)</option>
+                        <option value="E">Size E (4k - 10k mi)</option>
+                        <option value="F">Size F (10k - 40k mi)</option>
+                        <option value="G">Size G (40k - 100k mi)</option>
+                        <option value="H">Size H (100k - 1M mi)</option>
+                        <option value="I">Size I (1M - 10M mi)</option>
+                        <option value="J">Size J (&ge; 10M mi / AU)</option>
+                      </select>
+                    </div>
+
+                    <div className="editor-form-group">
+                      <label>Physical Size ({obj.sizeUnit || 'miles'})</label>
                       <input 
                         type="number" 
                         step="any"
-                        className="editor-input"
-                        value={obj.size}
-                        onChange={e => handleUpdateObject(index, { size: parseFloat(e.target.value) || 0 })}
+                        className={`editor-input ${!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') ? 'border-[var(--color-accent-red)] text-[var(--color-accent-red)]' : ''}`}
+                        value={obj.physicalSize ?? 1000}
+                        onChange={e => handleUpdateObject(index, { physicalSize: parseFloat(e.target.value) || 0 })}
+                        title={!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') ? 'Physical size is out of bounds for the selected Size Class.' : ''}
                       />
                     </div>
+                    {!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') && (
+                      <div className="text-[var(--color-accent-red)] text-[10px] mt-1 mb-2 px-1 font-bold">
+                        Warning: Size is out of bounds for Class {obj.sizeClass || 'D'}
+                      </div>
+                    )}
 
 
                         <div className="editor-form-group">

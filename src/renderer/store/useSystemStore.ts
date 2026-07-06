@@ -78,9 +78,25 @@ export const useSystemStore = create<SystemState>((set, get) => ({
       try {
         const res = await window.astrolabeAPI.loadJsonFile(filePath);
         if (res.success && res.data) {
+          // MIGRATION LOGIC: Ensure all objects have size properties
+          const migratedSphere: CrystalSphere = {
+            ...res.data,
+            objects: res.data.objects.map(obj => {
+              if (!obj.sizeClass) {
+                return {
+                  ...obj,
+                  sizeClass: 'D',
+                  physicalSize: 1000,
+                  sizeUnit: 'miles'
+                };
+              }
+              return obj;
+            })
+          };
+
           set({
-            activeSphere: res.data,
-            currentSystemDate: res.data.currentSystemDate || 0,
+            activeSphere: migratedSphere,
+            currentSystemDate: migratedSphere.currentSystemDate || 0,
           });
           return true;
         } else {

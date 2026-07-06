@@ -64,7 +64,9 @@ The application saves and loads system states via JSON configuration files store
       "required": [
         "name",
         "type",
-        "size",
+        "sizeClass",
+        "physicalSize",
+        "sizeUnit",
         "description",
         "distanceOrbited",
         "initialAngle"
@@ -95,9 +97,19 @@ The application saves and loads system states via JSON configuration files store
           "type": "boolean",
           "description": "If true, the object is considered a DM-only object and hidden from PC views. Defaults to false (PC object)."
         },
-        "size": {
+        "sizeClass": {
+          "type": "string",
+          "enum": ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"],
+          "description": "Categorical scale bracket (A through J) that defines the physical magnitude of the object."
+        },
+        "physicalSize": {
           "type": "number",
-          "description": "Relative physical size/diameter of the object."
+          "description": "Specific diameter of the object. Must fall within the boundaries of the selected sizeClass."
+        },
+        "sizeUnit": {
+          "type": "string",
+          "enum": ["miles", "AU"],
+          "description": "The unit of measurement for physicalSize (miles for A-I, AU for J)."
         },
         "description": {
           "type": "string",
@@ -189,6 +201,19 @@ The application saves and loads system states via JSON configuration files store
   }
 }
 ```
+
+### 2.2 Planetary Scale Classes
+The `sizeClass` defines the bounded magnitude of the body. When parsing physical scale, the application respects the following boundaries:
+* **Size A**: Less than 10 miles
+* **Size B**: 10 - 100 miles
+* **Size C**: 100 - 1,000 miles
+* **Size D**: 1,000 - 4,000 miles
+* **Size E**: 4,000 - 10,000 miles
+* **Size F**: 10,000 - 40,000 miles
+* **Size G**: 40,000 - 100,000 miles
+* **Size H**: 100,000 - 1,000,000 miles
+* **Size I**: 1,000,000 - 10,000,000 miles
+* **Size J**: Measured exclusively in AU (where 1 AU = 92,955,807 miles). Used for supersized objects (e.g. gigantic clouds or mega-structures).
 
 ---
 

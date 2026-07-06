@@ -1,7 +1,8 @@
 import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import { useSystemStore } from '../store/useSystemStore';
 import { saveCanvasExport } from '../utils/exportHelper';
-import { drawSolidBody, getMotionSuffix, getBodyColors, getElementColor } from '../utils/canvasRenderer';
+import { drawSolidBody, getBodyColors, getElementColor } from '../utils/canvasRenderer';
+import { ScaleManager } from '../utils/ScaleManager';
 
 export interface BookmarkCanvasHandle {
   handleExport: () => Promise<void>;
@@ -159,7 +160,7 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
       const r = getPixelRadius(obj.distanceOrbited);
       const objY = centerY - r;
       const sizeMultiplier = width / 300;
-      const objSize = Math.max(4, obj.size * 0.6 * sizeMultiplier);
+      const objSize = ScaleManager.getBookmarkVisualRadius(obj.sizeClass || 'D') * sizeMultiplier;
 
       if (obj.type === 'cloud') {
         const cloudFill = getElementColor(obj.elementAffinity || null) || (isDark ? '#a0a0a0' : '#808080');
@@ -177,15 +178,12 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
         drawSolidBody(ctx, centerX, objY, obj, objSize, bodyFill, bodyStroke, false, zoomEquiv);
       }
 
-      // --- Motion indicator suffix (◆ = fixed, ↺ = retrograde) ---
-      const motionSuffix = getMotionSuffix(obj.isStationary, obj.orbitDirection);
-
       // --- Name label to the right ---
       ctx.font = `normal ${Math.max(10, width * 0.035) * 1.5}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
       ctx.fillStyle = colorStroke;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText(obj.name + motionSuffix, centerX + objSize + 12, objY);
+      ctx.fillText(obj.name, centerX + objSize + 12, objY);
 
       // --- Distance label to the left ---
       if (showDistance) {

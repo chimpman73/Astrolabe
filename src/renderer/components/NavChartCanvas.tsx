@@ -3,7 +3,8 @@ import { useSystemStore } from '../store/useSystemStore';
 import { calculateSystemPositions } from '../utils/orbitMath';
 // unused imports removed
 import { saveCanvasExport } from '../utils/exportHelper';
-import { drawSolidBody, drawStationaryIndicator, getMotionSuffix, getBodyColors, getElementColor } from '../utils/canvasRenderer';
+import { drawSolidBody, drawStationaryIndicator, getBodyColors, getElementColor } from '../utils/canvasRenderer';
+import { ScaleManager } from '../utils/ScaleManager';
 
 export interface NavChartCanvasHandle {
   handleZoom: (factor: number) => void;
@@ -277,7 +278,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
       }
       const parentProj = project(px, py);
       const proj = project(pos.x, pos.y);
-      const renderSize = Math.max(3, (obj.size / 100) * (10 + activeZoom * 0.4));
+      const renderSize = ScaleManager.getNavChartVisualRadius(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles', activeZoom);
 
       if (obj.type === 'cloud') {
         if (obj.distanceOrbited <= 0) return;
@@ -301,17 +302,16 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
         }
       }
 
-      // Label (with motion indicator suffix)
+      // Label
       const shouldLabel = obj.type !== 'moon' || activeZoom > 150;
       if (shouldLabel) {
-          const motionTag = getMotionSuffix(obj.isStationary, obj.orbitDirection);
           ctx.font = obj.type === 'star'
             ? `bold 12px 'Elan', 'Cinzel', serif`
             : `500 10px 'Elan', 'Outfit', sans-serif`;
           ctx.fillStyle = colorStroke;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'top';
-        ctx.fillText(obj.name + motionTag, proj.x, proj.y + renderSize + 5);
+        ctx.fillText(obj.name, proj.x, proj.y + renderSize + 5);
       }
     });
 

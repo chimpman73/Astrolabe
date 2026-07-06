@@ -92,6 +92,3 @@ export const drawStationaryIndicator = (
   ctx.restore();
 };
 
-export const getMotionSuffix = (isStationary?: boolean, direction?: string) => {
-  return isStationary ? ' ◆' : direction === 'retrograde' ? ' ↺' : '';
-};
