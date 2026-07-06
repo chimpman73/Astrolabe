@@ -63,8 +63,8 @@ export class VellumStyle implements MapStyle {
       ? (context.activeSphere?.shellCustomScale ?? 1.2) : 2.0;
     const shellRadiusPx = maxDist * shellScale * context.activeZoom;
     
-    // Add 40% padding in model space
-    const paddingPx = shellRadiusPx * 0.4;
+    // 25% padding ensures the 24px title has room to breathe horizontally
+    const paddingPx = shellRadiusPx * 0.25;
     const paperWidthPx = shellRadiusPx * 2 + paddingPx * 2;
     const paperHeightPx = shellRadiusPx * 2 + paddingPx * 2;
     

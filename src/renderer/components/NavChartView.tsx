@@ -50,7 +50,7 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     <div className="navchart-view-content flex-1 flex flex-col h-full w-full">
       
       {/* Toolbar Overlay */}
-      <div className="save-manager-header w-full">
+      <div className="save-manager-header w-full" style={{ marginBottom: 0 }}>
         
         <div className="save-manager-header-title">
           {onCollapse && (

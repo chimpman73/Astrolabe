@@ -37,6 +37,7 @@ This file tracks the design, development, and integration tasks for the Astrolab
 | **AST-029** | Bookmark Dynamic Gap Compression | High | `Done` | Replace linear vertical scaling with a fractional power curve to compress empty space while enforcing minimum padding. |
 | **AST-030** | Bookmark Shared Orbit Grouping | High | `Done` | Group bodies on the same orbit to fan out horizontally along the arc, preventing overlap. Includes smart label alignment. |
 | **AST-031** | Disc Shape 3D Lip | Low | `Done` | Render disc shapes with a 3D lip to visually distinguish them from elliptical shapes. |
+| **AST-032** | Dynamic Vellum Desk Layout | Medium | `Done` | Implement contiguous scroll background, alpha-composited burn holes showing wood desk beneath, and absolute toolbar overlay layout. |
 
 ---
 
@@ -182,3 +183,9 @@ This file tracks the design, development, and integration tasks for the Astrolab
   * Updated `BaseRenderer.ts` shape path drawing for `disc`.
   * Transitioned from a flat 2D ellipse to a 3D "coin" cylinder shape.
   * Included a projected lip thickness to visually distinguish `disc` worlds from standard `elliptical` worlds.
+
+- [x] **AST-032: Dynamic Vellum Desk Layout**
+  * Migrated from a static background image to a dynamic, scalable model-relative parchment scroll canvas graphic.
+  * Added `wood_desk.png` layered behind the parchment scroll on the canvas.
+  * Rebuilt burn mark decoration rendering to punch true `destination-out` alpha holes through the parchment layer.
+  * Adjusted viewport panning constraints and auto-fit logic to account for overlay toolbar occlusion.

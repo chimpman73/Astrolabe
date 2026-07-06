@@ -73,7 +73,8 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
     const shellRadiusModel = maxDist * shellScale;
     
-    const paddingModel = shellRadiusModel * 0.4;
+    // 25% padding ensures the 24px title has room to breathe horizontally
+    const paddingModel = shellRadiusModel * 0.25;
     const paperWidthModel = shellRadiusModel * 2 + paddingModel * 2;
     const totalWidthModel = paperWidthModel * 1.06; // rod margins
     const totalHeightModel = paperWidthModel;
@@ -105,11 +106,11 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     }
     
     if (paperH <= dimensions.height) {
-      minY = dimensions.height / 2;
-      maxY = dimensions.height / 2;
+      minY = dimensions.height / 2 + 25; // Shift center down to account for toolbar
+      maxY = dimensions.height / 2 + 25;
     } else {
       minY = dimensions.height - deskMargin - paperH / 2;
-      maxY = paperH / 2 + deskMargin;
+      maxY = paperH / 2 + deskMargin + 25; // allow panning down slightly more to see top
     }
     
     return {
@@ -182,7 +183,8 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     const minDim = Math.min(dimensions.width, dimensions.height);
     const targetZoom = (minDim * 0.45) / viewRadius;
     
-    setViewport({ zoom: targetZoom, pan: { x: dimensions.width / 2, y: dimensions.height / 2 } });
+    // Offset the target pan down by 25px so the title isn't hidden under the toolbar
+    setViewport({ zoom: targetZoom, pan: { x: dimensions.width / 2, y: dimensions.height / 2 + 25 } });
   };
 
   useImperativeHandle(ref, () => ({
