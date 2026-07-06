@@ -87,8 +87,13 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
     ctx.fillStyle = colorBg;
     ctx.fillRect(0, 0, width, height);
 
+    // Calculate bottom margin dynamically based on the central object's size to prevent clipping
+    const centerObj = planetaryObjects.find(obj => obj.distanceOrbited === 0);
+    const sizeMultiplier = width / 300;
+    const centerObjSize = centerObj ? ScaleManager.getBookmarkVisualRadius(centerObj.sizeClass || 'D') * sizeMultiplier : 10 * sizeMultiplier;
+    
     // Coordinate settings
-    const bottomMargin = 15;
+    const bottomMargin = Math.max(25, centerObjSize + 20);
     const centerX = width / 2;
     const centerY = height - bottomMargin; // True center is slightly above bottom edge
 
@@ -101,17 +106,103 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
       ? Math.max(absoluteMaxDistance, shellDistance)
       : visibleMaxDistance;
 
-    // Helper: translate distance into pixel radius
+    // --- Dynamic Gap Compression Algorithm ---
+    const topMargin = showShell ? 15 : 45;
+    const scaleHeight = height - topMargin - bottomMargin;
+    
+    // Collect all objects that will be plotted to calculate spacing
+    const plottedDistances: { dist: number, sizeClass: string, physicalSize?: number }[] = [
+      { dist: 0, sizeClass: 'A', physicalSize: 0 } // Sun/Center
+    ];
+    
+    planetaryObjects.forEach(obj => {
+      plottedDistances.push({
+        dist: obj.distanceOrbited,
+        sizeClass: obj.sizeClass || 'D',
+        physicalSize: obj.physicalSize || 0
+      });
+    });
+    
+    if (showShell && shellDistance >= canvasBoundary) {
+      plottedDistances.push({ dist: canvasBoundary, sizeClass: 'A', physicalSize: 0 }); // Shell
+    }
+
+    // Sort by distance ascending
+    plottedDistances.sort((a, b) => a.dist - b.dist);
+
+    // Minimum padding between labels/icons in pixels
+    const MIN_PIXEL_GAP = 40; // Allow enough space for standard text + icon
+
+    // Calculate raw gaps and weights
+    let totalWeight = 0;
+    const gaps: { gapAU: number, weight: number, minPixels: number, pixels: number }[] = [];
+    
+    for (let i = 1; i < plottedDistances.length; i++) {
+      const prev = plottedDistances[i - 1];
+      const curr = plottedDistances[i];
+      const gapAU = curr.dist - prev.dist;
+      
+      // Weighting curve: square-root-like compression
+      const weight = Math.pow(Math.max(0, gapAU), 0.4);
+      totalWeight += weight;
+      
+      // Handle overlap rules for Size J worlds > 1 AU physical size, or basically identical orbits
+      const prevIsJ = prev.sizeClass === 'J' && (prev.physicalSize ?? 0) >= 1;
+      const currIsJ = curr.sizeClass === 'J' && (curr.physicalSize ?? 0) >= 1;
+      const allowsOverlap = prevIsJ || currIsJ || gapAU < 0.005;
+      
+      const minPixels = allowsOverlap ? 0 : MIN_PIXEL_GAP;
+      
+      gaps.push({ gapAU, weight, minPixels, pixels: 0 });
+    }
+
+    if (totalWeight > 0) {
+      let totalRequiredPixels = 0;
+      for (const g of gaps) {
+        g.pixels = (g.weight / totalWeight) * scaleHeight;
+        if (g.pixels < g.minPixels) {
+          g.pixels = g.minPixels;
+        }
+        totalRequiredPixels += g.pixels;
+      }
+      
+      // If we overshoot or undershoot due to MIN_PIXEL_GAP bounds, proportionally scale the final values
+      if (totalRequiredPixels > 0) {
+        const ratio = scaleHeight / totalRequiredPixels;
+        for (const g of gaps) {
+          g.pixels *= ratio;
+        }
+      }
+    }
+
+    const distanceToPixels = new Map<number, number>();
+    distanceToPixels.set(0, 0);
+    
+    let currentRadius = 0;
+    for (let i = 1; i < plottedDistances.length; i++) {
+      currentRadius += gaps[i - 1].pixels;
+      distanceToPixels.set(plottedDistances[i].dist, currentRadius);
+    }
+
+    // Helper: translate distance into pixel radius using the map
     const getPixelRadius = (distance: number) => {
-      if (canvasBoundary === 0) return 0;
-      const topMargin = showShell ? 15 : 45;
-      const scaleHeight = height - topMargin - bottomMargin;
-      return (distance / canvasBoundary) * scaleHeight;
+      if (distanceToPixels.has(distance)) return distanceToPixels.get(distance)!;
+      
+      // Interpolate for distances not explicitly in the list (e.g. cloud radius boundaries)
+      let lowerDist = 0;
+      let lowerPx = 0;
+      let upperDist = canvasBoundary;
+      let upperPx = scaleHeight;
+      
+      for (const [d, px] of distanceToPixels.entries()) {
+        if (d <= distance && d >= lowerDist) { lowerDist = d; lowerPx = px; }
+        if (d >= distance && d <= upperDist) { upperDist = d; upperPx = px; }
+      }
+      
+      if (upperDist === lowerDist) return lowerPx;
+      const fraction = (distance - lowerDist) / (upperDist - lowerDist);
+      return lowerPx + fraction * (upperPx - lowerPx);
     };
-
-
-
-    // Intentionally blank - getPixelRadius is now declared above Star drawing
 
     // Draw orbits
     ctx.lineWidth = 1;

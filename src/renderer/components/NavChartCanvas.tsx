@@ -61,8 +61,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
 
 
   // Canvas interaction state (Zoom & Pan)
-  const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [{ zoom, pan }, setViewport] = useState({ zoom: 1, pan: { x: 0, y: 0 } });
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
 
@@ -107,8 +106,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     const minDim = Math.min(dimensions.width, dimensions.height);
     const targetZoom = (minDim * 0.45) / viewRadius;
     
-    setZoom(targetZoom);
-    setPan({ x: dimensions.width / 2, y: dimensions.height / 2 });
+    setViewport({ zoom: targetZoom, pan: { x: dimensions.width / 2, y: dimensions.height / 2 } });
   };
 
   useImperativeHandle(ref, () => ({
@@ -390,10 +388,13 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDragging) return;
-    setPan({
-      x: e.clientX - dragStart.current.x,
-      y: e.clientY - dragStart.current.y,
-    });
+    setViewport((prev) => ({
+      ...prev,
+      pan: {
+        x: e.clientX - dragStart.current.x,
+        y: e.clientY - dragStart.current.y,
+      }
+    }));
   };
 
   const handleMouseUpOrLeave = () => {
@@ -402,40 +403,44 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
 
   // Zoom logic
   const handleZoom = (factor: number) => {
-    setZoom((prevZoom) => {
-      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, prevZoom * factor));
-      setPan((prevPan) => {
-        const mouseX = dimensions.width / 2;
-        const mouseY = dimensions.height / 2;
-        const modelX = (mouseX - prevPan.x) / prevZoom;
-        const modelY = (mouseY - prevPan.y) / prevZoom;
-        return {
+    setViewport((prev) => {
+      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, prev.zoom * factor));
+      const mouseX = dimensions.width / 2;
+      const mouseY = dimensions.height / 2;
+      const modelX = (mouseX - prev.pan.x) / prev.zoom;
+      const modelY = (mouseY - prev.pan.y) / prev.zoom;
+      return {
+        zoom: newZoom,
+        pan: {
           x: mouseX - modelX * newZoom,
           y: mouseY - modelY * newZoom,
-        };
-      });
-      return newZoom;
+        }
+      };
     });
   };
 
   const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
     const zoomFactor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
     const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+    if (!rect || !canvasRef.current) return;
+    
+    // Scale coordinates accurately if CSS size differs from canvas internal size
+    const scaleX = canvasRef.current.width / rect.width;
+    const scaleY = canvasRef.current.height / rect.height;
+    const mouseX = (e.clientX - rect.left) * scaleX;
+    const mouseY = (e.clientY - rect.top) * scaleY;
 
-    setZoom((prevZoom) => {
-      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, prevZoom * zoomFactor));
-      setPan((prevPan) => {
-        const modelX = (mouseX - prevPan.x) / prevZoom;
-        const modelY = (mouseY - prevPan.y) / prevZoom;
-        return {
+    setViewport((prev) => {
+      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, prev.zoom * zoomFactor));
+      const modelX = (mouseX - prev.pan.x) / prev.zoom;
+      const modelY = (mouseY - prev.pan.y) / prev.zoom;
+      return {
+        zoom: newZoom,
+        pan: {
           x: mouseX - modelX * newZoom,
           y: mouseY - modelY * newZoom,
-        };
-      });
-      return newZoom;
+        }
+      };
     });
   };
 
