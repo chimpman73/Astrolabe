@@ -16,7 +16,7 @@
       "coronaSize": 1.5,
       "isStationary": true,
       "sizeClass": "H",
-      "physicalSize": 100000,
+      "physicalSize": 900000,
       "sizeUnit": "miles"
     },
     {
@@ -288,9 +288,9 @@
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Toril",
       "distanceOrbited": 0.18,
-      "initialAngle": 330,
+      "initialAngle": 347,
       "orbitalPeriodDays": 30,
-      "arcDegrees": 50,
+      "arcDegrees": 21,
       "cloudTransparency": 0.3,
       "cloudiness": 0.5,
       "cloudObjectDensity": 11,
@@ -348,7 +348,7 @@
       "size": 10,
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Glyth",
-      "distanceOrbited": 0.3,
+      "distanceOrbited": 0.1,
       "initialAngle": 0,
       "orbitalPeriodDays": 340,
       "arcDegrees": 360,
@@ -356,9 +356,10 @@
       "cloudiness": 0,
       "cloudObjectDensity": 48,
       "elementAffinity": "water",
-      "sizeClass": "D",
-      "physicalSize": 1000,
-      "sizeUnit": "miles"
+      "sizeClass": "B",
+      "physicalSize": 10,
+      "sizeUnit": "miles",
+      "cloudObjectSize": 1
     },
     {
       "name": "Haven",
@@ -366,13 +367,13 @@
       "size": 5,
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Glyth",
-      "distanceOrbited": 0.4,
+      "distanceOrbited": 0.17,
       "initialAngle": 84,
       "orbitalPeriodDays": 365,
       "worldShape": "elliptical",
       "elementAffinity": "earth",
-      "sizeClass": "D",
-      "physicalSize": 1000,
+      "sizeClass": "A",
+      "physicalSize": 9,
       "sizeUnit": "miles"
     },
     {
@@ -381,7 +382,7 @@
       "size": 10,
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Glyth",
-      "distanceOrbited": 0.5,
+      "distanceOrbited": 0.23,
       "initialAngle": 0,
       "orbitalPeriodDays": 400,
       "arcDegrees": 360,
@@ -389,8 +390,8 @@
       "cloudiness": 0,
       "cloudObjectDensity": 75,
       "elementAffinity": "earth",
-      "sizeClass": "D",
-      "physicalSize": 1000,
+      "sizeClass": "B",
+      "physicalSize": 10,
       "sizeUnit": "miles"
     },
     {
@@ -399,12 +400,12 @@
       "size": 10,
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Glyth",
-      "distanceOrbited": 0.8,
+      "distanceOrbited": 0.4,
       "initialAngle": 344,
       "orbitalPeriodDays": 450,
       "elementAffinity": "earth",
-      "sizeClass": "D",
-      "physicalSize": 1000,
+      "sizeClass": "B",
+      "physicalSize": 100,
       "sizeUnit": "miles"
     },
     {
@@ -413,12 +414,12 @@
       "size": 5,
       "description": "A newly added planetary body.",
       "orbitedObjectName": "Mingabwe",
-      "distanceOrbited": 0.15,
+      "distanceOrbited": 0.1,
       "initialAngle": 296,
       "orbitalPeriodDays": 60,
       "worldShape": "irregular",
-      "sizeClass": "D",
-      "physicalSize": 1000,
+      "sizeClass": "A",
+      "physicalSize": 9,
       "sizeUnit": "miles"
     },
     {

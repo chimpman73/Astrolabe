@@ -1,11 +1,11 @@
 import { SizeClass, SizeUnit } from '../../types/astrolabe';
-import { IVisualScaleStrategy, LiteralClampedScaleStrategy } from './VisualScaleStrategy';
+import { IVisualScaleStrategy, HybridScaleStrategy } from './VisualScaleStrategy';
 
 export class ScaleManager {
   public static readonly AU_IN_MILES = 92955807;
 
   // Active strategy for Nav Chart zoomable scaling
-  private static navChartStrategy: IVisualScaleStrategy = new LiteralClampedScaleStrategy();
+  private static navChartStrategy: IVisualScaleStrategy = new HybridScaleStrategy();
 
   public static setNavChartStrategy(strategy: IVisualScaleStrategy) {
     this.navChartStrategy = strategy;
@@ -58,6 +58,26 @@ export class ScaleManager {
       case 'I': return 24;
       case 'J': return 32;
       default: return 8; // fallback
+    }
+  }
+
+  /**
+   * Returns the miniature symbolic pixel radius for the NavChart Hybrid view, 
+   * starting at 1px for Size A and growing up to 12px for Size J.
+   */
+  public static getNavChartSymbolicRadius(sizeClass: SizeClass): number {
+    switch (sizeClass) {
+      case 'A': return 1;
+      case 'B': return 1.5;
+      case 'C': return 2;
+      case 'D': return 3;
+      case 'E': return 4;
+      case 'F': return 5;
+      case 'G': return 6;
+      case 'H': return 8;
+      case 'I': return 10;
+      case 'J': return 12;
+      default: return 3; // fallback
     }
   }
 

@@ -12,6 +12,9 @@ export interface NavChartCanvasHandle {
   handleExport: () => Promise<void>;
 }
 
+const MIN_ZOOM = 5;
+const MAX_ZOOM = 1000;
+
 export interface NavChartCanvasProps {
   mapTheme: 'parchment' | 'space';
 }
@@ -203,8 +206,27 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
       };
     };
 
+    // Sub-orbiter Culling: Determine which objects to hide if zoomed out too far
+    const culledObjects = new Set<string>();
+    visibleObjects.forEach(obj => {
+      if (obj.orbitedObjectName && obj.orbitedObjectName !== obj.name && !isPrimary(obj)) {
+        const orbitRadiusPx = obj.distanceOrbited * activeZoom;
+        const parent = objects.find(o => o.name === obj.orbitedObjectName);
+        let cullThreshold = 10;
+        if (parent) {
+          const parentSize = ScaleManager.getNavChartVisualRadius(parent.sizeClass || 'D', parent.physicalSize || 1000, parent.sizeUnit || 'miles', activeZoom);
+          cullThreshold = parentSize + 5;
+        }
+        if (orbitRadiusPx < cullThreshold) {
+          culledObjects.add(obj.name);
+        }
+      }
+    });
+
+    const activeVisibleObjects = visibleObjects.filter(obj => !culledObjects.has(obj.name));
+
     // 1. Draw orbits (back-to-front)
-    visibleObjects.forEach((obj) => {
+    activeVisibleObjects.forEach((obj) => {
       // Find parent coordinate in model space
       let px = 0;
       let py = 0;
@@ -266,7 +288,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
       );
 
     // 3. Draw bodies (nebulas, sargassos, and solid bodies) in array order (z-index)
-    visibleObjects.forEach((obj) => {
+    activeVisibleObjects.forEach((obj) => {
       const pos = positions[obj.name];
       if (!pos) return;
 
@@ -315,6 +337,38 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
       }
     });
 
+    // 4. Draw Dynamic Scale Bar Overlay
+    const scaleBarWidth = 50;
+    const auRepresented = scaleBarWidth / activeZoom;
+    
+    const padding = 20;
+    const barX = width - padding - scaleBarWidth;
+    const barY = height - padding;
+    
+    ctx.beginPath();
+    ctx.moveTo(barX, barY - 5);
+    ctx.lineTo(barX, barY);
+    ctx.lineTo(barX + scaleBarWidth, barY);
+    ctx.lineTo(barX + scaleBarWidth, barY - 5);
+    
+    ctx.strokeStyle = colorStroke;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    let scaleLabel = '';
+    if (auRepresented >= 0.1) {
+      scaleLabel = `${auRepresented.toFixed(2)} AU`;
+    } else {
+      const miles = Math.round(ScaleManager.auToMiles(auRepresented));
+      scaleLabel = `${miles.toLocaleString()} mi`;
+    }
+
+    ctx.font = `500 10px 'Elan', 'Outfit', sans-serif`;
+    ctx.fillStyle = colorStroke;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(scaleLabel, barX + (scaleBarWidth / 2), barY - 8);
+
   };
 
   // Redraw canvas
@@ -349,7 +403,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   // Zoom logic
   const handleZoom = (factor: number) => {
     setZoom((prevZoom) => {
-      const newZoom = Math.max(5, Math.min(1000, prevZoom * factor));
+      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, prevZoom * factor));
       setPan((prevPan) => {
         const mouseX = dimensions.width / 2;
         const mouseY = dimensions.height / 2;
@@ -372,7 +426,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     const mouseY = e.clientY - rect.top;
 
     setZoom((prevZoom) => {
-      const newZoom = Math.max(5, Math.min(1000, prevZoom * zoomFactor));
+      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, prevZoom * zoomFactor));
       setPan((prevPan) => {
         const modelX = (mouseX - prevPan.x) / prevZoom;
         const modelY = (mouseY - prevPan.y) / prevZoom;
