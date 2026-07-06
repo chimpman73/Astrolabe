@@ -34,6 +34,8 @@ This file tracks the design, development, and integration tasks for the Astrolab
 | **AST-026** | PC/DM Global View Toggle | High | `Done` | Add global UI toggle to switch between PC/DM modes; filter map views accordingly. |
 | **AST-027** | Bookmark Dynamic Scaling | Medium | `Done` | Scale Bookmark view dynamically to outermost visible object when shell is hidden. |
 | **AST-028** | Bookmark Titles | Low | `Done` | Display system name without 'SHELL' suffix when shell boundary is hidden. |
+| **AST-029** | Bookmark Dynamic Gap Compression | High | `Done` | Replace linear vertical scaling with a fractional power curve to compress empty space while enforcing minimum padding. |
+| **AST-030** | Bookmark Shared Orbit Grouping | High | `Done` | Group bodies on the same orbit to fan out horizontally along the arc, preventing overlap. Includes smart label alignment. |
 
 ---
 
@@ -159,3 +161,17 @@ This file tracks the design, development, and integration tasks for the Astrolab
 - [x] **AST-028: Bookmark Titles**
   * Display the system name without 'SHELL' suffix when the shell boundary is hidden.
   * Adjusted vertical position of the label to y=12 for a cleaner layout above the top object.
+
+### Phase 8: Advanced Bookmark Layouts
+- [x] **AST-029: Bookmark Dynamic Gap Compression**
+  * Removed linear scale calculation mapping from Bookmark view.
+  * Applied non-linear square-root curve algorithm to visually compress large distance gaps without altering mathematical distances.
+  * Applied minimum pixel padding rule to separate objects, exempting objects >1 AU in size.
+  * Dynamically calculated bottom canvas margins to perfectly accommodate the central primary object.
+
+- [x] **AST-030: Bookmark Shared Orbit Grouping**
+  * Implemented grouping strategy to aggregate bodies on identically overlapping orbits.
+  * Calculated arc segments to uniformly spread objects horizontally along the top orbital curve.
+  * Sub-grouped by `initialAngle` so identical physical bodies (e.g. cloud + planet) correctly stack exactly on top of one another.
+  * Implemented Smart Label Alignment, alternating label sides to point outward.
+  * Consolidated to a single distance label on the left edge for the entire shared orbit group.

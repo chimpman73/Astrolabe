@@ -1,7 +1,7 @@
 {
   "sphereName": "Greyspace",
   "currentCampaignDate": "2026-07-04",
-  "currentSystemDate": 0,
+  "currentSystemDate": 3253,
   "objects": [
     {
       "name": "Oerth",
@@ -13,111 +13,152 @@
       "initialAngle": 0,
       "orbitalPeriodDays": 0,
       "isStationary": true,
-      "elementAffinity": "mixed"
+      "elementAffinity": "mixed",
+      "sizeClass": "E",
+      "physicalSize": 9500,
+      "sizeUnit": "miles"
     },
     {
       "name": "Kule",
       "type": "moon",
       "size": 15,
-      "description": "A newly added planetary body.",
+      "description": "Kule, also known as Celene or the Handmaiden, is the first celestial body in orbit around the system primary Oerth.",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 0.08,
       "initialAngle": 252,
       "orbitalPeriodDays": 91,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "B",
+      "physicalSize": 10,
+      "sizeUnit": "miles"
     },
     {
       "name": "Raenei",
       "type": "moon",
       "size": 20,
-      "description": "A newly added planetary body.",
+      "description": "Raenei, also known as Luna or the Mistress[1], is the second celestial body in orbit around the system primary Oerth",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 0.29,
       "initialAngle": 113,
       "orbitalPeriodDays": 28,
-      "elementAffinity": "water"
+      "elementAffinity": "water",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Liga",
       "type": "star",
       "size": 35,
-      "description": "A newly added planetary body.",
+      "description": "Liga, also known as the Sun, is the third celestial body in orbit around the system primary Oerth",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 1,
       "initialAngle": 125,
       "orbitalPeriodDays": 364,
       "elementAffinity": "fire",
       "isStationary": false,
-      "orbitDirection": "prograde"
+      "orbitDirection": "prograde",
+      "sizeClass": "G",
+      "physicalSize": 90000,
+      "sizeUnit": "miles"
+    },
+    {
+      "name": "The Moth",
+      "type": "moon",
+      "sizeClass": "C",
+      "physicalSize": 900,
+      "sizeUnit": "miles",
+      "description": "The Moth is a voidworld, without an atmosphere, and is completely devoid of life.",
+      "orbitedObjectName": "Liga",
+      "distanceOrbited": 0.02,
+      "initialAngle": 258,
+      "orbitalPeriodDays": 365,
+      "elementAffinity": "earth",
+      "isDMOnly": true
     },
     {
       "name": "The Grinder",
       "type": "cloud",
       "size": 40,
-      "description": "A newly added planetary body.",
+      "description": "The Grinder is a dense asteroid field, composed of countless millions of asteroids, planetoids and rocks, ranging in size from 100 miles (161 kilometres) down to the size of a golf-ball.",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 2,
       "initialAngle": 83,
       "orbitalPeriodDays": 720,
       "arcDegrees": 360,
-      "cloudTransparency": 0,
+      "cloudTransparency": 0.45,
       "cloudiness": 0,
       "cloudObjectShape": "irregular",
       "cloudObjectDensity": 150,
       "cloudObjectSize": 7,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "B",
+      "physicalSize": 99,
+      "sizeUnit": "miles"
     },
     {
       "name": "Edill",
       "type": "planet",
       "size": 15,
-      "description": "A newly added planetary body.",
+      "description": "From a distance, Edill resembles a robin-egg blue sphere, with no discernible features. Although there are numerous elemental bodies spinning throughout its atmosphere, Edill does not have a solid core – it is simply a massive concentration of breathable air. ",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 4,
       "initialAngle": 241,
       "orbitalPeriodDays": 480,
-      "elementAffinity": "air"
+      "elementAffinity": "air",
+      "sizeClass": "G",
+      "physicalSize": 90000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Gnibile",
       "type": "planet",
       "size": 25,
-      "description": "A newly added planetary body.",
+      "description": "Gnibile is a baleful dark red gas giant, only slightly smaller than its' sister planet Edill. The planet is sheathed in an unbroken layer of caustic, corrosive and extremely toxic clouds 500 yards (460 meters) thick, whipped up into a frenzy by enormous storms that make the hurricanes of Oerth look puny by comparison. ",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 6,
       "initialAngle": 324,
       "orbitalPeriodDays": 1920,
-      "elementAffinity": "air"
+      "elementAffinity": "air",
+      "sizeClass": "G",
+      "physicalSize": 80000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Conatha",
       "type": "planet",
       "size": 20,
-      "description": "A newly added planetary body.",
+      "description": "Conatha is an elliptical world that tumbles end-over-end as it revolves around Oerth along its roughly circular orbit. Although Conatha is a water planet, it does have an atmosphere 5 miles (8 kilometres) deep, with about the same pressure and oxygen levels' as Oerth’s atmosphere. The thin layer of air is perfectly clear, with no clouds or other signs of weather, and is never disturbed by any winds. ",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 10,
       "initialAngle": 44,
       "orbitalPeriodDays": 3600,
       "elementAffinity": "water",
-      "worldShape": "elliptical"
+      "worldShape": "elliptical",
+      "sizeClass": "C",
+      "physicalSize": 900,
+      "sizeUnit": "miles"
     },
     {
       "name": "Ginsel",
       "type": "planet",
       "size": 20,
-      "description": "A newly added planetary body.",
+      "description": "Ginsel is a crescent-shaped planet, resembling a sphere out of which a large bite has been taken. The two points of the crescent are the north and south poles of the world, which rotates around an axis running through the poles, making it look like it wobbles wildly through wildspace. When Ginsel is viewed edge-on, it resembles a perfect crescent moon. When viewed face-on, however, it looks like an ellipse. ",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 15,
       "initialAngle": 106,
       "orbitalPeriodDays": 5400,
       "worldShape": "irregular",
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "C",
+      "physicalSize": 900,
+      "sizeUnit": "miles"
     },
     {
       "name": "Borka",
       "type": "cloud",
       "size": 20,
-      "description": "A newly added planetary body.",
+      "description": "Borka is a cluster of several thousand rocks, all sharing a common atmosphere. Individual rocks range in size from less than 500 yards (457 meters) in diameter to almost 10 miles (16 kilometres) in diameter. Some rocks are roughly spherical, while others are completely irregular. The cluster itself is roughly spherical, or at least the atmospheric envelope is, and is about 5000 miles (8046 kilometres) in diameter. ",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 20,
       "initialAngle": 296,
@@ -127,32 +168,41 @@
       "cloudiness": 0,
       "elementAffinity": "earth",
       "cloudObjectDensity": 20,
-      "cloudObjectSize": 6
+      "cloudObjectSize": 6,
+      "sizeClass": "E",
+      "physicalSize": 5000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Greela",
       "type": "planet",
       "size": 30,
-      "description": "A newly added planetary body.",
+      "description": "Greela is a cluster-world comprised of several hundred planetoids, ranging in size from tens of miles across (size A) to a few hundred miles across (size C). Most of the planetoids average about 150 miles (241 kilometres) long and 100 miles (160 kilometres) in diameter at their widest points. ",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 30,
       "initialAngle": 335,
       "orbitalPeriodDays": 10800,
       "worldShape": "cluster",
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "sizeClass": "E",
+      "physicalSize": 9000,
+      "sizeUnit": "miles"
     },
     {
       "name": "The Spectre",
       "type": "planet",
       "size": 15,
-      "description": "A newly added planetary body.",
+      "description": "The Spectre is a flat disk-world about 100 miles (160 kilometres) in diameter and 10 miles (16 kilometres) thick at the edge. Viewed from above, it is almost perfectly circular. As it orbits around Oerth, it rotates along its horizontal axis, like a tossed coin. This is why it appears to \"wink\" when viewed from Oerth; when it turns edge-on to the observer, at any distance at all, it appears to disappear. The Spectre also spins around its central axis. One complete rotation takes 35 standard days. This means that the point where the sun rises and sets changes with time. ",
       "orbitedObjectName": "Oerth",
       "distanceOrbited": 40,
       "initialAngle": 166,
       "orbitalPeriodDays": 13500,
       "worldShape": "disc",
       "elementAffinity": "earth",
-      "affectsShellBoundary": true
+      "affectsShellBoundary": true,
+      "sizeClass": "B",
+      "physicalSize": 99,
+      "sizeUnit": "miles"
     },
     {
       "name": "Sister's Sargasso",
@@ -167,7 +217,10 @@
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
       "affectsShellBoundary": false,
-      "cloudObjectSize": 1.5
+      "cloudObjectSize": 1.5,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "The Sisters",
@@ -179,7 +232,10 @@
       "initialAngle": 203,
       "orbitalPeriodDays": 12000,
       "worldShape": "cluster",
-      "affectsShellBoundary": false
+      "affectsShellBoundary": false,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Great Sargasso",
@@ -193,7 +249,11 @@
       "affectsShellBoundary": false,
       "arcDegrees": 30,
       "cloudTransparency": 0.45,
-      "cloudiness": 0.5
+      "cloudiness": 0.5,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles",
+      "isDMOnly": true
     },
     {
       "name": "The Habitat",
@@ -205,7 +265,11 @@
       "initialAngle": 43,
       "orbitalPeriodDays": 16000,
       "affectsShellBoundary": false,
-      "worldShape": "ship"
+      "worldShape": "ship",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles",
+      "isDMOnly": true
     },
     {
       "name": "Dark Star 1",
@@ -216,7 +280,11 @@
       "distanceOrbited": 65,
       "initialAngle": 0,
       "orbitalPeriodDays": 25000,
-      "affectsShellBoundary": false
+      "affectsShellBoundary": false,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles",
+      "isDMOnly": true
     },
     {
       "name": "Dark Star 2",
@@ -227,7 +295,11 @@
       "distanceOrbited": 65,
       "initialAngle": 151,
       "orbitalPeriodDays": 8000,
-      "affectsShellBoundary": false
+      "affectsShellBoundary": false,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles",
+      "isDMOnly": true
     },
     {
       "name": "Dark Star 3",
@@ -238,7 +310,11 @@
       "distanceOrbited": 65,
       "initialAngle": 235,
       "orbitalPeriodDays": 1200,
-      "affectsShellBoundary": false
+      "affectsShellBoundary": false,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles",
+      "isDMOnly": true
     }
   ]
 }

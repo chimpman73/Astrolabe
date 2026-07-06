@@ -246,44 +246,109 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
       showShell ? 32 : 12
     );
 
-    // Draw objects and labels along the center line
+    // Group objects by their orbital distance
+    const groupedObjects = new Map<number, typeof planetaryObjects>();
     planetaryObjects.forEach((obj) => {
-      const r = getPixelRadius(obj.distanceOrbited);
-      const objY = centerY - r;
+      const d = obj.distanceOrbited;
+      if (!groupedObjects.has(d)) groupedObjects.set(d, []);
+      groupedObjects.get(d)!.push(obj);
+    });
+
+    // Draw objects and labels
+    groupedObjects.forEach((objects, distance) => {
+      const r = getPixelRadius(distance);
       const sizeMultiplier = width / 300;
-      const objSize = ScaleManager.getBookmarkVisualRadius(obj.sizeClass || 'D') * sizeMultiplier;
-
-      if (obj.type === 'cloud') {
-        const cloudFill = getElementColor(obj.elementAffinity || null) || (isDark ? '#a0a0a0' : '#808080');
-        drawSolidBody(ctx, centerX, centerY, obj, objSize, cloudFill, '#505050', false, 1, 
-          true, centerX, centerY, undefined, undefined, width, r, centerY
-        );
-      } else {
-        const { bodyFill, bodyStroke } = getBodyColors(obj, !isDark, colorBg, colorStroke, '#e2b34a');
-        
-        // Calculate true pixels per AU
-        const scaleHeight = height - (showShell ? 15 : 45) - bottomMargin;
-        const pixelsPerAU = canvasBoundary > 0 ? scaleHeight / canvasBoundary : 1;
-        const zoomEquiv = pixelsPerAU; // For branch scaling on living worlds
-
-        drawSolidBody(ctx, centerX, objY, obj, objSize, bodyFill, bodyStroke, false, zoomEquiv);
-      }
-
-      // --- Name label to the right ---
-      ctx.font = `normal ${Math.max(10, width * 0.035) * 1.5}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
-      ctx.fillStyle = colorStroke;
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(obj.name, centerX + objSize + 12, objY);
-
-      // --- Distance label to the left ---
-      if (showDistance) {
-        ctx.font = `italic ${Math.max(8, width * 0.028) * 1.5}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
-        ctx.fillStyle = colorMuted;
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(`${obj.distanceOrbited.toFixed(2)} AU`, centerX - objSize - 12, objY);
-      }
+      
+      // Sub-group by initialAngle to allow overlapping for objects that share the exact same position
+      const angleGroups = new Map<number, typeof objects>();
+      objects.forEach(o => {
+        const ang = o.initialAngle || 0;
+        if (!angleGroups.has(ang)) angleGroups.set(ang, []);
+        angleGroups.get(ang)!.push(o);
+      });
+      
+      const clusterCount = angleGroups.size;
+      let clusterIndex = 0;
+      
+      angleGroups.forEach((cluster) => {
+        cluster.forEach((obj, objIndexInCluster) => {
+          const objSize = ScaleManager.getBookmarkVisualRadius(obj.sizeClass || 'D') * sizeMultiplier;
+          let x = centerX;
+          let y = centerY - r;
+          
+          let nameTextAlign: CanvasTextAlign = 'left';
+          let nameXOffset = objSize + 12;
+          
+          if (clusterCount > 1) {
+            if (r === 0) {
+              // Binary central stars: spread horizontally
+              const spread = 80;
+              const offset = (clusterIndex - (clusterCount - 1) / 2) * spread;
+              x = centerX + offset;
+              
+              if (offset < 0) {
+                nameTextAlign = 'right';
+                nameXOffset = -objSize - 12;
+              }
+            } else {
+              // Fan out along the arc
+              const j = clusterIndex - (clusterCount - 1) / 2; 
+              const avgArcPixels = 120; // Approx horizontal space needed per item
+              let stepTheta = avgArcPixels / r;
+              if (stepTheta > Math.PI / 4) stepTheta = Math.PI / 4; // Cap angle to prevent wrapping
+              
+              const alpha = -Math.PI / 2 + j * stepTheta;
+              
+              x = centerX + r * Math.cos(alpha);
+              y = centerY + r * Math.sin(alpha);
+              
+              if (j < 0) {
+                 nameTextAlign = 'right'; // Draw name to the left of the body
+                 nameXOffset = -objSize - 12;
+              }
+            }
+          }
+  
+          if (obj.type === 'cloud') {
+            const cloudFill = getElementColor(obj.elementAffinity || null) || (isDark ? '#a0a0a0' : '#808080');
+            drawSolidBody(ctx, centerX, centerY, obj, objSize, cloudFill, '#505050', false, 1, 
+              true, centerX, centerY, undefined, undefined, width, r, centerY
+            );
+          } else {
+            const { bodyFill, bodyStroke } = getBodyColors(obj, !isDark, colorBg, colorStroke, '#e2b34a');
+            const scaleHeight = height - (showShell ? 15 : 45) - bottomMargin;
+            const pixelsPerAU = canvasBoundary > 0 ? scaleHeight / canvasBoundary : 1;
+            
+            drawSolidBody(ctx, x, y, obj, objSize, bodyFill, bodyStroke, false, pixelsPerAU);
+          }
+  
+          // --- Name label ---
+          // If multiple objects share this exact same angle, offset their text vertically so they don't overwrite each other
+          const verticalOffset = objIndexInCluster * 14; 
+          ctx.font = `normal ${Math.max(10, width * 0.035) * 1.5}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
+          ctx.fillStyle = colorStroke;
+          ctx.textAlign = nameTextAlign;
+          ctx.textBaseline = 'middle';
+          ctx.fillText(obj.name, x + nameXOffset, y + verticalOffset);
+  
+          // --- Distance label (only for the leftmost cluster, and only for the first object in that cluster) ---
+          if (showDistance && clusterIndex === 0 && objIndexInCluster === 0) {
+            ctx.font = `italic ${Math.max(8, width * 0.028) * 1.5}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
+            ctx.fillStyle = colorMuted;
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            
+            let distanceXOffset = -objSize - 12;
+            if (nameTextAlign === 'right') {
+               const textW = ctx.measureText(obj.name).width;
+               distanceXOffset = -objSize - 12 - textW - 12; // Push past the name label
+            }
+            
+            ctx.fillText(`${obj.distanceOrbited.toFixed(2)} AU`, x + distanceXOffset, y);
+          }
+        });
+        clusterIndex++;
+      });
     });
 
     // Decorative Bookmark borders
