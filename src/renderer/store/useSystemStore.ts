@@ -1,6 +1,15 @@
 import { create } from 'zustand';
 import { CrystalSphere, SaveFileInfo, CelestialObject } from '../../types/astrolabe';
 
+export interface ParchmentDecoration {
+  type: 'ink' | 'coffee' | 'burn';
+  x: number;
+  y: number;
+  rotation: number;
+  scale: number;
+  opacity: number;
+}
+
 interface SystemState {
   saveDirectory: string | null;
   savesList: SaveFileInfo[];
@@ -11,6 +20,7 @@ interface SystemState {
   bookmarkShowShell: boolean;
   bookmarkShowDistance: boolean;
   toastMessage: { type: 'success' | 'error'; text: string } | null;
+  decorations: ParchmentDecoration[];
   
   // Actions
   setSaveDirectory: (path: string) => Promise<void>;
@@ -33,6 +43,8 @@ interface SystemState {
   setToastMessage: (toast: { type: 'success' | 'error'; text: string } | null) => void;
   viewMode: 'PC' | 'DM';
   setViewMode: (mode: 'PC' | 'DM') => void;
+  generateDecorations: (maxRadius: number) => void;
+  clearDecorations: () => void;
 }
 
 export const useSystemStore = create<SystemState>((set, get) => ({
@@ -46,8 +58,34 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   bookmarkShowDistance: true,
   toastMessage: null,
   viewMode: 'PC',
+  decorations: [],
 
   setViewMode: (mode) => set({ viewMode: mode }),
+
+  generateDecorations: (maxRadius: number) => {
+    const numDecorations = Math.floor(Math.random() * 5) + 5; // 5 to 9 decorations
+    const newDecorations: ParchmentDecoration[] = [];
+    const types: ('ink' | 'coffee' | 'burn')[] = ['ink', 'ink', 'ink', 'coffee', 'burn'];
+
+    for (let i = 0; i < numDecorations; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      // Keep radius outside the immediate center (at least 40% of maxRadius out to 150%)
+      const minRadius = maxRadius * 0.4;
+      const radius = minRadius + (Math.random() * (maxRadius * 1.5 - minRadius));
+      newDecorations.push({
+        type: types[Math.floor(Math.random() * types.length)],
+        x: Math.cos(angle) * radius,
+        y: Math.sin(angle) * radius,
+        rotation: Math.random() * Math.PI * 2,
+        scale: 0.5 + Math.random() * 1.5,
+        // Lower opacity so they are not too dark
+        opacity: 0.15 + Math.random() * 0.25,
+      });
+    }
+    set({ decorations: newDecorations });
+  },
+
+  clearDecorations: () => set({ decorations: [] }),
 
   setSaveDirectory: async (path: string) => {
     set({ saveDirectory: path });

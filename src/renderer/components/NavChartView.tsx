@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useSystemStore } from '../store/useSystemStore';
-import { Play, Pause, FastForward, RotateCcw, Download, ZoomIn, ZoomOut, Maximize, ChevronLeft } from 'lucide-react';
+import { Play, Pause, FastForward, RotateCcw, Download, ZoomIn, ZoomOut, Maximize, ChevronLeft, Sparkles } from 'lucide-react';
 import { NavChartCanvas, NavChartCanvasHandle } from './NavChartCanvas';
 
 interface NavChartViewProps {
@@ -12,6 +12,8 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
     currentSystemDate,
     setCurrentSystemDate,
     advanceSystemDate,
+    generateDecorations,
+    activeSphere
   } = useSystemStore();
 
   const canvasRef = useRef<NavChartCanvasHandle>(null);
@@ -127,6 +129,22 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
           </button>
 
           <div className="w-[1px] h-4 bg-[var(--color-border-parchment)] mx-1" />
+
+          {mapTheme === 'parchment' && (
+            <button
+              onClick={() => {
+                let maxDist = 0.1;
+                activeSphere?.objects.forEach(o => {
+                  if (o.distanceOrbited > maxDist) maxDist = o.distanceOrbited;
+                });
+                generateDecorations(maxDist * 2);
+              }}
+              title="Regenerate Parchment Stains"
+              className="flex items-center gap-1 px-1.5 py-0.5 scroll-border bg-[var(--color-bg-base)] hover:bg-[var(--color-border-parchment)] transition-colors text-[9px] font-semibold text-[var(--color-text-muted)]"
+            >
+              <Sparkles className="w-3 h-3 text-[var(--color-accent-gold)]" /> Stains
+            </button>
+          )}
 
           <button
             onClick={() => canvasRef.current?.handleZoom(1.2)}

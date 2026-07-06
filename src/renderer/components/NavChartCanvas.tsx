@@ -1,10 +1,12 @@
-import React, { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useRef, useEffect, useState, forwardRef, useImperativeHandle, useMemo } from 'react';
 import { useSystemStore } from '../store/useSystemStore';
 import { calculateSystemPositions } from '../utils/orbitMath';
 // unused imports removed
 import { saveCanvasExport } from '../utils/exportHelper';
-import { drawSolidBody, drawStationaryIndicator, getBodyColors, getElementColor } from '../utils/canvasRenderer';
 import { ScaleManager } from '../utils/ScaleManager';
+import { VellumStyle } from '../styles/VellumStyle';
+import { SpaceStyle } from '../styles/SpaceStyle';
+import { MapStyleContext } from '../styles/MapStyle';
 
 export interface NavChartCanvasHandle {
   handleZoom: (factor: number) => void;
@@ -25,9 +27,103 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     currentSystemDate,
     setToastMessage,
     viewMode,
+    decorations,
   } = useSystemStore();
 
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [forceRenderState, setForceRenderState] = useState(0);
+
+  const forceRedraw = () => setForceRenderState(s => s + 1);
+
+  const stylesRef = useRef({
+    vellum: new VellumStyle(forceRedraw),
+    space: new SpaceStyle()
+  });
+
+  const objects = activeSphere?.objects || [];
+  
+  const isPrimary = (obj: any) => {
+    if (!obj.orbitedObjectName) return true;
+    const parent = objects.find((p: any) => p.name === obj.orbitedObjectName);
+    if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
+    return false;
+  };
+
+  const [dimensions, setDimensions] = useState({ width: 850, height: 600 });
+  const [{ zoom, pan }, setViewport] = useState({ zoom: 1, pan: { x: 425, y: 300 } });
+  
+  const setZoom = (fn: (z: number) => number) => {
+      setViewport(prev => ({ ...prev, zoom: fn(prev.zoom) }));
+  };
+
+  const setPan = (fn: (p: {x: number, y: number}) => {x: number, y: number}) => {
+      setViewport(prev => ({ ...prev, pan: fn(prev.pan) }));
+  };
+
+  const panLimits = useMemo(() => {
+    if (mapTheme !== 'parchment') return null;
+    let maxDist = 0.1;
+    objects.forEach((o: any) => {
+      if (!isPrimary(o) || o.affectsShellBoundary === false) return;
+      const dist = o.distanceOrbited;
+      const reach = o.type === 'living_world' ? dist + (o.branchExtent ?? 2.5) : dist;
+      if (reach > maxDist) maxDist = reach;
+    });
+    const isCustom = activeSphere?.shellBoundaryType === 'custom' || activeSphere?.shellBoundaryType === 'relativeMargin';
+    const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
+    const shellRadiusModel = maxDist * shellScale;
+    
+    const paddingModel = shellRadiusModel * 0.4;
+    const paperWidthModel = shellRadiusModel * 2 + paddingModel * 2;
+    const totalWidthModel = paperWidthModel * 1.06; // rod margins
+    const totalHeightModel = paperWidthModel;
+    
+    return { width: totalWidthModel, height: totalHeightModel };
+  }, [objects, activeSphere, mapTheme]);
+
+  const minZoomLimit = useMemo(() => {
+    if (!panLimits || dimensions.width === 0) return 0.5;
+    const deskMargin = 40;
+    const minZoomX = (dimensions.width - deskMargin * 2) / panLimits.width;
+    const minZoomY = (dimensions.height - deskMargin * 2) / panLimits.height;
+    return Math.max(Math.min(minZoomX, minZoomY), 0.1);
+  }, [panLimits, dimensions]);
+
+  const constrainPan = (p: { x: number; y: number }, z: number) => {
+    if (!panLimits || mapTheme !== 'parchment') return p;
+    const paperW = panLimits.width * z;
+    const paperH = panLimits.height * z;
+    const deskMargin = 40;
+    
+    let minX, maxX, minY, maxY;
+    if (paperW <= dimensions.width) {
+      minX = dimensions.width / 2;
+      maxX = dimensions.width / 2;
+    } else {
+      minX = dimensions.width - deskMargin - paperW / 2;
+      maxX = paperW / 2 + deskMargin;
+    }
+    
+    if (paperH <= dimensions.height) {
+      minY = dimensions.height / 2;
+      maxY = dimensions.height / 2;
+    } else {
+      minY = dimensions.height - deskMargin - paperH / 2;
+      maxY = paperH / 2 + deskMargin;
+    }
+    
+    return {
+      x: Math.max(minX, Math.min(p.x, maxX)),
+      y: Math.max(minY, Math.min(p.y, maxY))
+    };
+  };
+
+  useEffect(() => {
+    if (mapTheme === 'parchment' && zoom < minZoomLimit) {
+      setZoom(() => minZoomLimit);
+      setPan(p => constrainPan(p, minZoomLimit));
+    }
+  }, [minZoomLimit, zoom, mapTheme]);
 
   useEffect(() => {
     if (document.fonts) {
@@ -39,9 +135,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [dimensions, setDimensions] = useState({ width: 850, height: 600 });
 
-  // ResizeObserver to handle dynamic sizing of the canvas wrapper container
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -58,38 +152,20 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     };
   }, []);
   
-
-
-  // Canvas interaction state (Zoom & Pan)
-  const [{ zoom, pan }, setViewport] = useState({ zoom: 1, pan: { x: 0, y: 0 } });
   const [isDragging, setIsDragging] = useState(false);
-  const dragStart = useRef({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
-  // Map theme (space vs parchment) is now a prop
-
-  const objects = activeSphere?.objects || [];
-  const visibleObjects = objects.filter(o => !o.isHidden && (viewMode === 'DM' || !o.isDMOnly));
+  const visibleObjects = objects.filter((o: any) => !o.isHidden && (viewMode === 'DM' || !o.isDMOnly));
   
-  const isPrimary = (obj: any) => {
-    if (!obj.orbitedObjectName) return true;
-    const parent = objects.find((p) => p.name === obj.orbitedObjectName);
-    if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
-    return false;
-  };
-  
-  // Central body is implicitly (0,0).
-
   // Resolve positions
   const positions = calculateSystemPositions(objects, currentSystemDate);
-
-
 
   const handleAutoFit = () => {
     if (visibleObjects.length === 0) return;
     
     let maxDist = 0.1;
     let absoluteMaxDist = 0.1;
-    objects.forEach(o => {
+    objects.forEach((o: any) => {
       if (!isPrimary(o)) return;
       const dist = o.distanceOrbited;
       const reach = o.type === 'living_world' ? dist + (o.branchExtent ?? 2.5) : dist;
@@ -110,12 +186,17 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   };
 
   useImperativeHandle(ref, () => ({
-    handleZoom,
+    handleZoom: (factor: number) => {
+        setZoom((z) => {
+            const newZoom = Math.max(Math.min(z * factor, MAX_ZOOM), mapTheme === 'parchment' ? minZoomLimit : MIN_ZOOM);
+            setPan(p => constrainPan(p, newZoom));
+            return newZoom;
+        });
+    },
     handleAutoFit,
     handleExport,
   }));
 
-  // Set default zoom based on max distance and active dimensions
   const lastDimensions = useRef({ width: 0, height: 0 });
   const lastFitSphere = useRef<string | null>(null);
 
@@ -133,7 +214,6 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     }
   }, [activeSphere?.sphereName, dimensions.width, dimensions.height]);
 
-  // Canvas drawing routine
   const drawMap = (
     ctx: CanvasRenderingContext2D,
     width: number,
@@ -142,61 +222,6 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     activeZoom: number,
     activePan: { x: number; y: number }
   ) => {
-    const isParchment = theme === 'parchment';
-    
-    // Color definitions
-    const colorBg = isParchment ? '#f9f5e8' : '#06070a';
-    const colorGrid = isParchment ? 'rgba(94, 79, 60, 0.05)' : 'rgba(255, 255, 255, 0.03)';
-    const colorOrbit = isParchment ? 'rgba(94, 79, 60, 0.18)' : 'rgba(255, 255, 255, 0.15)';
-    const colorOrbitDash = isParchment ? 'rgba(143, 50, 36, 0.25)' : 'rgba(68, 128, 230, 0.3)';
-    const colorStroke = isParchment ? '#2b2316' : '#ffffff';
-    const colorMuted = isParchment ? '#7c694e' : '#888d9e';
-    const colorGold = isParchment ? '#b58315' : '#e2b34a';
-
-    // Clear background
-    ctx.fillStyle = colorBg;
-    ctx.fillRect(0, 0, width, height);
-
-    // Draw Grid (Navigational Lines)
-    ctx.strokeStyle = colorGrid;
-    ctx.lineWidth = 1;
-    const gridSize = 80;
-    
-    // Draw circular compass-like navigation grids
-    ctx.beginPath();
-    for (let r = gridSize; r < Math.max(width, height); r += gridSize) {
-      ctx.arc(activePan.x, activePan.y, r, 0, 2 * Math.PI);
-    }
-    ctx.stroke();
-
-    // Radial spokes
-    ctx.beginPath();
-    const spokes = 12;
-    for (let i = 0; i < spokes; i++) {
-      const rad = (i * 2 * Math.PI) / spokes;
-      const x = Math.cos(rad) * Math.max(width, height);
-      const y = Math.sin(rad) * Math.max(width, height);
-      ctx.moveTo(activePan.x, activePan.y);
-      ctx.lineTo(activePan.x + x, activePan.y + y);
-    }
-    ctx.stroke();
-
-    // Compass Rose decoration (drawn at coordinate origin)
-    const starProjRaw = { x: activePan.x, y: activePan.y };
-    if (!isParchment) {
-      // Draw a subtle sun icon behind the center if it's space theme
-      ctx.beginPath();
-      for (let i = 0; i < 8; i++) {
-        const rad = (i * Math.PI) / 4;
-        ctx.moveTo(starProjRaw.x, starProjRaw.y);
-        ctx.lineTo(starProjRaw.x + Math.cos(rad) * 15, starProjRaw.y + Math.sin(rad) * 15);
-      }
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
-
-    // Project coordinates from model space (AU) to canvas space
     const project = (xModel: number, yModel: number) => {
       return {
         x: activePan.x + xModel * activeZoom,
@@ -204,12 +229,11 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
       };
     };
 
-    // Sub-orbiter Culling: Determine which objects to hide if zoomed out too far
     const culledObjects = new Set<string>();
-    visibleObjects.forEach(obj => {
+    visibleObjects.forEach((obj: any) => {
       if (obj.orbitedObjectName && obj.orbitedObjectName !== obj.name && !isPrimary(obj)) {
         const orbitRadiusPx = obj.distanceOrbited * activeZoom;
-        const parent = objects.find(o => o.name === obj.orbitedObjectName);
+        const parent = objects.find((o: any) => o.name === obj.orbitedObjectName);
         let cullThreshold = 10;
         if (parent) {
           const parentSize = ScaleManager.getNavChartVisualRadius(parent.sizeClass || 'D', parent.physicalSize || 1000, parent.sizeUnit || 'miles', activeZoom);
@@ -221,155 +245,52 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
       }
     });
 
-    const activeVisibleObjects = visibleObjects.filter(obj => !culledObjects.has(obj.name));
+    const activeVisibleObjects = visibleObjects.filter((obj: any) => !culledObjects.has(obj.name));
+    const activeStyle = theme === 'parchment' ? stylesRef.current.vellum : stylesRef.current.space;
 
-    // 1. Draw orbits (back-to-front)
-    activeVisibleObjects.forEach((obj) => {
-      // Find parent coordinate in model space
-      let px = 0;
-      let py = 0;
-      if (obj.orbitedObjectName && obj.orbitedObjectName !== obj.name) {
-        const parentPos = positions[obj.orbitedObjectName];
-        if (parentPos) {
-          px = parentPos.x;
-          py = parentPos.y;
-        }
-      }
+    const context: MapStyleContext = {
+      ctx,
+      width,
+      height,
+      activeZoom,
+      activePan,
+      objects,
+      visibleObjects,
+      positions,
+      activeSphere,
+      isPrimary,
+      project,
+      decorations,
+      fontsLoaded
+    };
 
-      const parentProj = project(px, py);
-      const orbitRadius = obj.distanceOrbited * activeZoom;
+    activeStyle.drawBackground(context);
+    activeStyle.drawGrid(context);
+    activeStyle.drawDecorations(context);
+    activeStyle.drawOrbits(context, activeVisibleObjects);
 
-      if (orbitRadius > 0) {
-        ctx.beginPath();
-        ctx.arc(parentProj.x, parentProj.y, orbitRadius, 0, 2 * Math.PI);
-        const isPrimaryOrbit = isPrimary(obj);
-        ctx.lineWidth = isPrimaryOrbit ? 1.2 : 0.75;
-        ctx.strokeStyle = isPrimaryOrbit ? colorOrbit : colorOrbitDash;
-        ctx.stroke();
-      }
+    let maxDist = 0.1;
+    objects.forEach((o: any) => {
+      if (!isPrimary(o) || o.affectsShellBoundary === false) return;
+      const dist = o.distanceOrbited;
+      const reach = o.type === 'living_world' ? dist + (o.branchExtent ?? 2.5) : dist;
+      if (reach > maxDist) maxDist = reach;
     });
+    const shellProj = project(0, 0);
+    const isCustom = activeSphere?.shellBoundaryType === 'custom' || activeSphere?.shellBoundaryType === 'relativeMargin';
+    const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
+    const shellRadius = maxDist * shellScale * activeZoom;
 
-    // 2. Draw outer Crystal Sphere Shell boundary if max planet exists
-      let maxDist = 0.1;
-      objects.forEach(o => {
-        if (!isPrimary(o) || o.affectsShellBoundary === false) return;
-        const dist = o.distanceOrbited;
-        const reach = o.type === 'living_world' ? dist + (o.branchExtent ?? 2.5) : dist;
-        if (reach > maxDist) maxDist = reach;
-      });
-      const shellProj = project(0, 0);
-      const isCustom = activeSphere?.shellBoundaryType === 'custom' || activeSphere?.shellBoundaryType === 'relativeMargin';
-      const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
-      const shellRadius = maxDist * shellScale * activeZoom;
-
-      // Draw thick outer sphere boundary
-      ctx.beginPath();
-      ctx.arc(shellProj.x, shellProj.y, Math.max(0, shellRadius), 0, 2 * Math.PI);
-      ctx.strokeStyle = colorStroke;
-      ctx.lineWidth = 3;
-      ctx.stroke();
-      
-      ctx.beginPath();
-      ctx.arc(shellProj.x, shellProj.y, Math.max(0, shellRadius - 5), 0, 2 * Math.PI);
-      ctx.lineWidth = 0.75;
-      ctx.stroke();
-
-      // Draw shell title
-      ctx.font = `bold 24px 'Elan', 'Cinzel', serif`;
-      ctx.fillStyle = colorStroke;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText(
-        (activeSphere?.sphereName || 'CRYSTAL SHELL').toUpperCase() + ' SHELL',
-        shellProj.x,
-        shellProj.y - shellRadius - 10
-      );
-
-    // 3. Draw bodies (nebulas, sargassos, and solid bodies) in array order (z-index)
-    activeVisibleObjects.forEach((obj) => {
-      const pos = positions[obj.name];
-      if (!pos) return;
-
-      // Resolve parent canvas position
-      let px = 0, py = 0;
-      if (obj.orbitedObjectName) {
-        const parentPos = positions[obj.orbitedObjectName];
-        if (parentPos) { px = parentPos.x; py = parentPos.y; }
-      }
-      const parentProj = project(px, py);
-      const proj = project(pos.x, pos.y);
-      const renderSize = ScaleManager.getNavChartVisualRadius(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles', activeZoom);
-
-      if (obj.type === 'cloud') {
-        if (obj.distanceOrbited <= 0) return;
-        const orbitR = obj.distanceOrbited * activeZoom;
-        const cloudFill = getElementColor(obj.elementAffinity || null) || (isParchment ? '#808080' : '#a0a0a0');
-        
-        drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, cloudFill, '#505050', false, activeZoom,
-          false, parentProj.x, parentProj.y, orbitR, pos.angle
-        );
-      } else {
-        // Solid body drawing
-        const { bodyFill, bodyStroke } = getBodyColors(obj, isParchment, colorBg, colorStroke, colorGold);
-
-        drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, bodyFill, bodyStroke, false, activeZoom);
-
-        // Star sunburst ring removed because it is now drawn as a corona inside drawSolidBody
-
-        // --- Stationary diamond ring indicator ---
-        if (obj.isStationary && obj.type !== 'star') {
-          drawStationaryIndicator(ctx, proj.x, proj.y, renderSize, colorMuted);
-        }
-      }
-
-      // Label
-      const shouldLabel = obj.type !== 'moon' || activeZoom > 150;
-      if (shouldLabel) {
-          ctx.font = obj.type === 'star'
-            ? `bold 12px 'Elan', 'Cinzel', serif`
-            : `500 10px 'Elan', 'Outfit', sans-serif`;
-          ctx.fillStyle = colorStroke;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'top';
-        ctx.fillText(obj.name, proj.x, proj.y + renderSize + 5);
-      }
-    });
-
-    // 4. Draw Dynamic Scale Bar Overlay
-    const scaleBarWidth = 50;
-    const auRepresented = scaleBarWidth / activeZoom;
+    activeStyle.drawShell(context, shellRadius, shellProj);
     
-    const padding = 20;
-    const barX = width - padding - scaleBarWidth;
-    const barY = height - padding;
-    
-    ctx.beginPath();
-    ctx.moveTo(barX, barY - 5);
-    ctx.lineTo(barX, barY);
-    ctx.lineTo(barX + scaleBarWidth, barY);
-    ctx.lineTo(barX + scaleBarWidth, barY - 5);
-    
-    ctx.strokeStyle = colorStroke;
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    activeStyle.drawBodies(context, activeVisibleObjects);
+    activeStyle.drawScaleBar(context);
 
-    let scaleLabel = '';
-    if (auRepresented >= 0.1) {
-      scaleLabel = `${auRepresented.toFixed(2)} AU`;
-    } else {
-      const miles = Math.round(ScaleManager.auToMiles(auRepresented));
-      scaleLabel = `${miles.toLocaleString()} mi`;
+    if (activeStyle.drawForeground) {
+      activeStyle.drawForeground(context);
     }
-
-    ctx.font = `500 10px 'Elan', 'Outfit', sans-serif`;
-    ctx.fillStyle = colorStroke;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(scaleLabel, barX + (scaleBarWidth / 2), barY - 8);
-
   };
 
-  // Redraw canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -377,46 +298,24 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    drawMap(ctx, dimensions.width, dimensions.height, mapTheme, zoom, pan);
-  }, [activeSphere, currentSystemDate, zoom, pan, mapTheme, objects, positions, dimensions, fontsLoaded]);
+    drawMap(ctx, dimensions.width, dimensions.height, mapTheme, zoom, constrainPan(pan, zoom));
+  }, [activeSphere, currentSystemDate, zoom, pan, mapTheme, objects, positions, dimensions, fontsLoaded, decorations, forceRenderState]);
 
-  // Handle dragging/panning
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     setIsDragging(true);
-    dragStart.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
+    setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDragging) return;
-    setViewport((prev) => ({
-      ...prev,
-      pan: {
-        x: e.clientX - dragStart.current.x,
-        y: e.clientY - dragStart.current.y,
-      }
-    }));
+    setPan(() => constrainPan({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y,
+    }, zoom));
   };
 
   const handleMouseUpOrLeave = () => {
     setIsDragging(false);
-  };
-
-  // Zoom logic
-  const handleZoom = (factor: number) => {
-    setViewport((prev) => {
-      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, prev.zoom * factor));
-      const mouseX = dimensions.width / 2;
-      const mouseY = dimensions.height / 2;
-      const modelX = (mouseX - prev.pan.x) / prev.zoom;
-      const modelY = (mouseY - prev.pan.y) / prev.zoom;
-      return {
-        zoom: newZoom,
-        pan: {
-          x: mouseX - modelX * newZoom,
-          y: mouseY - modelY * newZoom,
-        }
-      };
-    });
   };
 
   const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
@@ -424,23 +323,21 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect || !canvasRef.current) return;
     
-    // Scale coordinates accurately if CSS size differs from canvas internal size
-    const scaleX = canvasRef.current.width / rect.width;
-    const scaleY = canvasRef.current.height / rect.height;
-    const mouseX = (e.clientX - rect.left) * scaleX;
-    const mouseY = (e.clientY - rect.top) * scaleY;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
 
-    setViewport((prev) => {
-      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, prev.zoom * zoomFactor));
-      const modelX = (mouseX - prev.pan.x) / prev.zoom;
-      const modelY = (mouseY - prev.pan.y) / prev.zoom;
-      return {
-        zoom: newZoom,
-        pan: {
-          x: mouseX - modelX * newZoom,
-          y: mouseY - modelY * newZoom,
-        }
-      };
+    setZoom((z) => {
+      const newZoom = Math.min(Math.max(z * zoomFactor, mapTheme === 'parchment' ? minZoomLimit : MIN_ZOOM), MAX_ZOOM);
+      
+      // Calculate new pan to zoom toward mouse
+      const scale = newZoom / z;
+      const newPan = constrainPan({
+        x: mouseX - (mouseX - pan.x) * scale,
+        y: mouseY - (mouseY - pan.y) * scale,
+      }, newZoom);
+      
+      setPan(() => newPan);
+      return newZoom;
     });
   };
 
