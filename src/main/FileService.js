@@ -3,13 +3,15 @@ const path = require('path');
 const { app, dialog } = require('electron');
 
 class FileService {
+  #appManager;
+
   constructor(appManager) {
-    this.appManager = appManager;
+    this.#appManager = appManager;
   }
 
   async selectSaveDirectory() {
     try {
-      const mainWindow = this.appManager.getMainWindow();
+      const mainWindow = this.#appManager.getMainWindow();
       const result = await dialog.showOpenDialog(mainWindow, {
         title: 'Select Crystal Sphere Saves Directory',
         properties: ['openDirectory', 'createDirectory'],
@@ -89,7 +91,7 @@ class FileService {
 
   async exportPngFile(dataUrl, defaultName) {
     try {
-      const mainWindow = this.appManager.getMainWindow();
+      const mainWindow = this.#appManager.getMainWindow();
       const result = await dialog.showSaveDialog(mainWindow, {
         title: 'Export Map as PNG',
         defaultPath: defaultName || 'crystal_sphere.png',

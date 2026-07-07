@@ -2,9 +2,12 @@ const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
 class AppManager {
+  #mainWindow;
+  #isDev;
+
   constructor() {
-    this.mainWindow = null;
-    this.isDev = process.argv.includes('--dev') || !app.isPackaged;
+    this.#mainWindow = null;
+    this.#isDev = process.argv.includes('--dev') || !app.isPackaged;
   }
 
   init() {
@@ -26,7 +29,7 @@ class AppManager {
   }
 
   createWindow() {
-    this.mainWindow = new BrowserWindow({
+    this.#mainWindow = new BrowserWindow({
       width: 1280,
       height: 850,
       webPreferences: {
@@ -36,26 +39,26 @@ class AppManager {
       },
     });
 
-    if (this.isDev) {
-      this.mainWindow.loadURL('http://localhost:5173');
-      this.mainWindow.webContents.openDevTools();
+    if (this.#isDev) {
+      this.#mainWindow.loadURL('http://localhost:5173');
+      this.#mainWindow.webContents.openDevTools();
     } else {
-      this.mainWindow.loadFile(path.join(__dirname, '../../dist/index.html'));
+      this.#mainWindow.loadFile(path.join(__dirname, '../../dist/index.html'));
     }
 
-    this.mainWindow.on('closed', () => {
-      this.mainWindow = null;
+    this.#mainWindow.on('closed', () => {
+      this.#mainWindow = null;
     });
   }
 
   getMainWindow() {
-    return this.mainWindow;
+    return this.#mainWindow;
   }
 
   setupGlobalErrorHandlers() {
     const sendErrorToFrontend = (type, error) => {
-      if (this.mainWindow) {
-        this.mainWindow.webContents.send('backend-error', {
+      if (this.#mainWindow) {
+        this.#mainWindow.webContents.send('backend-error', {
           type,
           message: error.message || String(error),
           stack: error.stack
