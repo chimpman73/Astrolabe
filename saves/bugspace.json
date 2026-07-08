@@ -22,9 +22,10 @@
       "hasLeaves": true,
       "branchBend": 0.5,
       "isHidden": false,
-      "sizeClass": "D",
-      "physicalSize": 1000,
-      "sizeUnit": "miles"
+      "sizeClass": "J",
+      "physicalSize": 56,
+      "sizeUnit": "AU",
+      "affectsShellBoundary": false
     },
     {
       "name": "World Tree2",
@@ -42,9 +43,11 @@
       "branchBend": 0.5,
       "isStationary": true,
       "elementAffinity": "earth",
-      "sizeClass": "D",
-      "physicalSize": 1000,
-      "sizeUnit": "miles"
+      "sizeClass": "J",
+      "physicalSize": 56,
+      "sizeUnit": "AU",
+      "isHidden": false,
+      "affectsShellBoundary": false
     },
     {
       "name": "SteamCloud1",
@@ -52,18 +55,20 @@
       "size": 200,
       "description": "A newly added planetary body.",
       "orbitedObjectName": null,
-      "distanceOrbited": 16,
+      "distanceOrbited": 16.5,
       "initialAngle": 270,
       "orbitalPeriodDays": 365,
-      "arcDegrees": 30,
+      "arcDegrees": 6,
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
       "elementAffinity": "water",
       "isStationary": false,
       "orbitDirection": "prograde",
-      "sizeClass": "D",
-      "physicalSize": 1000,
-      "sizeUnit": "miles"
+      "sizeClass": "J",
+      "physicalSize": 4,
+      "sizeUnit": "AU",
+      "affectsShellBoundary": false,
+      "isDMOnly": true
     },
     {
       "name": "SteamCloud2",
@@ -74,13 +79,15 @@
       "distanceOrbited": 11,
       "initialAngle": 270,
       "orbitalPeriodDays": 365,
-      "arcDegrees": 30,
+      "arcDegrees": 8,
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
       "elementAffinity": "water",
-      "sizeClass": "D",
-      "physicalSize": 1000,
-      "sizeUnit": "miles"
+      "sizeClass": "J",
+      "physicalSize": 4,
+      "sizeUnit": "AU",
+      "affectsShellBoundary": false,
+      "isDMOnly": true
     },
     {
       "name": "Toroid Sea",
@@ -121,6 +128,6 @@
       "sizeUnit": "miles"
     }
   ],
-  "shellBoundaryType": "relativeMargin",
+  "shellBoundaryType": "double",
   "shellCustomScale": 1.05
 }

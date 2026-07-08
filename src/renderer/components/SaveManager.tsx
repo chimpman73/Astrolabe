@@ -84,7 +84,6 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
       const current = activeSphere!.objects[index];
       updated.branchLevels = updated.branchLevels ?? current.branchLevels ?? 2;
       updated.branchDensity = updated.branchDensity ?? current.branchDensity ?? 3;
-      updated.branchExtent = updated.branchExtent ?? current.branchExtent ?? 2.5;
       updated.hasLeaves = updated.hasLeaves ?? current.hasLeaves ?? true;
       updated.branchBend = updated.branchBend ?? current.branchBend ?? 0.5;
     }
@@ -714,17 +713,6 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 className="editor-input"
                                 value={obj.branchDensity ?? 3}
                                 onChange={e => handleUpdateObject(index, { branchDensity: parseInt(e.target.value, 10) || 3 })}
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Branch Length (AU)</label>
-                              <input
-                                type="number"
-                                step="0.1"
-                                min="0.1"
-                                className="editor-input"
-                                value={obj.branchExtent ?? 2.5}
-                                onChange={e => handleUpdateObject(index, { branchExtent: parseFloat(e.target.value) || 2.5 })}
                               />
                             </div>
                             <div className="editor-form-group flex items-center justify-between mt-2">

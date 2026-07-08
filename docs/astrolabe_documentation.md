@@ -181,11 +181,6 @@ The application saves and loads system states via JSON configuration files store
           "maximum": 10,
           "description": "Branching factor/density for a living_world."
         },
-        "branchExtent": {
-          "type": "number",
-          "minimum": 0.1,
-          "description": "Length of primary branches in AU for a living_world."
-        },
         "hasLeaves": {
           "type": "boolean",
           "description": "Whether to draw leaves at the branch tips for a living_world."

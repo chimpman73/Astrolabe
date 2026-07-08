@@ -66,7 +66,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     objects.forEach((o: any) => {
       if (!isPrimary(o) || o.affectsShellBoundary === false) return;
       const dist = o.distanceOrbited;
-      const reach = o.type === 'living_world' ? dist + (o.branchExtent ?? 2.5) : dist;
+      const reach = o.type === 'living_world' ? dist + ((o.sizeUnit === 'AU' ? (o.physicalSize ?? 0) : ((o.physicalSize ?? 0) / 92955807)) / 2) : dist;
       if (reach > maxDist) maxDist = reach;
     });
     const isCustom = activeSphere?.shellBoundaryType === 'custom' || activeSphere?.shellBoundaryType === 'relativeMargin';
@@ -169,7 +169,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     objects.forEach((o: any) => {
       if (!isPrimary(o)) return;
       const dist = o.distanceOrbited;
-      const reach = o.type === 'living_world' ? dist + (o.branchExtent ?? 2.5) : dist;
+      const reach = o.type === 'living_world' ? dist + ((o.sizeUnit === 'AU' ? (o.physicalSize ?? 0) : ((o.physicalSize ?? 0) / 92955807)) / 2) : dist;
       if (o.affectsShellBoundary !== false && reach > maxDist) maxDist = reach;
       if (reach > absoluteMaxDist) absoluteMaxDist = reach;
     });
@@ -275,7 +275,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     objects.forEach((o: any) => {
       if (!isPrimary(o) || o.affectsShellBoundary === false) return;
       const dist = o.distanceOrbited;
-      const reach = o.type === 'living_world' ? dist + (o.branchExtent ?? 2.5) : dist;
+      const reach = o.type === 'living_world' ? dist + ((o.sizeUnit === 'AU' ? (o.physicalSize ?? 0) : ((o.physicalSize ?? 0) / 92955807)) / 2) : dist;
       if (reach > maxDist) maxDist = reach;
     });
     const shellProj = project(0, 0);
@@ -392,7 +392,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
       );
       let maxDist = 0.1;
       primaryObjects.forEach(o => {
-        const reach = o.type === 'living_world' ? o.distanceOrbited + (o.branchExtent ?? 2.5) : o.distanceOrbited;
+        const reach = o.type === 'living_world' ? o.distanceOrbited + ((o.sizeUnit === 'AU' ? (o.physicalSize ?? 0) : ((o.physicalSize ?? 0) / 92955807)) / 2) : o.distanceOrbited;
         if (reach > maxDist) maxDist = reach;
       });
       const isCustom = activeSphere?.shellBoundaryType === 'custom' || activeSphere?.shellBoundaryType === 'relativeMargin';

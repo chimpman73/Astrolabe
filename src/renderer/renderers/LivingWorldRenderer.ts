@@ -20,20 +20,31 @@ function hashString(str: string) {
 }
 
 export class LivingWorldRenderer extends BaseRenderer {
-  private static geometryCache = new Map<string, { branches: Record<number, Path2D>, leavesData: {x: number, y: number, rand: number}[], maxRadius: number }>();
+  private static geometryCache = new Map<string, { 
+    branches: Record<number, Path2D>, 
+    leavesData: {x: number, y: number, rand: number}[], 
+    maxRadius: number,
+    navBitmap?: HTMLCanvasElement,
+    navBitmapScale?: number,
+    navBitmapBranchLength?: number,
+    navBitmapStroke?: string,
+    bookmarkBitmap?: HTMLCanvasElement,
+    bookmarkBitmapScale?: number,
+    bookmarkBitmapBranchLength?: number,
+    bookmarkBitmapStroke?: string
+  }>();
 
   public draw(context: RenderContext): void {
-    const { ctx, x, y, obj, size, bodyFill, bodyStroke, zoom = 1 } = context;
+    const { ctx, x, y, obj, size, bodyStroke } = context;
     const levels = obj.branchLevels ?? 2;
     const density = obj.branchDensity ?? 3;
-    const extentAU = obj.branchExtent ?? 2.5;
     const bendFactor = obj.branchBend ?? 0.5;
     
-    // Convert AU to pixel length by multiplying by zoom factor
-    const branchLengthPixels = extentAU * zoom;
+    // Set the max reach of the tree to be the visual size calculated by the ScaleManager
+    const branchLengthPixels = size;
     const baseSeed = obj.name + (obj.orbitedObjectName || '');
     
-    const cacheKey = `${baseSeed}_${levels}_${density}_${extentAU}_${bendFactor}_${obj.hasLeaves}`;
+    const cacheKey = `${baseSeed}_${levels}_${density}_${bendFactor}_${obj.hasLeaves}`;
     
     // Generate normalized geometry (scale = 1) if not cached
     if (!LivingWorldRenderer.geometryCache.has(cacheKey)) {
@@ -99,10 +110,10 @@ export class LivingWorldRenderer extends BaseRenderer {
             cy += Math.sin(cAngle) * actualSegLen;
             bPath.lineTo(cx, cy);
             nodes.push({ x: cx, y: cy, angle: cAngle });
+            
+            const dist = Math.sqrt(cx * cx + cy * cy);
+            if (dist > currentMaxRadius.value) currentMaxRadius.value = dist;
           }
-          
-          const dist = Math.sqrt(cx * cx + cy * cy);
-          if (dist > currentMaxRadius.value) currentMaxRadius.value = dist;
           
           if (currentLevel < levels) {
             traverseTree(cx, cy, cAngle, branchLen * 0.75, currentLevel + 1, branchSeed + '_tip', currentMaxRadius);
@@ -141,42 +152,89 @@ export class LivingWorldRenderer extends BaseRenderer {
     // Calculate the scale required to match the target pixels on screen
     const scale = branchLengthPixels / cachedGeometry.maxRadius;
     
-    // GPU hardware rendering of the complex fractal tree
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(scale, scale);
-    
-    // Stroke all branches grouped by thickness
-    const sizeScale = Math.max(1, size / 12);
-    for (const [thicknessStr, path] of Object.entries(cachedGeometry.branches)) {
-      // Counter-act the canvas scale but apply sizeScale to grow thickness when zoomed in
-      ctx.lineWidth = (parseFloat(thicknessStr) * sizeScale) / scale;
-      ctx.strokeStyle = bodyStroke;
-      ctx.stroke(path);
-    }
-    
-    // Fill all leaves in a single draw call, scaling them relative to the trunk size
-    if (obj.hasLeaves !== false) {
-      ctx.fillStyle = '#2ea84b';
-      ctx.beginPath();
-      for (const leaf of cachedGeometry.leavesData) {
-        const targetPixelSize = Math.max(2, size * (0.15 + leaf.rand * 0.2));
-        const leafRadiusScaled = targetPixelSize / scale;
-        ctx.moveTo(leaf.x + leafRadiusScaled, leaf.y);
-        ctx.arc(leaf.x, leaf.y, leafRadiusScaled, 0, 2 * Math.PI);
+    // Separate the cache slots to prevent the Bookmark view and Nav view from overwriting each other
+    // and causing the canvas to literally be recreated twice every single frame.
+    const isBookmark = context.isBookmarkView === true;
+    const currentBitmap = isBookmark ? cachedGeometry.bookmarkBitmap : cachedGeometry.navBitmap;
+    const currentBitmapScale = isBookmark ? cachedGeometry.bookmarkBitmapScale : cachedGeometry.navBitmapScale;
+    const currentBitmapStroke = isBookmark ? cachedGeometry.bookmarkBitmapStroke : cachedGeometry.navBitmapStroke;
+
+    const needsNewBitmap = !currentBitmap || 
+                           currentBitmapStroke !== bodyStroke ||
+                           scale > (currentBitmapScale || 0) * 1.5 ||
+                           scale < (currentBitmapScale || 0) * 0.5;
+
+    let bmp = currentBitmap;
+
+    if (needsNewBitmap) {
+      // Create a padded offscreen canvas
+      const padding = 10;
+      const drawRadius = branchLengthPixels + padding;
+      const idealCanvasSize = Math.ceil(drawRadius * 2);
+      
+      // Cap hardware size to 2048 to prevent extreme memory spikes when zoomed in massively
+      const canvasSize = Math.min(idealCanvasSize, 2048);
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = canvasSize;
+      canvas.height = canvasSize;
+      const offCtx = canvas.getContext('2d')!;
+      
+      const hwScale = canvasSize / idealCanvasSize;
+      const drawingScale = scale * hwScale;
+      
+      offCtx.translate(canvasSize / 2, canvasSize / 2);
+      offCtx.scale(drawingScale, drawingScale);
+      
+      // Stroke all branches grouped by thickness
+      const sizeScale = Math.max(1, Math.min(3, Math.pow(size / 12, 0.5)));
+      for (const [thicknessStr, path] of Object.entries(cachedGeometry.branches)) {
+        const visualThickness = parseFloat(thicknessStr) * 0.5;
+        offCtx.lineWidth = (visualThickness * sizeScale) / drawingScale;
+        offCtx.strokeStyle = bodyStroke;
+        offCtx.stroke(path);
       }
-      ctx.fill();
+      
+      // Fill all leaves
+      if (obj.hasLeaves !== false) {
+        offCtx.fillStyle = '#2ea84b';
+        offCtx.beginPath();
+        for (const leaf of cachedGeometry.leavesData) {
+          const targetPixelSize = 2 + leaf.rand * 0.5;
+          const leafRadiusScaled = targetPixelSize / drawingScale;
+          offCtx.moveTo(leaf.x + leafRadiusScaled, leaf.y);
+          offCtx.arc(leaf.x, leaf.y, leafRadiusScaled, 0, 2 * Math.PI);
+        }
+        offCtx.fill();
+      }
+      
+      bmp = canvas;
+      if (isBookmark) {
+        cachedGeometry.bookmarkBitmap = canvas;
+        cachedGeometry.bookmarkBitmapScale = scale;
+        cachedGeometry.bookmarkBitmapBranchLength = branchLengthPixels;
+        cachedGeometry.bookmarkBitmapStroke = bodyStroke;
+      } else {
+        cachedGeometry.navBitmap = canvas;
+        cachedGeometry.navBitmapScale = scale;
+        cachedGeometry.navBitmapBranchLength = branchLengthPixels;
+        cachedGeometry.navBitmapStroke = bodyStroke;
+      }
     }
     
-    ctx.restore();
+    // Calculate how much the tree has scaled since the bitmap was generated
+    const originalScale = isBookmark ? cachedGeometry.bookmarkBitmapScale! : cachedGeometry.navBitmapScale!;
+    const originalBranchLength = isBookmark ? cachedGeometry.bookmarkBitmapBranchLength! : cachedGeometry.navBitmapBranchLength!;
     
-    // Central ball (trunk) - rendered unscaled so it stays a perfect sphere size
-    ctx.beginPath();
-    ctx.arc(x, y, size, 0, 2 * Math.PI);
-    ctx.fillStyle = bodyFill;
-    ctx.fill();
-    ctx.lineWidth = 1.5;
-    ctx.strokeStyle = bodyStroke;
-    ctx.stroke();
+    const bmpScale = scale / originalScale;
+    
+    // We must scale the *original* ideal canvas size by bmpScale to prevent double-zooming
+    const idealOriginalCanvasSize = Math.ceil((originalBranchLength + 10) * 2);
+    const drawSize = idealOriginalCanvasSize * bmpScale;
+    
+    // Draw the generated bitmap
+    ctx.drawImage(bmp!, x - drawSize / 2, y - drawSize / 2, drawSize, drawSize);
+    
+    // Solid trunk/planet component removed as per AST-033 specification.
   }
 }

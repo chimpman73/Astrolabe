@@ -47,7 +47,7 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
     ? activeSphere.objects
         .filter((obj) => obj.distanceOrbited >= 0 && isPrimary(obj) && obj.affectsShellBoundary !== false)
         .reduce((max, obj) => {
-          const reach = obj.type === 'living_world' ? obj.distanceOrbited + (obj.branchExtent ?? 2.5) : obj.distanceOrbited;
+          const reach = obj.type === 'living_world' ? obj.distanceOrbited + ((obj.sizeUnit === 'AU' ? (obj.physicalSize ?? 0) : ((obj.physicalSize ?? 0) / 92955807)) / 2) : obj.distanceOrbited;
           return Math.max(max, reach);
         }, 0.1)
     : 0.1;
@@ -56,13 +56,13 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
     ? activeSphere.objects
         .filter((obj) => obj.distanceOrbited >= 0 && isPrimary(obj))
         .reduce((max, obj) => {
-          const reach = obj.type === 'living_world' ? obj.distanceOrbited + (obj.branchExtent ?? 2.5) : obj.distanceOrbited;
+          const reach = obj.type === 'living_world' ? obj.distanceOrbited + ((obj.sizeUnit === 'AU' ? (obj.physicalSize ?? 0) : ((obj.physicalSize ?? 0) / 92955807)) / 2) : obj.distanceOrbited;
           return Math.max(max, reach);
         }, 0.1)
     : 0.1;
 
   const visibleMaxDistance = planetaryObjects.reduce((max, obj) => {
-    const reach = obj.type === 'living_world' ? obj.distanceOrbited + (obj.branchExtent ?? 2.5) : obj.distanceOrbited;
+    const reach = obj.type === 'living_world' ? obj.distanceOrbited + ((obj.sizeUnit === 'AU' ? (obj.physicalSize ?? 0) : ((obj.physicalSize ?? 0) / 92955807)) / 2) : obj.distanceOrbited;
     return Math.max(max, reach);
   }, 0.1);
 

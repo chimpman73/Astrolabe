@@ -14,12 +14,15 @@
       "orbitalPeriodDays": 0,
       "branchLevels": 3,
       "branchDensity": 8,
-      "branchExtent": 2,
       "hasLeaves": false,
       "branchBend": 0.5,
       "isStationary": true,
       "elementAffinity": "earth",
-      "isHidden": false
+      "isHidden": false,
+      "sizeClass": "J",
+      "physicalSize": 4,
+      "sizeUnit": "AU",
+      "affectsShellBoundary": false
     },
     {
       "name": "The Great Tree",
@@ -32,11 +35,14 @@
       "orbitalPeriodDays": 0,
       "branchLevels": 5,
       "branchDensity": 3,
-      "branchExtent": 6,
       "hasLeaves": true,
       "branchBend": 0.5,
       "elementAffinity": "earth",
-      "isHidden": false
+      "isHidden": false,
+      "sizeClass": "J",
+      "physicalSize": 11,
+      "sizeUnit": "AU",
+      "affectsShellBoundary": false
     },
     {
       "name": "S1",
@@ -48,7 +54,10 @@
       "initialAngle": 230,
       "orbitalPeriodDays": 0,
       "isStationary": true,
-      "elementAffinity": "fire"
+      "elementAffinity": "fire",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "S2",
@@ -61,7 +70,10 @@
       "orbitalPeriodDays": 0,
       "coronaSize": 3,
       "elementAffinity": "fire",
-      "isStationary": true
+      "isStationary": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "S3",
@@ -74,7 +86,10 @@
       "orbitalPeriodDays": 0,
       "coronaSize": 2,
       "elementAffinity": "fire",
-      "isStationary": true
+      "isStationary": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "S4",
@@ -87,7 +102,10 @@
       "orbitalPeriodDays": 1,
       "isStationary": true,
       "elementAffinity": "fire",
-      "coronaSize": 2
+      "coronaSize": 2,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "S5",
@@ -100,7 +118,10 @@
       "orbitalPeriodDays": 0,
       "elementAffinity": "fire",
       "coronaSize": 2,
-      "isStationary": true
+      "isStationary": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "S6",
@@ -113,7 +134,10 @@
       "orbitalPeriodDays": 0,
       "isStationary": true,
       "elementAffinity": "fire",
-      "coronaSize": 2
+      "coronaSize": 2,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "S7",
@@ -125,7 +149,10 @@
       "initialAngle": 170,
       "orbitalPeriodDays": 0,
       "elementAffinity": "fire",
-      "isStationary": true
+      "isStationary": true,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "S8",
@@ -137,7 +164,10 @@
       "initialAngle": 175,
       "orbitalPeriodDays": 0,
       "isStationary": true,
-      "elementAffinity": "fire"
+      "elementAffinity": "fire",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "S9",
@@ -150,7 +180,10 @@
       "orbitalPeriodDays": 0,
       "isStationary": true,
       "elementAffinity": "fire",
-      "coronaSize": 2
+      "coronaSize": 2,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "S10",
@@ -163,7 +196,10 @@
       "orbitalPeriodDays": 1,
       "isStationary": true,
       "elementAffinity": "fire",
-      "coronaSize": 1.7
+      "coronaSize": 1.7,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "S11",
@@ -175,7 +211,10 @@
       "initialAngle": 340,
       "orbitalPeriodDays": 0,
       "isStationary": true,
-      "elementAffinity": "fire"
+      "elementAffinity": "fire",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "S12",
@@ -187,7 +226,10 @@
       "initialAngle": 250,
       "orbitalPeriodDays": 0,
       "isStationary": true,
-      "elementAffinity": "fire"
+      "elementAffinity": "fire",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "S13",
@@ -200,7 +242,10 @@
       "orbitalPeriodDays": 0,
       "isStationary": true,
       "elementAffinity": "fire",
-      "coronaSize": 3
+      "coronaSize": 3,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "S14",
@@ -213,7 +258,10 @@
       "orbitalPeriodDays": 0,
       "isStationary": true,
       "elementAffinity": "fire",
-      "coronaSize": 2
+      "coronaSize": 2,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "S15",
@@ -225,7 +273,10 @@
       "initialAngle": 200,
       "orbitalPeriodDays": 0,
       "isStationary": true,
-      "elementAffinity": "fire"
+      "elementAffinity": "fire",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "S16",
@@ -238,7 +289,10 @@
       "orbitalPeriodDays": 0,
       "isStationary": true,
       "elementAffinity": "fire",
-      "coronaSize": 3
+      "coronaSize": 3,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Genia",
@@ -251,7 +305,10 @@
       "orbitalPeriodDays": 0,
       "isStationary": true,
       "elementAffinity": "air",
-      "isHidden": false
+      "isHidden": false,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Freemore",
@@ -264,7 +321,10 @@
       "orbitalPeriodDays": 0,
       "isStationary": true,
       "elementAffinity": "mixed",
-      "isHidden": false
+      "isHidden": false,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Agron",
@@ -277,7 +337,10 @@
       "orbitalPeriodDays": 365,
       "isStationary": true,
       "elementAffinity": "mixed",
-      "isHidden": false
+      "isHidden": false,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Tiqua",
@@ -290,7 +353,10 @@
       "orbitalPeriodDays": 0,
       "elementAffinity": "water",
       "isStationary": true,
-      "isHidden": false
+      "isHidden": false,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Morath",
@@ -303,7 +369,10 @@
       "orbitalPeriodDays": 0,
       "elementAffinity": "earth",
       "isStationary": true,
-      "isHidden": false
+      "isHidden": false,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Krag",
@@ -316,7 +385,10 @@
       "orbitalPeriodDays": 0,
       "isStationary": true,
       "elementAffinity": "mixed",
-      "isHidden": false
+      "isHidden": false,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Beastra",
@@ -329,7 +401,10 @@
       "orbitalPeriodDays": 0,
       "isStationary": true,
       "elementAffinity": "earth",
-      "isHidden": false
+      "isHidden": false,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Mish",
@@ -342,7 +417,10 @@
       "orbitalPeriodDays": 0,
       "isStationary": true,
       "elementAffinity": "water",
-      "isHidden": false
+      "isHidden": false,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     }
   ],
   "shellBoundaryType": "custom",

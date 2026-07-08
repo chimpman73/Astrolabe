@@ -57,7 +57,7 @@ export class VellumStyle implements MapStyle {
     context.objects.forEach((o: any) => {
       if (!context.isPrimary(o) || o.affectsShellBoundary === false) return;
       const dist = o.distanceOrbited;
-      const reach = o.type === 'living_world' ? dist + (o.branchExtent ?? 2.5) : dist;
+      const reach = o.type === 'living_world' ? dist + (o.sizeUnit === 'AU' ? (o.physicalSize ?? 0) : ((o.physicalSize ?? 0) / 92955807)) : dist;
       if (reach > maxDist) maxDist = reach;
     });
     const shellScale = (context.activeSphere?.shellBoundaryType === 'custom' || context.activeSphere?.shellBoundaryType === 'relativeMargin') 
@@ -308,7 +308,7 @@ export class VellumStyle implements MapStyle {
         const { bodyFill, bodyStroke } = getBodyColors(obj, true, this.colorBg, this.colorStroke, this.colorGold);
         drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, bodyFill, bodyStroke, false, activeZoom);
 
-        if (obj.isStationary && obj.type !== 'star') {
+        if (obj.isStationary && obj.type !== 'star' && obj.type !== 'living_world') {
           drawStationaryIndicator(ctx, proj.x, proj.y, renderSize, this.colorMuted);
         }
       }

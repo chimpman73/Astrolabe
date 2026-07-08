@@ -30,7 +30,16 @@ export function drawBookmark(
 
   // Calculate bottom margin dynamically based on the central object's size to prevent clipping
   const centerObj = planetaryObjects.find(obj => obj.distanceOrbited === 0);
-  const centerObjSize = centerObj ? ScaleManager.getBookmarkVisualRadius(centerObj.sizeClass || 'D') * sizeMultiplier : 10 * sizeMultiplier;
+  let centerObjSize = 10 * sizeMultiplier;
+  if (centerObj) {
+    if (centerObj.type === 'living_world') {
+      // Living worlds are drawn at full AU scale and act as a background element spanning the view.
+      // We don't push the bottom margin up, otherwise it would push the entire map off the top of the canvas!
+      centerObjSize = 10 * sizeMultiplier;
+    } else {
+      centerObjSize = ScaleManager.getBookmarkVisualRadius(centerObj.sizeClass || 'D') * sizeMultiplier;
+    }
+  }
   
   // Coordinate settings
   const bottomMargin = Math.max(25 * sizeMultiplier, centerObjSize + 20 * sizeMultiplier);
@@ -63,8 +72,11 @@ export function drawBookmark(
     });
   });
   
-  if (showShell && shellDistance >= canvasBoundary) {
-    plottedDistances.push({ dist: canvasBoundary, sizeClass: 'A', physicalSize: 0 }); // Shell
+  // Always ensure the canvasBoundary is represented in the layout spacing
+  // so that physical spans (like massive Living World branches) are accounted for in the bookmark height!
+  const maxPlottedDist = Math.max(...plottedDistances.map(d => d.dist));
+  if (canvasBoundary > maxPlottedDist) {
+    plottedDistances.push({ dist: canvasBoundary, sizeClass: 'A', physicalSize: 0 }); // System Boundary
   }
 
   // Sort by distance ascending
@@ -211,7 +223,15 @@ export function drawBookmark(
     
     angleGroups.forEach((cluster) => {
       cluster.forEach((obj, objIndexInCluster) => {
-        const objSize = ScaleManager.getBookmarkVisualRadius(obj.sizeClass || 'D') * sizeMultiplier;
+        let objSize = ScaleManager.getBookmarkVisualRadius(obj.sizeClass || 'D') * sizeMultiplier;
+        if (obj.type === 'living_world') {
+          const unit = obj.sizeUnit || 'miles';
+          const diameterAu = unit === 'AU' ? (obj.physicalSize || 1000) : (obj.physicalSize || 1000) / 92955807.0;
+          const physicalPixelSize = getPixelRadius(diameterAu / 2);
+          // Only override the symbolic icon size if the physical size is actually larger!
+          // This prevents living worlds measured in miles from shrinking to 1px dots.
+          objSize = Math.max(objSize, physicalPixelSize);
+        }
         let x = centerX;
         let y = centerY - r;
         
@@ -258,7 +278,7 @@ export function drawBookmark(
           const scaleHeight = height - (showShell ? 15 : 45) - bottomMargin;
           const pixelsPerAU = canvasBoundary > 0 ? scaleHeight / canvasBoundary : 1;
           
-          drawSolidBody(ctx, x, y, obj, objSize, bodyFill, bodyStroke, false, pixelsPerAU);
+          drawSolidBody(ctx, x, y, obj, objSize, bodyFill, bodyStroke, false, pixelsPerAU, true);
         }
 
         // --- Name label ---

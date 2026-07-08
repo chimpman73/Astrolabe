@@ -38,6 +38,7 @@ This file tracks the design, development, and integration tasks for the Astrolab
 | **AST-030** | Bookmark Shared Orbit Grouping | High | `Done` | Group bodies on the same orbit to fan out horizontally along the arc, preventing overlap. Includes smart label alignment. |
 | **AST-031** | Disc Shape 3D Lip | Low | `Done` | Render disc shapes with a 3D lip to visually distinguish them from elliptical shapes. |
 | **AST-032** | Dynamic Vellum Desk Layout | Medium | `Done` | Implement contiguous scroll background, alpha-composited burn holes showing wood desk beneath, and absolute toolbar overlay layout. |
+| **AST-033** | Refactor Living World Scaling | Medium | `Planned` | Remove `branchExtent`, use `sizeClass` for branch length, and remove central planet sphere. |
 
 ---
 
@@ -189,3 +190,8 @@ This file tracks the design, development, and integration tasks for the Astrolab
   * Added `wood_desk.png` layered behind the parchment scroll on the canvas.
   * Rebuilt burn mark decoration rendering to punch true `destination-out` alpha holes through the parchment layer.
   * Adjusted viewport panning constraints and auto-fit logic to account for overlay toolbar occlusion.
+
+- [ ] **AST-033: Refactor Living World Scaling**
+  * Removed `branchExtent` property from schema and UI.
+  * Tied branch maximum extent directly to standard `sizeClass` and `physicalSize` calculations.
+  * Removed central solid planet sphere from `LivingWorldRenderer`.

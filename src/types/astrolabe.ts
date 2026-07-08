@@ -53,8 +53,7 @@ export interface CelestialObject {
   branchLevels?: number;
   /** For living_world types: branching factor. */
   branchDensity?: number;
-  /** For living_world types: how far branches extend in AU. */
-  branchExtent?: number;
+
   /** For living_world types: whether to draw leaves at the tips. */
   hasLeaves?: boolean;
   /** For living_world types: how much the branches bend at nodes. */
