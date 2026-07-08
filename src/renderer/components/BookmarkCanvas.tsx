@@ -1,7 +1,8 @@
 import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import { useSystemStore } from '../store/useSystemStore';
 import { saveCanvasExport } from '../utils/exportHelper';
-import { drawBookmark } from '../renderers/BookmarkRenderer';
+import { drawBookmark } from '../renderers/SimpleVertBookmarkRenderer';
+import { ScaleManager } from '../utils/ScaleManager';
 
 export interface BookmarkCanvasHandle {
   handleExport: () => Promise<void>;
@@ -47,7 +48,7 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
     ? activeSphere.objects
         .filter((obj) => obj.distanceOrbited >= 0 && isPrimary(obj) && obj.affectsShellBoundary !== false)
         .reduce((max, obj) => {
-          const reach = obj.type === 'living_world' ? obj.distanceOrbited + ((obj.sizeUnit === 'AU' ? (obj.physicalSize ?? 0) : ((obj.physicalSize ?? 0) / 92955807)) / 2) : obj.distanceOrbited;
+          const reach = ScaleManager.getPhysicalReachAU(obj);
           return Math.max(max, reach);
         }, 0.1)
     : 0.1;
@@ -56,17 +57,17 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
     ? activeSphere.objects
         .filter((obj) => obj.distanceOrbited >= 0 && isPrimary(obj))
         .reduce((max, obj) => {
-          const reach = obj.type === 'living_world' ? obj.distanceOrbited + ((obj.sizeUnit === 'AU' ? (obj.physicalSize ?? 0) : ((obj.physicalSize ?? 0) / 92955807)) / 2) : obj.distanceOrbited;
+          const reach = ScaleManager.getPhysicalReachAU(obj);
           return Math.max(max, reach);
         }, 0.1)
     : 0.1;
 
   const visibleMaxDistance = planetaryObjects.reduce((max, obj) => {
-    const reach = obj.type === 'living_world' ? obj.distanceOrbited + ((obj.sizeUnit === 'AU' ? (obj.physicalSize ?? 0) : ((obj.physicalSize ?? 0) / 92955807)) / 2) : obj.distanceOrbited;
+    const reach = ScaleManager.getPhysicalReachAU(obj);
     return Math.max(max, reach);
   }, 0.1);
 
-  // Unified Draw Function for rendering on both Screen and Export canvas is extracted to BookmarkRenderer.ts
+  // Unified Draw Function for rendering on both Screen and Export canvas is extracted to SimpleVertBookmarkRenderer.ts
 
   // Re-draw on UI canvas when configuration changes
   useEffect(() => {

@@ -1,10 +1,9 @@
-import { MapStyle } from './MapStyle';
-import { MapStyleContext } from '../../types/renderer';
+import { MapStyleContext, INavigationChartRenderer } from '../../types/renderer';
 import { CelestialObject } from '../../types/astrolabe';
 import { drawSolidBody, drawStationaryIndicator, getBodyColors, getElementColor } from '../utils/canvasRenderer';
 import { ScaleManager } from '../utils/ScaleManager';
 
-export class SpaceStyle implements MapStyle {
+export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
   private readonly colorBg = '#06070a';
   private readonly colorGrid = 'rgba(255, 255, 255, 0.03)';
   private readonly colorOrbit = 'rgba(255, 255, 255, 0.15)';
@@ -184,5 +183,29 @@ export class SpaceStyle implements MapStyle {
 
   drawForeground(): void {
     // No foreground in space mode
+  }
+
+  render(context: MapStyleContext): void {
+    this.drawBackground(context);
+    this.drawGrid(context);
+    this.drawDecorations();
+    this.drawOrbits(context, context.visibleObjects);
+
+    let maxDist = 0.1;
+    context.objects.forEach((o: any) => {
+      if (!context.isPrimary(o) || o.affectsShellBoundary === false) return;
+      const reach = ScaleManager.getPhysicalReachAU(o);
+      if (reach > maxDist) maxDist = reach;
+    });
+    
+    const shellProj = context.project(0, 0);
+    const isCustom = context.activeSphere?.shellBoundaryType === 'custom' || context.activeSphere?.shellBoundaryType === 'relativeMargin';
+    const shellScale = isCustom ? (context.activeSphere?.shellCustomScale ?? 1.2) : 2.0;
+    const shellRadius = maxDist * shellScale * context.activeZoom;
+
+    this.drawShell(context, shellRadius, shellProj);
+    this.drawBodies(context, context.visibleObjects);
+    this.drawScaleBar(context);
+    this.drawForeground();
   }
 }

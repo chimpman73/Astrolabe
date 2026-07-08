@@ -1,10 +1,9 @@
-import { MapStyle } from './MapStyle';
-import { ParchmentDecoration, MapStyleContext } from '../../types/renderer';
+import { ParchmentDecoration, MapStyleContext, INavigationChartRenderer } from '../../types/renderer';
 import { CelestialObject } from '../../types/astrolabe';
 import { drawSolidBody, drawStationaryIndicator, getBodyColors, getElementColor } from '../utils/canvasRenderer';
 import { ScaleManager } from '../utils/ScaleManager';
 
-export class VellumStyle implements MapStyle {
+export class VellumNavigationChartRenderer implements INavigationChartRenderer {
   private readonly colorBg = '#f9f5e8';
   private readonly colorGrid = 'rgba(94, 79, 60, 0.05)';
   private readonly colorOrbit = 'rgba(94, 79, 60, 0.18)';
@@ -56,8 +55,7 @@ export class VellumStyle implements MapStyle {
     let maxDist = 0.1;
     context.objects.forEach((o: any) => {
       if (!context.isPrimary(o) || o.affectsShellBoundary === false) return;
-      const dist = o.distanceOrbited;
-      const reach = o.type === 'living_world' ? dist + (o.sizeUnit === 'AU' ? (o.physicalSize ?? 0) : ((o.physicalSize ?? 0) / 92955807)) : dist;
+      const reach = ScaleManager.getPhysicalReachAU(o);
       if (reach > maxDist) maxDist = reach;
     });
     const shellScale = (context.activeSphere?.shellBoundaryType === 'custom' || context.activeSphere?.shellBoundaryType === 'relativeMargin') 
@@ -372,5 +370,29 @@ export class VellumStyle implements MapStyle {
     }
     
     ctx.restore();
+  }
+
+  render(context: MapStyleContext): void {
+    this.drawBackground(context);
+    this.drawGrid(context);
+    this.drawDecorations(context);
+    this.drawOrbits(context, context.visibleObjects);
+
+    let maxDist = 0.1;
+    context.objects.forEach((o: any) => {
+      if (!context.isPrimary(o) || o.affectsShellBoundary === false) return;
+      const reach = ScaleManager.getPhysicalReachAU(o);
+      if (reach > maxDist) maxDist = reach;
+    });
+    
+    const shellProj = context.project(0, 0);
+    const isCustom = context.activeSphere?.shellBoundaryType === 'custom' || context.activeSphere?.shellBoundaryType === 'relativeMargin';
+    const shellScale = isCustom ? (context.activeSphere?.shellCustomScale ?? 1.2) : 2.0;
+    const shellRadius = maxDist * shellScale * context.activeZoom;
+
+    this.drawShell(context, shellRadius, shellProj);
+    this.drawBodies(context, context.visibleObjects);
+    this.drawScaleBar(context);
+    this.drawForeground(context);
   }
 }

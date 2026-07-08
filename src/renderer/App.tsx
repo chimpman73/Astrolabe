@@ -36,9 +36,15 @@ const App: React.FC = () => {
       if (stored) {
         await setSaveDirectory(stored);
       } else if (window.astrolabeAPI) {
-        const res = await window.astrolabeAPI.getDefaultSaveDirectory();
-        if (res.success && res.data) {
-          await setSaveDirectory(res.data);
+        try {
+          const res = await window.astrolabeAPI.getDefaultSaveDirectory();
+          if (res.success && res.data) {
+            await setSaveDirectory(res.data);
+          } else if (!res.success && res.error) {
+            useSystemStore.getState().setToastMessage({ type: 'error', text: res.error || 'Failed to get default directory' });
+          }
+        } catch (err: any) {
+          useSystemStore.getState().setToastMessage({ type: 'error', text: err.message || 'IPC error getting default directory' });
         }
       }
     };

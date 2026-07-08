@@ -46,3 +46,7 @@ export interface ParchmentDecoration {
   scale: number;
   opacity: number;
 }
+
+export interface INavigationChartRenderer {
+  render(context: MapStyleContext): void;
+}
