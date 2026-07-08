@@ -159,10 +159,14 @@ The application saves and loads system states via JSON configuration files store
           "enum": ["sphere", "disc", "pyramid", "cluster", "irregular", "elliptical"],
           "description": "For cloud types: shape of objects drawn inside the cloud."
         },
-        "cloudObjectSize": {
+        "cloudObjectSizeClass": {
+          "type": "string",
+          "enum": ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"],
+          "description": "For cloud types: size class of objects drawn inside the cloud."
+        },
+        "cloudObjectPhysicalSize": {
           "type": "number",
-          "minimum": 0,
-          "description": "For cloud types: size of objects drawn inside the cloud."
+          "description": "For cloud types: physical size of objects drawn inside the cloud (in miles)."
         },
         "cloudObjectDensity": {
           "type": "number",
@@ -298,6 +302,7 @@ A vertical strip (fixed width 280px) displaying a radial hierarchy.
 * **Dynamic Scaling & Boundaries**:
   * If the Crystal Shell outline is **ON**, the drawing boundary `shellDistance` defaults to `2 * maxDistance` (Double) or `1.2 * maxDistance` (Relative Margin) depending on `shellBoundaryType`, centering the furthest planet on screen and allocating the top portion of the canvas to the shell and navigation metadata.
   * If the Crystal Shell outline is toggled **OFF**, the drawing boundary `shellDistance` recalibrates to `maxDistance`, scaling the furthest planet directly to the top of the canvas and distributing all planets proportionally across the full screen height (with proportional margins to prevent clipping).
+  * The gap compression algorithm uses the system boundary as an anchor. Physical expanses (such as the massive branches of a `living_world`) calculate their true physical reach to dictate the boundary limit, rather than strictly using the object's orbital center. This ensures enormous branching structures are properly given layout space and visually span up the bookmark rather than extrapolating off the canvas, while smaller Living Worlds in miles correctly fallback to drawing as symbolic icons.
 * **Scope**: Displays only objects directly orbiting the central star (ignoring moons, satellites, and sub-orbiting planets).
 * **Typography**: Celestial object labels (names and distances) are drawn with **ITC Eras-Bold** at a 1.5x scale multiplier for improved legibility. Shell boundary headers are rendered using the gothic fantasy font **Mephisto**.
 * **Compact Controls**: Small overlays to switch background mode (Light/Dark), toggle the shell boundary outline, toggle distance labels (DIST: ON/OFF), and export a high-res portrait PNG (300 DPI).

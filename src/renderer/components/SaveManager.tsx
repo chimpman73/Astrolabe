@@ -664,14 +664,32 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               </select>
                             </div>
                             <div className="editor-form-group">
-                              <label>Internal Size</label>
+                              <label>Internal Size Class</label>
+                              <select
+                                className="editor-select"
+                                value={obj.cloudObjectSizeClass ?? 'A'}
+                                onChange={e => handleUpdateObject(index, { cloudObjectSizeClass: e.target.value as SizeClass })}
+                              >
+                                <option value="A">Size A (&lt; 10 mi)</option>
+                                <option value="B">Size B (10 - 100 mi)</option>
+                                <option value="C">Size C (100 - 1,000 mi)</option>
+                                <option value="D">Size D (1,000 - 4,000 mi)</option>
+                                <option value="E">Size E (4,000 - 10,000 mi)</option>
+                                <option value="F">Size F (10,000 - 40,000 mi)</option>
+                                <option value="G">Size G (40,000 - 100k mi)</option>
+                                <option value="H">Size H (100k - 1m mi)</option>
+                                <option value="I">Size I (1m - 10m mi)</option>
+                              </select>
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Internal Physical Size (miles)</label>
                               <input
                                 type="number"
-                                step="0.5"
-                                min="0.5"
+                                step="any"
+                                min="0"
                                 className="editor-input"
-                                value={obj.cloudObjectSize ?? 2}
-                                onChange={e => handleUpdateObject(index, { cloudObjectSize: parseFloat(e.target.value) || 2 })}
+                                value={obj.cloudObjectPhysicalSize ?? 5}
+                                onChange={e => handleUpdateObject(index, { cloudObjectPhysicalSize: parseFloat(e.target.value) || 0 })}
                               />
                             </div>
                             <div className="editor-form-group">

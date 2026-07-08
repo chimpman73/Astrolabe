@@ -86,7 +86,7 @@
       "initialAngle": 83,
       "orbitalPeriodDays": 720,
       "arcDegrees": 360,
-      "cloudTransparency": 0.45,
+      "cloudTransparency": 0.25,
       "cloudiness": 0,
       "cloudObjectShape": "irregular",
       "cloudObjectDensity": 150,
@@ -171,7 +171,8 @@
       "cloudObjectSize": 6,
       "sizeClass": "E",
       "physicalSize": 5000,
-      "sizeUnit": "miles"
+      "sizeUnit": "miles",
+      "cloudObjectPhysicalSize": 5
     },
     {
       "name": "Greela",

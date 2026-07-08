@@ -1,5 +1,6 @@
 import { BaseRenderer } from './BaseRenderer';
 import { RenderContext } from '../../types/renderer';
+import { ScaleManager } from '../utils/ScaleManager';
 
 class PRNG {
   private seed: number;
@@ -120,11 +121,17 @@ export class CloudRenderer extends BaseRenderer {
     if (density > 0) {
       const rng = new PRNG(obj.name);
       const objShape = obj.cloudObjectShape ?? 'sphere';
-      const baseObjSize = obj.cloudObjectSize ?? 2;
+      const baseSizeClass = obj.cloudObjectSizeClass ?? 'A';
+      const basePhysicalSize = obj.cloudObjectPhysicalSize ?? 5;
       const arcHalf = (arcDegrees / 2) * (Math.PI / 180);
       const halfH = Math.max(8, size * 1.5);
       
-      const scaledBaseSize = (baseObjSize / (obj.size || 10)) * size;
+      let scaledBaseSize = 0;
+      if (isBookmarkView) {
+        scaledBaseSize = ScaleManager.getBookmarkVisualRadius(baseSizeClass) * (bookmarkWidth ? bookmarkWidth / 300 : 1);
+      } else {
+        scaledBaseSize = ScaleManager.getNavChartVisualRadius(baseSizeClass, basePhysicalSize, 'miles', context.zoom || 1);
+      }
 
       ctx.save();
       ctx.fillStyle = bodyFill;

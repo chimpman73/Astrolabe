@@ -45,8 +45,12 @@ export interface CelestialObject {
   cloudiness?: number;
   /** For cloud types: shape of objects drawn inside the cloud. */
   cloudObjectShape?: WorldShape;
-  /** For cloud types: size of objects drawn inside the cloud. */
+  /** @deprecated Use cloudObjectPhysicalSize instead. */
   cloudObjectSize?: number;
+  /** For cloud types: size class of objects drawn inside the cloud. */
+  cloudObjectSizeClass?: SizeClass;
+  /** For cloud types: physical size of objects drawn inside the cloud (in miles). */
+  cloudObjectPhysicalSize?: number;
   /** For cloud types: density (or count) of objects drawn inside the cloud. */
   cloudObjectDensity?: number;
   /** For living_world types: depth/tiers of branching. */
