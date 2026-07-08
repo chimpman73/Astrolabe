@@ -65,8 +65,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     let maxDist = 0.1;
     objects.forEach((o: any) => {
       if (!isPrimary(o) || o.affectsShellBoundary === false) return;
-      const dist = o.distanceOrbited;
-      const reach = o.type === 'living_world' ? dist + ((o.sizeUnit === 'AU' ? (o.physicalSize ?? 0) : ((o.physicalSize ?? 0) / 92955807)) / 2) : dist;
+      const reach = ScaleManager.getPhysicalReachAU(o);
       if (reach > maxDist) maxDist = reach;
     });
     const isCustom = activeSphere?.shellBoundaryType === 'custom' || activeSphere?.shellBoundaryType === 'relativeMargin';
@@ -168,8 +167,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     let absoluteMaxDist = 0.1;
     objects.forEach((o: any) => {
       if (!isPrimary(o)) return;
-      const dist = o.distanceOrbited;
-      const reach = o.type === 'living_world' ? dist + ((o.sizeUnit === 'AU' ? (o.physicalSize ?? 0) : ((o.physicalSize ?? 0) / 92955807)) / 2) : dist;
+      const reach = ScaleManager.getPhysicalReachAU(o);
       if (o.affectsShellBoundary !== false && reach > maxDist) maxDist = reach;
       if (reach > absoluteMaxDist) absoluteMaxDist = reach;
     });
@@ -274,8 +272,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     let maxDist = 0.1;
     objects.forEach((o: any) => {
       if (!isPrimary(o) || o.affectsShellBoundary === false) return;
-      const dist = o.distanceOrbited;
-      const reach = o.type === 'living_world' ? dist + ((o.sizeUnit === 'AU' ? (o.physicalSize ?? 0) : ((o.physicalSize ?? 0) / 92955807)) / 2) : dist;
+      const reach = ScaleManager.getPhysicalReachAU(o);
       if (reach > maxDist) maxDist = reach;
     });
     const shellProj = project(0, 0);
@@ -392,7 +389,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
       );
       let maxDist = 0.1;
       primaryObjects.forEach(o => {
-        const reach = o.type === 'living_world' ? o.distanceOrbited + ((o.sizeUnit === 'AU' ? (o.physicalSize ?? 0) : ((o.physicalSize ?? 0) / 92955807)) / 2) : o.distanceOrbited;
+        const reach = ScaleManager.getPhysicalReachAU(o);
         if (reach > maxDist) maxDist = reach;
       });
       const isCustom = activeSphere?.shellBoundaryType === 'custom' || activeSphere?.shellBoundaryType === 'relativeMargin';

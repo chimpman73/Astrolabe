@@ -1,5 +1,5 @@
 import { CrystalSphere, CelestialObject } from '../../types/astrolabe';
-import { drawSolidBody, getBodyColors, getElementColor } from '../utils/canvasRenderer';
+import { drawSolidBody, getBodyColors } from '../utils/canvasRenderer';
 import { ScaleManager } from '../utils/ScaleManager';
 
 export function drawBookmark(
@@ -32,13 +32,7 @@ export function drawBookmark(
   const centerObj = planetaryObjects.find(obj => obj.distanceOrbited === 0);
   let centerObjSize = 10 * sizeMultiplier;
   if (centerObj) {
-    if (centerObj.type === 'living_world') {
-      // Living worlds are drawn at full AU scale and act as a background element spanning the view.
-      // We don't push the bottom margin up, otherwise it would push the entire map off the top of the canvas!
-      centerObjSize = 10 * sizeMultiplier;
-    } else {
-      centerObjSize = ScaleManager.getBookmarkVisualRadius(centerObj.sizeClass || 'D') * sizeMultiplier;
-    }
+    centerObjSize = ScaleManager.getBookmarkVisualRadius(centerObj.sizeClass || 'D') * sizeMultiplier;
   }
   
   // Coordinate settings
@@ -224,14 +218,11 @@ export function drawBookmark(
     angleGroups.forEach((cluster) => {
       cluster.forEach((obj, objIndexInCluster) => {
         let objSize = ScaleManager.getBookmarkVisualRadius(obj.sizeClass || 'D') * sizeMultiplier;
-        if (obj.type === 'living_world') {
-          const unit = obj.sizeUnit || 'miles';
-          const diameterAu = unit === 'AU' ? (obj.physicalSize || 1000) : (obj.physicalSize || 1000) / 92955807.0;
-          const physicalPixelSize = getPixelRadius(diameterAu / 2);
-          // Only override the symbolic icon size if the physical size is actually larger!
-          // This prevents living worlds measured in miles from shrinking to 1px dots.
-          objSize = Math.max(objSize, physicalPixelSize);
-        }
+        const physicalRadiusAU = ScaleManager.getPhysicalRadiusAU(obj);
+        const physicalPixelSize = getPixelRadius(physicalRadiusAU);
+        // Only override the symbolic icon size if the physical size is actually larger!
+        // This ensures massive objects (like giant stars, nebula clouds, or Dyson spheres) reflect their true scale.
+        objSize = Math.max(objSize, physicalPixelSize);
         let x = centerX;
         let y = centerY - r;
         
@@ -268,18 +259,14 @@ export function drawBookmark(
           }
         }
 
-        if (obj.type === 'cloud') {
-          const cloudFill = getElementColor(obj.elementAffinity || null) || (isDark ? '#a0a0a0' : '#808080');
-          drawSolidBody(ctx, centerX, centerY, obj, objSize, cloudFill, '#505050', false, 1, 
-            true, centerX, centerY, undefined, undefined, width, r, centerY
-          );
-        } else {
-          const { bodyFill, bodyStroke } = getBodyColors(obj, !isDark, colorBg, colorStroke, '#e2b34a');
-          const scaleHeight = height - (showShell ? 15 : 45) - bottomMargin;
-          const pixelsPerAU = canvasBoundary > 0 ? scaleHeight / canvasBoundary : 1;
-          
-          drawSolidBody(ctx, x, y, obj, objSize, bodyFill, bodyStroke, false, pixelsPerAU, true);
-        }
+        const { bodyFill, bodyStroke } = getBodyColors(obj, !isDark, colorBg, colorStroke, '#e2b34a');
+        const scaleHeight = height - (showShell ? 15 : 45) - bottomMargin;
+        const pixelsPerAU = canvasBoundary > 0 ? scaleHeight / canvasBoundary : 1;
+        
+        drawSolidBody(
+          ctx, x, y, obj, objSize, bodyFill, bodyStroke, false, pixelsPerAU, 
+          true, centerX, centerY, undefined, undefined, width, r, centerY
+        );
 
         // --- Name label ---
         // If multiple objects share this exact same angle, offset their text vertically so they don't overwrite each other

@@ -1,4 +1,4 @@
-import { SizeClass, SizeUnit } from '../../types/astrolabe';
+import { SizeClass, SizeUnit, CelestialObject } from '../../types/astrolabe';
 import { IVisualScaleStrategy, HybridScaleStrategy } from './VisualScaleStrategy';
 
 export class ScaleManager {
@@ -87,5 +87,22 @@ export class ScaleManager {
    */
   public static getNavChartVisualRadius(sizeClass: SizeClass, physicalSize: number, unit: SizeUnit, zoomLevel: number): number {
     return this.navChartStrategy.getVisualRadius(sizeClass, physicalSize, unit, zoomLevel);
+  }
+
+  /**
+   * Returns the physical radius of the object in AU.
+   */
+  public static getPhysicalRadiusAU(obj: CelestialObject): number {
+    if (!obj.physicalSize) return 0;
+    const radius = obj.physicalSize / 2;
+    return obj.sizeUnit === 'AU' ? radius : this.milesToAu(radius);
+  }
+
+  /**
+   * Returns the maximum physical boundary distance (reach) of the object from its parent in AU.
+   */
+  public static getPhysicalReachAU(obj: CelestialObject): number {
+    const dist = obj.distanceOrbited || 0;
+    return dist + this.getPhysicalRadiusAU(obj);
   }
 }
