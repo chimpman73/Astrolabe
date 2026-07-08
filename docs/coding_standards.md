@@ -14,7 +14,7 @@ This document provides explicit, high-signal instructions for AI models working 
 
 ## 2. Object-Oriented Programming (OOP) & S.O.L.I.D.
 *   **One Class/Component Per File:** Every logical unit must be its own file.
-*   **Single Responsibility Principle:** One class/component = One specific purpose. Is it Modular? (e.g. `BookmarkCanvas` should delegate actual drawing logic to `BookmarkRenderer`; similarly, complex logic should be separated from React lifecycles).
+*   **Single Responsibility Principle:** One class/component = One specific purpose. Is it Modular? (e.g. `BookmarkCanvas` should delegate actual drawing logic to a renderer style like `SimpleVertBookmarkRenderer`; similarly, complex logic should be separated from React lifecycles).
 *   **Encapsulation:** 
     *   **JS/TS (Backend):** Use `#` for private fields in Node.js classes (e.g. `AppManager`, `FileService`, `IpcController`) to enforce strict encapsulation.
     *   **JS/TS (Frontend):** Use standard React conventions (hooks, local state) or `#` for helper classes.
@@ -32,7 +32,7 @@ This document provides explicit, high-signal instructions for AI models working 
     *   `SCREAMING_SNAKE_CASE` for global constants.
     *   `PascalCase` for React component filenames.
 *   **State Management:** Keep local state in components where possible; use a lightweight global store (`zustand` via `useSystemStore.ts`) for global app state (active sphere, view modes, toast messages).
-*   **Graphics/Canvas:** Encapsulate all Canvas rendering logic into dedicated stateless rendering components (e.g. `BaseRenderer`, `BookmarkRenderer`, `VellumStyle`) to separate them from standard UI layout controls.
+*   **Graphics/Canvas:** Encapsulate all Canvas rendering logic into dedicated stateless rendering components (e.g. `BaseRenderer`, `SimpleVertBookmarkRenderer`, `VellumNavigationChartRenderer`) to separate them from standard UI layout controls. React canvas components should act as "View Areas" that instantiate a "Renderer Style" and call `.render()`.
 
 ## 5. File Export & Serialization
 *   **Data Serialization:** When passing system data to the main process for saving, ensure it matches the `CrystalSphere` JSON schema.

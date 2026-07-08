@@ -320,6 +320,13 @@ A responsive map canvas occupying all remaining screen width (`flex: 1`).
 
 ---
 
+### 4.4 Renderer Architecture
+Astrolabe enforces a strict separation between **View Areas** and **Renderer Styles**.
+* **View Areas (React Components)**: Canvas components (e.g., `NavChartCanvas`, `BookmarkCanvas`) are responsible strictly for React lifecycles, state management, window resize observing, mouse events (panning, zooming), and maintaining the drawing bounds. They do not contain any procedural canvas drawing logic.
+* **Renderer Styles (Stateless Classes)**: All actual rendering logic is pushed into swappable renderer style classes (e.g., `SimpleVertBookmarkRenderer`, `VellumNavigationChartRenderer`, `SpaceNavigationChartRenderer`). These implement the `INavigationChartRenderer` interface (or a similar common interface) exposing a `render(context)` method. The View Area instantiates the desired renderer and passes it a context object containing the canvas context, viewport state, and the celestial objects to draw. This structure allows seamless swapping of map aesthetic styles without re-implementing user interaction handling.
+
+---
+
 ## 5. Technology Stack Recommendations
 * **Frontend**: React (TypeScript) + custom CSS custom properties. Uses local `@font-face` loads for **Mephisto** (general application layers) and **ITC Eras-Bold** (canvas object labels).
 * **Font Loading Hook**: Uses `document.fonts.ready` observer in React component hooks to trigger automatic canvas redraws once font files have loaded asynchronously.
