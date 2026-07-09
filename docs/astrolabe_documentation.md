@@ -321,7 +321,7 @@ A vertical panel of width 360px.
 * **Visibility Toggles**: A hide/show button on each card controls the `isHidden` property to exclude objects from canvas views (while retaining them in system scale boundaries).
 * **Boundary Toggles**: A secondary toggle allows users to define whether an object `affectsShellBoundary`, controlling if it is included when calculating the Crystal Sphere's outer radius.
 * **Shape Customization**: Users can select the `worldShape` (e.g. Sphere, Cluster, Elliptical). If the object is a "Station", the dropdown conditionally updates to show station-exclusive shapes (Ring, Cylinder, Ship).
-* **Elemental Affinities**: Users can assign one of five elemental affinities (Fire, Water, Earth, Air, Mixed). The editor dynamically colors inline classical alchemical SVGs (triangles/hexagrams) directly into the UI based on the `getElementColor()` mapping via CSS masks.
+* **Elemental Affinities**: Users can assign one of five elemental affinities (Fire, Water, Earth, Air, Mixed). The editor dynamically colors inline classical alchemical SVGs (triangles/hexagrams) sourced from `assets/elements/` directly into the UI based on the `getElementColor()` mapping via CSS masks.
 * **On-the-fly Validation**: Parses input dynamically. Shows details of JSON syntax errors or schema validation warnings in a red alert banner.
 * **Apply & Save**: Commits edits directly to the local save folder.
 
