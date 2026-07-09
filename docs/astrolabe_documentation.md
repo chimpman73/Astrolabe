@@ -221,6 +221,10 @@ The application saves and loads system states via JSON configuration files store
           "minimum": 0.0,
           "maximum": 1.0,
           "description": "For constellation types: the alpha transparency of the inner background fill."
+        },
+        "constellationFlipX": {
+          "type": "boolean",
+          "description": "For constellation types: whether to perfectly mirror the constellation horizontally."
         }
       }
     }

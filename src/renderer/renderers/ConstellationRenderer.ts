@@ -56,7 +56,8 @@ export class ConstellationRenderer extends BaseRenderer {
     const cx = 50;
     const cy = 50;
 
-    const sX = (scaleX * 2) / w;
+    const flipX = obj.constellationFlipX ? -1 : 1;
+    const sX = ((scaleX * 2) / w) * flipX;
     const sY = (scaleY * 2) / h;
     
     // 1) Draw the background shape (scaled)

@@ -82,6 +82,8 @@ export interface CelestialObject {
   constellationStyle?: 'outline' | 'internal';
   /** For constellation types: the alpha transparency of the inner cloud fill (0.0 to 1.0). */
   constellationFillAlpha?: number;
+  /** For constellation types: whether to flip the rendering horizontally. */
+  constellationFlipX?: boolean;
 }
 
 export interface CrystalSphere {

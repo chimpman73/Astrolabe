@@ -93,6 +93,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
       const current = activeSphere!.objects[index];
       updated.constellationDetail = updated.constellationDetail ?? current.constellationDetail ?? 1;
       updated.constellationStarCount = updated.constellationStarCount ?? current.constellationStarCount ?? 5;
+      updated.constellationFlipX = updated.constellationFlipX ?? current.constellationFlipX ?? false;
     }
     updateCelestialObject(index, updated);
   };
@@ -790,6 +791,17 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                         {/* Constellation Config */}
                         {obj.type === 'constellation' && (
                           <>
+                            <div className="editor-form-group">
+                              <label>Inverse (Flip X)</label>
+                              <label className="editor-checkbox">
+                                <input
+                                  type="checkbox"
+                                  checked={obj.constellationFlipX || false}
+                                  onChange={e => handleUpdateObject(index, { constellationFlipX: e.target.checked })}
+                                />
+                                <span>Mirror image horizontally</span>
+                              </label>
+                            </div>
                             <div className="editor-form-group">
                               <label>Background Fill Alpha (0-1)</label>
                               <input
