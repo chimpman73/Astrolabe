@@ -230,6 +230,24 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
       };
     };
 
+    const culledObjects = new Set<string>();
+    visibleObjects.forEach((obj: any) => {
+      if (obj.orbitedObjectName && obj.orbitedObjectName !== obj.name && !isPrimary(obj)) {
+        const orbitRadiusPx = obj.distanceOrbited * zoom;
+        const parent = objects.find((o: any) => o.name === obj.orbitedObjectName);
+        let cullThreshold = 10;
+        if (parent) {
+          const parentSize = ScaleManager.getNavChartVisualRadius(parent.sizeClass || 'D', parent.physicalSize || 1000, parent.sizeUnit || 'miles', zoom);
+          cullThreshold = parentSize + 5;
+        }
+        if (orbitRadiusPx < cullThreshold) {
+          culledObjects.add(obj.name);
+        }
+      }
+    });
+
+    const activeVisibleObjects = visibleObjects.filter((obj: any) => !culledObjects.has(obj.name));
+
     const context: MapStyleContext = {
       ctx,
       width: dimensions.width,
@@ -237,7 +255,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
       activeZoom: zoom,
       activePan,
       objects,
-      visibleObjects,
+      visibleObjects: activeVisibleObjects,
       positions,
       activeSphere,
       isPrimary,

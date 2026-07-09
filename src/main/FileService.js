@@ -127,6 +127,34 @@ class FileService {
       return { success: false, error: err.message, code: 'ERR_GET_DEFAULT_SAVE_DIR_FAILED' };
     }
   }
+
+  async listShapesDirectory() {
+    try {
+      const shapesPath = path.join(app.getAppPath(), 'assets', 'shapes');
+      if (!fs.existsSync(shapesPath)) {
+        return { success: true, data: [] };
+      }
+      const files = fs.readdirSync(shapesPath);
+      const shapes = files.filter(f => f.endsWith('.svg')).map(f => f.replace('.svg', ''));
+      return { success: true, data: shapes };
+    } catch (err) {
+      return { success: false, error: err.message, code: 'ERR_SHAPES_DIR_READ_FAILED' };
+    }
+  }
+
+  async loadShape(shapeName) {
+    try {
+      const shapesPath = path.join(app.getAppPath(), 'assets', 'shapes');
+      const filePath = path.join(shapesPath, `${shapeName}.svg`);
+      if (!fs.existsSync(filePath)) {
+        return { success: false, error: 'Shape not found.', code: 'ERR_SHAPE_NOT_FOUND' };
+      }
+      const content = fs.readFileSync(filePath, 'utf8');
+      return { success: true, data: content };
+    } catch (err) {
+      return { success: false, error: err.message, code: 'ERR_SHAPE_READ_FAILED' };
+    }
+  }
 }
 
 module.exports = FileService;

@@ -6,6 +6,7 @@ import { SaveManager } from './components/SaveManager';
 import { OpenSystemModal } from './components/OpenSystemModal';
 import { SaveAsModal } from './components/SaveAsModal';
 import { Compass, HelpCircle, ChevronRight } from 'lucide-react';
+import { shapeManager } from './utils/ShapeManager';
 
 const App: React.FC = () => {
   const {
@@ -28,6 +29,9 @@ const App: React.FC = () => {
   const [editorCollapsed, setEditorCollapsed] = useState(false);
   const [bookmarkCollapsed, setBookmarkCollapsed] = useState(false);
   const [systemNavCollapsed, setSystemNavCollapsed] = useState(false);
+
+  // Shape initialization state
+  const [, setShapesLoaded] = useState(false);
 
   // Auto-select documents or last directory on load
   useEffect(() => {
@@ -61,6 +65,11 @@ const App: React.FC = () => {
         });
       });
     }
+  }, []);
+
+  // Initialize ShapeManager
+  useEffect(() => {
+    shapeManager.init().then(() => setShapesLoaded(true));
   }, []);
 
   // Auto-load first file if directory is selected and no sphere is active

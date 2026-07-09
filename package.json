@@ -8,7 +8,19 @@
     "dev:renderer": "vite",
     "dev:main": "wait-on http://localhost:5173 && electron .",
     "build": "tsc && vite build",
-    "package": "npm run build && electron-builder"
+    "package": "npm run build && electron-builder",
+    "generate-shape": "node tools/generate-shape.js"
+  },
+  "build": {
+    "extraResources": [
+      {
+        "from": "assets",
+        "to": "assets",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
   },
   "dependencies": {
     "lucide-react": "^0.395.0",
@@ -23,6 +35,9 @@
     "concurrently": "^8.2.2",
     "electron": "^31.1.0",
     "electron-builder": "^24.13.3",
+    "pngjs": "^7.0.0",
+    "potrace": "^2.1.8",
+    "svgo": "^4.0.1",
     "typescript": "^5.5.2",
     "vite": "^5.3.1",
     "wait-on": "^7.2.0"

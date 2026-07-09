@@ -1,8 +1,30 @@
 {
   "sphereName": "Krynnspace",
   "currentCampaignDate": "2026-07-08",
-  "currentSystemDate": 0,
+  "currentSystemDate": 588,
   "objects": [
+    {
+      "name": "Constellation 1",
+      "type": "constellation",
+      "sizeClass": "J",
+      "physicalSize": 25,
+      "sizeUnit": "AU",
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "The Sun",
+      "distanceOrbited": 26,
+      "initialAngle": 90,
+      "orbitalPeriodDays": 0,
+      "affectsShellBoundary": false,
+      "arcDegrees": 15,
+      "isHidden": false,
+      "constellationStarCount": 10,
+      "elementAffinity": null,
+      "constellationDetail": 10,
+      "customShapeName": "star",
+      "constellationStarMinSizeClass": "D",
+      "constellationStarMaxSizeClass": "F",
+      "constellationFillAlpha": 0.25
+    },
     {
       "name": "The Sun",
       "type": "star",

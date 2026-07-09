@@ -1,9 +1,10 @@
 import { RenderContext } from '../../types/renderer';
+import { shapeManager } from '../utils/ShapeManager';
 
 export abstract class BaseRenderer {
   public abstract draw(context: RenderContext): void;
 
-  protected drawShapePath(ctx: CanvasRenderingContext2D, shape: string, x: number, y: number, s: number): void {
+  protected drawShapePath(ctx: CanvasRenderingContext2D, shape: string, x: number, y: number, s: number, customShapeName?: string): void {
     ctx.beginPath();
     switch (shape) {
       case 'disc': {
@@ -131,6 +132,29 @@ export abstract class BaseRenderer {
         ctx.lineTo(x - s * 0.1, y + s * 0.4);
         ctx.closePath();
         break;
+      case 'custom':
+        if (customShapeName) {
+          const path = shapeManager.getCachedPath(customShapeName);
+          if (path) {
+            ctx.save();
+            ctx.translate(x, y);
+            // Assuming default SVGs are roughly 100x100 viewBox centered around (0,0) or (50,50). 
+            // We'll scale it to match 's' (radius). If the SVG is 100x100 (0..100), we center it.
+            // A simple scale transform. Let's just scale by s / 50 and translate -50, -50.
+            const scale = s / 50;
+            ctx.scale(scale, scale);
+            ctx.translate(-50, -50);
+            
+            // Note: ctx.fill(path) works, but since we are doing beginPath above, this logic is tricky. 
+            // Let's just draw the path. Wait, if we use path2D, we don't use beginPath. 
+            // I'll adjust the logic in drawBaseSolid to handle path2D returns.
+            ctx.restore();
+            return; // We handle custom in drawBaseSolid because Path2D requires ctx.fill(path)
+          }
+        }
+        // Fallback to sphere
+        ctx.arc(x, y, s, 0, 2 * Math.PI);
+        break;
       default: // sphere
         ctx.arc(x, y, s, 0, 2 * Math.PI);
     }
@@ -139,11 +163,28 @@ export abstract class BaseRenderer {
   protected drawBaseSolid(context: RenderContext): void {
     const { ctx, x, y, obj, size, bodyFill, bodyStroke } = context;
     const shape = obj.worldShape ?? 'sphere';
-    this.drawShapePath(ctx, shape, x, y, size);
+    
     ctx.fillStyle = bodyFill;
-    ctx.fill();
     ctx.lineWidth = obj.type === 'star' ? 2 : 1.5;
     ctx.strokeStyle = bodyStroke;
+    
+    if (shape === 'custom' && obj.customShapeName) {
+      const path = shapeManager.getCachedPath(obj.customShapeName);
+      if (path) {
+        ctx.save();
+        ctx.translate(x, y);
+        const scale = size / 50;
+        ctx.scale(scale, scale);
+        ctx.translate(-50, -50);
+        ctx.fill(path);
+        ctx.stroke(path);
+        ctx.restore();
+        return;
+      }
+    }
+
+    this.drawShapePath(ctx, shape, x, y, size, obj.customShapeName);
+    ctx.fill();
     ctx.stroke();
   }
 }

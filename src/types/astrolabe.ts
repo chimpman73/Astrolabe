@@ -1,8 +1,8 @@
 export type CelestialObjectType =
   | 'star' | 'planet' | 'moon' | 'asteroid'
-  | 'station' | 'cloud' | 'custom' | 'living_world';
+  | 'station' | 'cloud' | 'custom' | 'living_world' | 'constellation';
 
-export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular' | 'elliptical' | 'ring' | 'cylinder' | 'ship' | 'rectangular' | 'castle' | 'skull';
+export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular' | 'elliptical' | 'ring' | 'cylinder' | 'ship' | 'rectangular' | 'castle' | 'skull' | 'custom';
 export type ElementAffinity = 'fire' | 'water' | 'earth' | 'air' | 'mixed';
 export type OrbitDirection = 'prograde' | 'retrograde';
 export type SizeClass = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J';
@@ -35,6 +35,8 @@ export interface CelestialObject {
   orbitDirection?: OrbitDirection;
   /** Visual shape of the celestial body. Defaults to sphere. */
   worldShape?: WorldShape;
+  /** Name of the custom SVG shape to use when worldShape is 'custom'. */
+  customShapeName?: string;
   /** Elemental association for fantasy worlds. */
   elementAffinity?: ElementAffinity | null;
   /** For cloud types: angular arc width in degrees along the orbital path. */
@@ -66,6 +68,18 @@ export interface CelestialObject {
   coronaSize?: number;
   /** For star types: alpha transparency of the corona (0.0 to 1.0, default 0.3). */
   coronaAlpha?: number;
+
+  // --- Constellation Extensions ---
+  /** For constellation types: the number of line segments to break the SVG path into (determines wireframe detail). */
+  constellationDetail?: number;
+  /** For constellation types: the number of stars to place along the wireframe nodes. */
+  constellationStarCount?: number;
+  /** For constellation types: the min size class of internal stars. */
+  constellationStarMinSizeClass?: SizeClass;
+  /** For constellation types: the max size class of internal stars. */
+  constellationStarMaxSizeClass?: SizeClass;
+  /** For constellation types: the alpha transparency of the inner cloud fill (0.0 to 1.0). */
+  constellationFillAlpha?: number;
 }
 
 export interface CrystalSphere {
@@ -100,6 +114,8 @@ export interface IAstrolabeAPI {
   saveJsonFile: (filePath: string, data: CrystalSphere) => Promise<IpcResponse<void>>;
   exportPngFile: (dataUrl: string, defaultName: string) => Promise<IpcResponse<string>>;
   getDefaultSaveDirectory: () => Promise<IpcResponse<string>>;
+  listShapesDirectory: () => Promise<IpcResponse<string[]>>;
+  loadShape: (shapeName: string) => Promise<IpcResponse<string>>;
   onBackendError: (callback: (data: { type: string; message: string; stack?: string }) => void) => void;
 }
 

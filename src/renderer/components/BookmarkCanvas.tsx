@@ -37,16 +37,19 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
     return false;
   };
 
+  const isValidBookmarkObject = (obj: any) => 
+    obj.distanceOrbited >= 0 && isPrimary(obj) && obj.type !== 'constellation';
+
   // Filter objects to only those that orbit the central point (0,0) or orbit a body at (0,0)
   const planetaryObjects = activeSphere
     ? activeSphere.objects.filter((obj) => 
-        obj.distanceOrbited >= 0 && isPrimary(obj) && !obj.isHidden && (viewMode === 'DM' || !obj.isDMOnly)
+        isValidBookmarkObject(obj) && !obj.isHidden && (viewMode === 'DM' || !obj.isDMOnly)
       )
     : [];
 
   const shellBasisDistance = activeSphere 
     ? activeSphere.objects
-        .filter((obj) => obj.distanceOrbited >= 0 && isPrimary(obj) && obj.affectsShellBoundary !== false)
+        .filter((obj) => isValidBookmarkObject(obj) && obj.affectsShellBoundary !== false)
         .reduce((max, obj) => {
           const reach = ScaleManager.getPhysicalReachAU(obj);
           return Math.max(max, reach);
@@ -55,7 +58,7 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
 
   const absoluteMaxDistance = activeSphere 
     ? activeSphere.objects
-        .filter((obj) => obj.distanceOrbited >= 0 && isPrimary(obj))
+        .filter((obj) => isValidBookmarkObject(obj))
         .reduce((max, obj) => {
           const reach = ScaleManager.getPhysicalReachAU(obj);
           return Math.max(max, reach);

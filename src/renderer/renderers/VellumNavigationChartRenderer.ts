@@ -304,7 +304,10 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
         );
       } else {
         const { bodyFill, bodyStroke } = getBodyColors(obj, true, this.colorBg, this.colorStroke, this.colorGold);
-        drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, bodyFill, bodyStroke, false, activeZoom);
+        const orbitR = obj.distanceOrbited * activeZoom;
+        drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, bodyFill, bodyStroke, false, activeZoom,
+          false, parentProj.x, parentProj.y, orbitR, pos.angle
+        );
 
         if (obj.isStationary && obj.type !== 'star' && obj.type !== 'living_world') {
           drawStationaryIndicator(ctx, proj.x, proj.y, renderSize, this.colorMuted);
@@ -316,10 +319,18 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
         ctx.font = obj.type === 'star'
           ? `bold 12px 'Elan', 'Cinzel', serif`
           : `500 10px 'Elan', 'Outfit', sans-serif`;
-        ctx.fillStyle = this.colorStroke;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        ctx.fillText(obj.name, proj.x, proj.y + renderSize + 5);
+        
+        if (obj.type === 'constellation') {
+          ctx.fillStyle = '#ffffff';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(obj.name, proj.x, proj.y);
+        } else {
+          ctx.fillStyle = this.colorStroke;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
+          ctx.fillText(obj.name, proj.x, proj.y + renderSize + 5);
+        }
       }
     });
   }

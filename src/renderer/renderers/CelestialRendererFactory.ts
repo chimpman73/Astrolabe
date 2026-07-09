@@ -3,6 +3,7 @@ import { StarRenderer } from './StarRenderer';
 import { PlanetRenderer } from './PlanetRenderer';
 import { LivingWorldRenderer } from './LivingWorldRenderer';
 import { CloudRenderer } from './CloudRenderer';
+import { ConstellationRenderer } from './ConstellationRenderer';
 import { DefaultRenderer } from './DefaultRenderer';
 import { CelestialObjectType } from '../../types/astrolabe';
 
@@ -15,6 +16,7 @@ export class CelestialRendererFactory {
     this.renderers.set('planet', new PlanetRenderer());
     this.renderers.set('living_world', new LivingWorldRenderer());
     this.renderers.set('cloud', new CloudRenderer());
+    this.renderers.set('constellation', new ConstellationRenderer());
     
     const defaultRenderer = new DefaultRenderer();
     this.renderers.set('moon', defaultRenderer);

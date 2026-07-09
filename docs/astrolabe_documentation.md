@@ -77,7 +77,7 @@ The application saves and loads system states via JSON configuration files store
         },
         "type": {
           "type": "string",
-          "enum": ["star", "planet", "moon", "asteroid", "station", "custom", "cloud", "living_world"],
+          "enum": ["star", "planet", "moon", "asteroid", "station", "custom", "cloud", "living_world", "constellation"],
           "description": "Category of the celestial body."
         },
         "worldShape": {
@@ -194,6 +194,32 @@ The application saves and loads system states via JSON configuration files store
           "minimum": 0.0,
           "maximum": 2.0,
           "description": "How much the branches bend at nodes for a living_world."
+        },
+        "constellationDetail": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "For constellation types: the number of line segments to break the SVG path into (determines wireframe detail)."
+        },
+        "constellationStarCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "For constellation types: the number of stars to place along the wireframe nodes."
+        },
+        "constellationStarMinSizeClass": {
+          "type": "string",
+          "enum": ["A", "B", "C", "D", "E", "F", "G", "H", "I"],
+          "description": "For constellation types: the minimum size class of internal stars."
+        },
+        "constellationStarMaxSizeClass": {
+          "type": "string",
+          "enum": ["A", "B", "C", "D", "E", "F", "G", "H", "I"],
+          "description": "For constellation types: the maximum size class of internal stars."
+        },
+        "constellationFillAlpha": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "For constellation types: the alpha transparency of the inner background fill."
         }
       }
     }
@@ -303,7 +329,7 @@ A vertical strip (fixed width 280px) displaying a radial hierarchy.
   * If the Crystal Shell outline is **ON**, the drawing boundary `shellDistance` defaults to `2 * maxDistance` (Double) or `1.2 * maxDistance` (Relative Margin) depending on `shellBoundaryType`, centering the furthest planet on screen and allocating the top portion of the canvas to the shell and navigation metadata.
   * If the Crystal Shell outline is toggled **OFF**, the drawing boundary `shellDistance` recalibrates to `maxDistance`, scaling the furthest planet directly to the top of the canvas and distributing all planets proportionally across the full screen height (with proportional margins to prevent clipping).
   * The gap compression algorithm uses the system boundary as an anchor. Physical expanses (such as the massive branches of a `living_world`) calculate their true physical reach to dictate the boundary limit, rather than strictly using the object's orbital center. This ensures enormous branching structures are properly given layout space and visually span up the bookmark rather than extrapolating off the canvas, while smaller Living Worlds in miles correctly fallback to drawing as symbolic icons.
-* **Scope**: Displays only objects directly orbiting the central star (ignoring moons, satellites, and sub-orbiting planets).
+* **Scope**: Displays only objects directly orbiting the central star (ignoring moons, satellites, and sub-orbiting planets). Constellations are also fully excluded from rendering in the bookmark view.
 * **Typography**: Celestial object labels (names and distances) are drawn with **ITC Eras-Bold** at a 1.5x scale multiplier for improved legibility. Shell boundary headers are rendered using the gothic fantasy font **Mephisto**.
 * **Compact Controls**: Small overlays to switch background mode (Light/Dark), toggle the shell boundary outline, toggle distance labels (DIST: ON/OFF), and export a high-res portrait PNG (300 DPI).
 
@@ -315,8 +341,25 @@ A responsive map canvas occupying all remaining screen width (`flex: 1`).
 * **Sub-orbiter Culling**: To declutter dense inner solar systems, sub-orbiters (moons) and their orbital lines are dynamically culled from rendering if their orbital radius in pixels is smaller than their parent planet's visual footprint (plus padding). They pop into view automatically when the user zooms in closer.
 * **Dynamic Scale Bar**: An overlay draws a static 50px line in the bottom right corner, dynamically calculating the physical distance it represents. It intelligently shifts units from Astronomical Units (AU) down to miles if the distance drops below 0.1 AU.
 * **Scale-to-Fit**: Automatically updates zoom and centering offsets on load or window resize to ensure the entire Crystal Sphere shell remains visible within the viewport. Autofit dimensions are calculated exclusively using primary celestial bodies that orbit the invisible coordinate origin directly (excluding sub-orbiting planets). The zoom boundary respects the active `shellBoundaryType`.
+* **Constellations**: Draws constellation shapes natively on the chart. Custom SVGs are parsed and uniformly scaled (based on their **Size Class**), using `arcDegrees` as an additional uniform scale multiplier instead of arbitrarily stretching them. They automatically align tangentially to the orbit path at their initial angle. The visual representation includes a translucent black background, an intersecting white wireframe, and blinking, pseudo-randomized stars populated strictly on the wireframe intersections. The elemental affinity dictates the star glow color.
 * **Simulation controls**: Scrubber controls and play/pause options to progress `currentSystemDate` and animate orbital vectors.
 * **Chart Export**: Combines map views to export a high-res landscape PNG (300 DPI), featuring a left-pane System Directory list where sub-orbiting planets are correctly nested under their parent bodies instead of duplicate primary lists.
+
+## 5. Utilities & Tools
+
+### 5.1 Image-to-SVG Generator
+Astrolabe includes an automated Node.js utility script (`tools/generate-shape.js`) that converts standard raster images (PNGs) into highly optimized, single-path SVGs specifically formatted for Astrolabe's rendering engine (perfect for creating custom Constellations or Custom Planets from internet silhouettes).
+
+**Usage:**
+```bash
+npm run generate-shape C:\path\to\image.png
+```
+
+**Pipeline:**
+1. **Binarization**: Reads the PNG via `pngjs` and creates a black-and-white bitmap in memory using `Jimp`.
+2. **Vector Tracing**: Processes the bitmap using `potrace` to extract a mathematical outline and generate a continuous SVG path.
+3. **SVGO Optimization**: Automatically runs the SVGO compiler (`applyTransforms` plugin) to mathematically "bake" translations and scaling into the native coordinates of the `d="..."` path attribute, stripping `<g>` transform wrappers so `ShapeManager.ts` can extract 0-100 normalized coordinates correctly.
+4. **Auto-Save**: Saves the final `.svg` directly into the `assets/shapes/` directory, automatically registering it in the application's UI dropdowns on next load.
 
 ---
 

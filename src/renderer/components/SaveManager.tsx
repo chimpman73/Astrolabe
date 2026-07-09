@@ -15,9 +15,11 @@ import {
   TreeDeciduous,
   Eye,
   EyeOff,
+  Sparkles,
 } from 'lucide-react';
 import { CelestialObject, CelestialObjectType, WorldShape, ElementAffinity, SizeClass } from '../../types/astrolabe';
 import { ScaleManager } from '../utils/ScaleManager';
+import { shapeManager } from '../utils/ShapeManager';
 
 interface SaveManagerProps {
   onCollapse?: () => void;
@@ -134,6 +136,8 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
         return <Cloud className="w-3.5 h-3.5 text-blue-400" />;
       case 'living_world':
         return <TreeDeciduous className="w-3.5 h-3.5 text-green-600 dark:text-green-500" />;
+      case 'constellation':
+        return <Sparkles className="w-3.5 h-3.5 text-purple-400" />;
       default:
         return <Globe className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />;
     }
@@ -394,7 +398,8 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                         <option value="station">🏙️ Station</option>
                         <option value="cloud">☁️ Cloud</option>
                         <option value="living_world">🌳 Living World</option>
-                        <option value="custom">✨ Custom</option>
+                        <option value="constellation">✨ Constellation</option>
+                        <option value="custom">⚙️ Custom (Legacy)</option>
                       </select>
                     </div>
 
@@ -436,6 +441,21 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                     {!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') && (
                       <div className="text-[var(--color-accent-red)] text-[10px] mt-1 mb-2 px-1 font-bold">
                         Warning: Size is out of bounds for Class {obj.sizeClass || 'D'}
+                      </div>
+                    )}
+
+                    {(obj.type === 'cloud' || obj.type === 'constellation') && (
+                      <div className="editor-form-group">
+                        <label>Arc Width (Degrees)</label>
+                        <input
+                          type="number"
+                          step="1"
+                          min="1"
+                          max="359"
+                          className="editor-input"
+                          value={obj.arcDegrees ?? 30}
+                          onChange={e => handleUpdateObject(index, { arcDegrees: parseFloat(e.target.value) || 30 })}
+                        />
                       </div>
                     )}
 
@@ -530,7 +550,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                         </div>
 
                         {/* World Shape (not shown for cloud-type objects) */}
-                        {obj.type !== 'cloud' && obj.type !== 'living_world' && (
+                        {obj.type !== 'cloud' && obj.type !== 'living_world' && obj.type !== 'constellation' && (
                           <div className="editor-form-group">
                             <label>World Shape</label>
                             {obj.type === 'station' ? (
@@ -558,8 +578,26 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 <option value="irregular">✦ Irregular</option>
                                 <option value="elliptical">⬭ Elliptical</option>
                                 <option value="rectangular">▭ Rectangular</option>
+                                <option value="custom">⚙️ Custom SVG</option>
                               </select>
                             )}
+                          </div>
+                        )}
+
+                        {/* Custom Shape Selector */}
+                        {(obj.worldShape === 'custom' || obj.type === 'constellation') && (
+                          <div className="editor-form-group">
+                            <label>Custom Shape</label>
+                            <select
+                              className="editor-select"
+                              value={obj.customShapeName ?? ''}
+                              onChange={e => handleUpdateObject(index, { customShapeName: e.target.value })}
+                            >
+                              <option value="">-- Select Shape --</option>
+                              {shapeManager.getAvailableShapes().map(shape => (
+                                <option key={shape} value={shape}>{shape}</option>
+                              ))}
+                            </select>
                           </div>
                         )}
 
@@ -612,18 +650,6 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                         {/* Cloud only properties */}
                         {(obj.type === 'cloud') && (
                           <>
-                            <div className="editor-form-group">
-                              <label>Arc Width (°)</label>
-                              <input
-                                type="number"
-                                step="1"
-                                min="1"
-                                max="359"
-                                className="editor-input"
-                                value={obj.arcDegrees ?? 30}
-                                onChange={e => handleUpdateObject(index, { arcDegrees: parseFloat(e.target.value) || 30 })}
-                              />
-                            </div>
                             <div className="editor-form-group">
                               <label>Transparency (0-1)</label>
                               <input
@@ -752,6 +778,83 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 value={obj.branchBend ?? 0.5}
                                 onChange={e => handleUpdateObject(index, { branchBend: parseFloat(e.target.value) || 0.0 })}
                               />
+                            </div>
+                          </>
+                        )}
+
+                        {/* Constellation Config */}
+                        {obj.type === 'constellation' && (
+                          <>
+                            <div className="editor-form-group">
+                              <label>Background Fill Alpha (0-1)</label>
+                              <input
+                                type="number"
+                                step="0.05"
+                                min="0.0"
+                                max="1.0"
+                                className="editor-input"
+                                value={obj.constellationFillAlpha ?? 0.2}
+                                onChange={e => handleUpdateObject(index, { constellationFillAlpha: parseFloat(e.target.value) || 0.0 })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Wireframe Detail Level</label>
+                              <input
+                                type="number"
+                                step="1"
+                                min="2"
+                                className="editor-input"
+                                value={obj.constellationDetail ?? 10}
+                                onChange={e => handleUpdateObject(index, { constellationDetail: parseInt(e.target.value, 10) || 10 })}
+                                title="How many segments to break the SVG path into."
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Star Count</label>
+                              <input
+                                type="number"
+                                step="1"
+                                min="0"
+                                className="editor-input"
+                                value={obj.constellationStarCount ?? 5}
+                                onChange={e => handleUpdateObject(index, { constellationStarCount: parseInt(e.target.value, 10) || 0 })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Min Internal Star Size Class</label>
+                              <select
+                                className="editor-select"
+                                value={obj.constellationStarMinSizeClass || 'A'}
+                                onChange={e => handleUpdateObject(index, { constellationStarMinSizeClass: e.target.value as SizeClass })}
+                              >
+                                <option value="A">Size A</option>
+                                <option value="B">Size B</option>
+                                <option value="C">Size C</option>
+                                <option value="D">Size D</option>
+                                <option value="E">Size E</option>
+                                <option value="F">Size F</option>
+                                <option value="G">Size G</option>
+                                <option value="H">Size H</option>
+                                <option value="I">Size I</option>
+                              </select>
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Max Internal Star Size Class</label>
+                              <select
+                                className="editor-select"
+                                value={obj.constellationStarMaxSizeClass || 'C'}
+                                onChange={e => handleUpdateObject(index, { constellationStarMaxSizeClass: e.target.value as SizeClass })}
+                              >
+                                <option value="A">Size A</option>
+                                <option value="B">Size B</option>
+                                <option value="C">Size C</option>
+                                <option value="D">Size D</option>
+                                <option value="E">Size E</option>
+                                <option value="F">Size F</option>
+                                <option value="G">Size G</option>
+                                <option value="H">Size H</option>
+                                <option value="I">Size I</option>
+                              </select>
                             </div>
                           </>
                         )}
