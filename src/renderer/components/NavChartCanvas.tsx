@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState, forwardRef, useImperativeHandle, us
 import { useSystemStore } from '../store/useSystemStore';
 import { calculateSystemPositions } from '../utils/orbitMath';
 import { ScaleManager } from '../utils/ScaleManager';
+import { AutoFitCalculator } from '../utils/AutoFitCalculator';
 import { VellumNavigationChartRenderer } from '../renderers/VellumNavigationChartRenderer';
 import { SpaceNavigationChartRenderer } from '../renderers/SpaceNavigationChartRenderer';
 import { exportNavigationChart } from '../renderers/ExportDirectoryRenderer';
@@ -160,28 +161,8 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   const positions = calculateSystemPositions(objects, currentSystemDate);
 
   const handleAutoFit = () => {
-    if (visibleObjects.length === 0) return;
-    
-    let maxDist = 0.1;
-    let absoluteMaxDist = 0.1;
-    objects.forEach((o: any) => {
-      if (!isPrimary(o)) return;
-      const reach = ScaleManager.getPhysicalReachAU(o);
-      if (o.affectsShellBoundary !== false && reach > maxDist) maxDist = reach;
-      if (reach > absoluteMaxDist) absoluteMaxDist = reach;
-    });
-    
-    const isCustom = activeSphere?.shellBoundaryType === 'custom' || activeSphere?.shellBoundaryType === 'relativeMargin';
-    const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
-    
-    const shellRadius = maxDist * shellScale;
-    const viewRadius = Math.max(absoluteMaxDist, shellRadius);
-    
-    const minDim = Math.min(dimensions.width, dimensions.height);
-    const targetZoom = (minDim * 0.45) / viewRadius;
-    
-    // Offset the target pan down by 25px so the title isn't hidden under the toolbar
-    setViewport({ zoom: targetZoom, pan: { x: dimensions.width / 2, y: dimensions.height / 2 + 25 } });
+    const { zoom, pan } = AutoFitCalculator.calculateAutoFit(dimensions, objects, activeSphere);
+    setViewport({ zoom, pan });
   };
 
   useImperativeHandle(ref, () => ({
