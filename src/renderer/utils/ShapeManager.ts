@@ -1,10 +1,14 @@
-
+import { ConstellationData } from './constellation/ConstellationStrategy';
+import { OutlineStrategy } from './constellation/OutlineStrategy';
+import { InternalGeometricStrategy } from './constellation/InternalGeometricStrategy';
 
 class ShapeManager {
   private shapeList: string[] = [];
   private pathCache: Map<string, Path2D> = new Map();
   private stringCache: Map<string, string> = new Map();
-  private pointCache: Map<string, {x: number, y: number}[]> = new Map();
+  private graphCache: Map<string, ConstellationData> = new Map();
+  private outlineStrategy = new OutlineStrategy();
+  private internalStrategy = new InternalGeometricStrategy();
   private initialized = false;
 
   public async init(): Promise<void> {
@@ -31,32 +35,32 @@ class ShapeManager {
     return this.pathCache.get(shapeName) || null;
   }
 
-  public getSampledPoints(shapeName: string, detailLevel: number): {x: number, y: number}[] | null {
+  public getConstellationData(
+    shapeName: string, 
+    style: 'outline' | 'internal', 
+    detailLevel: number,
+    seed: string
+  ): ConstellationData | null {
     if (!shapeName) return null;
-    const cacheKey = `${shapeName}_${detailLevel}`;
-    if (this.pointCache.has(cacheKey)) return this.pointCache.get(cacheKey)!;
+    const cacheKey = `${shapeName}_${style}_${detailLevel}_${seed}`;
+    if (this.graphCache.has(cacheKey)) return this.graphCache.get(cacheKey)!;
 
     const pathData = this.stringCache.get(shapeName);
-    if (!pathData) return null;
+    const path2d = this.pathCache.get(shapeName);
+    if (!pathData || !path2d) return null;
 
     try {
-      const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      pathEl.setAttribute('d', pathData);
-      const totalLength = pathEl.getTotalLength();
-      
-      const points: {x: number, y: number}[] = [];
-      const steps = Math.max(2, detailLevel);
-      const stepLength = totalLength / steps;
-      
-      for (let i = 0; i <= steps; i++) {
-        const pt = pathEl.getPointAtLength(i * stepLength);
-        points.push({ x: pt.x, y: pt.y });
+      let data: ConstellationData;
+      if (style === 'internal') {
+        data = this.internalStrategy.generate(pathData, path2d, detailLevel, seed);
+      } else {
+        data = this.outlineStrategy.generate(pathData, path2d, detailLevel, seed);
       }
       
-      this.pointCache.set(cacheKey, points);
-      return points;
+      this.graphCache.set(cacheKey, data);
+      return data;
     } catch (e) {
-      console.error(`Failed to sample points for shape: ${shapeName}`, e);
+      console.error(`Failed to generate constellation data for shape: ${shapeName}`, e);
       return null;
     }
   }

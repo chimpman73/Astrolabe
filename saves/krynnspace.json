@@ -7,7 +7,7 @@
       "name": "Constellation 1",
       "type": "constellation",
       "sizeClass": "J",
-      "physicalSize": 25,
+      "physicalSize": 50,
       "sizeUnit": "AU",
       "description": "A newly added planetary body.",
       "orbitedObjectName": "The Sun",
@@ -20,7 +20,7 @@
       "constellationStarCount": 10,
       "elementAffinity": null,
       "constellationDetail": 10,
-      "customShapeName": "star",
+      "customShapeName": "basilisk_silhouette_1783562403952",
       "constellationStarMinSizeClass": "D",
       "constellationStarMaxSizeClass": "F",
       "constellationFillAlpha": 0.25

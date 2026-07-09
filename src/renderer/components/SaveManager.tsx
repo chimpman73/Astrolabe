@@ -798,6 +798,17 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               />
                             </div>
                             <div className="editor-form-group">
+                              <label>Line Drawing Style</label>
+                              <select
+                                className="editor-select"
+                                value={obj.constellationStyle || 'internal'}
+                                onChange={e => handleUpdateObject(index, { constellationStyle: e.target.value as 'outline' | 'internal' })}
+                              >
+                                <option value="internal">Internal Geometric Graph</option>
+                                <option value="outline">Shape Outline</option>
+                              </select>
+                            </div>
+                            <div className="editor-form-group">
                               <label>Wireframe Detail Level</label>
                               <input
                                 type="number"

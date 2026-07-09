@@ -78,6 +78,8 @@ export interface CelestialObject {
   constellationStarMinSizeClass?: SizeClass;
   /** For constellation types: the max size class of internal stars. */
   constellationStarMaxSizeClass?: SizeClass;
+  /** For constellation types: rendering style. */
+  constellationStyle?: 'outline' | 'internal';
   /** For constellation types: the alpha transparency of the inner cloud fill (0.0 to 1.0). */
   constellationFillAlpha?: number;
 }
