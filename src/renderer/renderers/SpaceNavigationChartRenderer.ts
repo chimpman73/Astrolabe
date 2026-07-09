@@ -57,6 +57,8 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
 
   drawOrbits({ ctx, activeZoom, positions, project, isPrimary }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
     activeVisibleObjects.forEach((obj) => {
+      if (obj.type === 'constellation') return;
+      
       let px = 0;
       let py = 0;
       if (obj.orbitedObjectName && obj.orbitedObjectName !== obj.name) {
