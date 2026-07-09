@@ -23,6 +23,7 @@ console.log(`Tracing image: ${inputPath}...`);
 
 const PNG = require('pngjs').PNG;
 const Jimp = require('jimp');
+const { generateSkeletonData } = require('./skeletonizer');
 
 // Configuration for potrace
 const params = {
@@ -91,7 +92,16 @@ Jimp.read(inputPath)
 
       fs.writeFileSync(outputPath, optimizedSvg.data, 'utf8');
       console.log(`✅ Successfully created: ${outputPath}`);
-      console.log(`You can now use "${shapeName}" as a custom shape in Astrolabe!`);
+      
+      // Generate and save the multi-resolution skeleton graph
+      generateSkeletonData(jimpImg).then(skeletonData => {
+        const jsonPath = path.join(outputDir, `${shapeName}_skeleton.json`);
+        fs.writeFileSync(jsonPath, JSON.stringify(skeletonData), 'utf8');
+        console.log(`✅ Successfully created: ${jsonPath}`);
+        console.log(`You can now use "${shapeName}" as a custom shape in Astrolabe!`);
+      }).catch(err => {
+        console.error("Failed to generate skeleton:", err);
+      });
     });
   })
   .catch((e) => {

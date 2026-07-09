@@ -7,6 +7,7 @@ class ShapeManager {
   private pathCache: Map<string, Path2D> = new Map();
   private stringCache: Map<string, string> = new Map();
   private graphCache: Map<string, ConstellationData> = new Map();
+  private skeletonCache: Map<string, Record<number, ConstellationData>> = new Map();
   private outlineStrategy = new OutlineStrategy();
   private internalStrategy = new InternalGeometricStrategy();
   private initialized = false;
@@ -50,15 +51,30 @@ class ShapeManager {
     if (!pathData || !path2d) return null;
 
     try {
-      let data: ConstellationData;
+      let data: ConstellationData | null = null;
       if (style === 'internal') {
-        data = this.internalStrategy.generate(pathData, path2d, detailLevel, seed);
+        const skeletons = this.skeletonCache.get(shapeName);
+        if (skeletons) {
+          // Find the closest LOD to the requested detailLevel
+          const availableLods = Object.keys(skeletons).map(Number).sort((a,b)=>a-b);
+          let bestLod = availableLods[0];
+          for (const lod of availableLods) {
+            if (detailLevel >= lod) bestLod = lod;
+          }
+          data = skeletons[bestLod];
+        } else {
+          // Fallback to runtime generation if no skeleton file exists
+          data = this.internalStrategy.generate(pathData, path2d, detailLevel, seed);
+        }
       } else {
         data = this.outlineStrategy.generate(pathData, path2d, detailLevel, seed);
       }
       
-      this.graphCache.set(cacheKey, data);
-      return data;
+      if (data) {
+        this.graphCache.set(cacheKey, data);
+        return data;
+      }
+      return null;
     } catch (e) {
       console.error(`Failed to generate constellation data for shape: ${shapeName}`, e);
       return null;
@@ -76,6 +92,18 @@ class ShapeManager {
         if (match && match[1]) {
           const pathData = match[1];
           this.stringCache.set(shapeName, pathData);
+
+          // Try fetching the pre-computed skeleton json
+          try {
+            const skelResponse = await fetch(`/assets/shapes/${shapeName}_skeleton.json`);
+            if (skelResponse.ok) {
+              const skelData = await skelResponse.json();
+              this.skeletonCache.set(shapeName, skelData);
+            }
+          } catch (e) {
+            // Silently ignore if a shape doesn't have a skeleton file
+          }
+
           const path2d = new Path2D(pathData);
           this.pathCache.set(shapeName, path2d);
           return path2d;
