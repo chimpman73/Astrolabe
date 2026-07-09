@@ -89,6 +89,11 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
       updated.hasLeaves = updated.hasLeaves ?? current.hasLeaves ?? true;
       updated.branchBend = updated.branchBend ?? current.branchBend ?? 0.5;
     }
+    if (updated.type === 'constellation') {
+      const current = activeSphere!.objects[index];
+      updated.constellationDetail = updated.constellationDetail ?? current.constellationDetail ?? 1;
+      updated.constellationStarCount = updated.constellationStarCount ?? current.constellationStarCount ?? 5;
+    }
     updateCelestialObject(index, updated);
   };
 

@@ -39,7 +39,7 @@ export class ConstellationRenderer extends BaseRenderer {
     ctx.save();
     ctx.translate(x, y);
     
-    const detail = obj.constellationDetail || 10;
+    const detail = obj.constellationDetail || 1;
     const starCount = obj.constellationStarCount ?? 5;
     const style = obj.constellationStyle || 'internal';
     const seed = obj.name || 'default';
