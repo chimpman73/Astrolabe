@@ -198,7 +198,8 @@ The application saves and loads system states via JSON configuration files store
         "constellationDetail": {
           "type": "integer",
           "minimum": 1,
-          "description": "For constellation types: the number of line segments to break the SVG path into (determines wireframe detail)."
+          "maximum": 20,
+          "description": "For constellation types: specifies the Level of Detail (LOD) for the pre-computed morphological skeleton, ranging from 1 (5 nodes) to 20 (100 nodes)."
         },
         "constellationStarCount": {
           "type": "integer",
@@ -359,7 +360,8 @@ npm run generate-shape C:\path\to\image.png
 1. **Binarization**: Reads the PNG via `pngjs` and creates a black-and-white bitmap in memory using `Jimp`.
 2. **Vector Tracing**: Processes the bitmap using `potrace` to extract a mathematical outline and generate a continuous SVG path.
 3. **SVGO Optimization**: Automatically runs the SVGO compiler (`applyTransforms` plugin) to mathematically "bake" translations and scaling into the native coordinates of the `d="..."` path attribute, stripping `<g>` transform wrappers so `ShapeManager.ts` can extract 0-100 normalized coordinates correctly.
-4. **Auto-Save**: Saves the final `.svg` directly into the `assets/shapes/` directory, automatically registering it in the application's UI dropdowns on next load.
+4. **Morphological Thinning**: Pipes the downsampled pixel grid through a Zhang-Suen thinning algorithm (`skeletonizer.js`) to extract a 1-pixel spine. It traces this spine into a graph and iteratively decimates it to generate exactly 20 LOD resolutions (from 5 points up to 100 points).
+5. **Auto-Save**: Saves the final `.svg` directly into the `assets/shapes/` directory, and outputs a matching `_skeleton.json` sidecar containing the 20 wireframe resolutions. Both are automatically registered in the application's UI on next load.
 
 ---
 
