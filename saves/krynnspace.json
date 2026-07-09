@@ -1,10 +1,10 @@
 {
   "sphereName": "Krynnspace",
   "currentCampaignDate": "2026-07-08",
-  "currentSystemDate": 588,
+  "currentSystemDate": 0,
   "objects": [
     {
-      "name": "Constellation 1",
+      "name": "Basalisk",
       "type": "constellation",
       "sizeClass": "J",
       "physicalSize": 50,
@@ -24,6 +24,25 @@
       "constellationStarMinSizeClass": "D",
       "constellationStarMaxSizeClass": "F",
       "constellationFillAlpha": 0.25
+    },
+    {
+      "name": "Chimera",
+      "type": "constellation",
+      "sizeClass": "J",
+      "physicalSize": 50,
+      "sizeUnit": "AU",
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "The Sun",
+      "distanceOrbited": 26,
+      "initialAngle": 270,
+      "orbitalPeriodDays": 0,
+      "affectsShellBoundary": false,
+      "arcDegrees": 15,
+      "customShapeName": "chimera_silhouette_1783562371269",
+      "constellationDetail": 5,
+      "constellationStarCount": 15,
+      "constellationStarMinSizeClass": "C",
+      "constellationStarMaxSizeClass": "E"
     },
     {
       "name": "The Sun",
@@ -357,6 +376,39 @@
       "cloudObjectShape": "irregular",
       "elementAffinity": "fire",
       "isDMOnly": true
+    },
+    {
+      "name": "New Body 28",
+      "type": "constellation",
+      "sizeClass": "J",
+      "physicalSize": 50,
+      "sizeUnit": "AU",
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": "The Sun",
+      "distanceOrbited": 26,
+      "initialAngle": 180,
+      "orbitalPeriodDays": 0,
+      "affectsShellBoundary": false,
+      "arcDegrees": 15,
+      "isStationary": true,
+      "customShapeName": "minotaur_silhouette_1783562357921",
+      "constellationDetail": 15,
+      "constellationStarMinSizeClass": "C",
+      "constellationStarMaxSizeClass": "F",
+      "constellationStarCount": 17
+    },
+    {
+      "name": "New Body 29",
+      "type": "constellation",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles",
+      "description": "A newly added planetary body.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 1,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 365,
+      "affectsShellBoundary": false
     }
   ]
 }

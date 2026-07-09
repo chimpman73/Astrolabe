@@ -133,7 +133,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
           false, parentProj.x, parentProj.y, orbitR, pos.angle
         );
 
-        if (obj.isStationary && obj.type !== 'star') {
+        if (obj.isStationary && obj.type !== 'star' && obj.type !== 'constellation') {
           drawStationaryIndicator(ctx, proj.x, proj.y, renderSize, this.colorMuted);
         }
       }

@@ -309,7 +309,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
           false, parentProj.x, parentProj.y, orbitR, pos.angle
         );
 
-        if (obj.isStationary && obj.type !== 'star' && obj.type !== 'living_world') {
+        if (obj.isStationary && obj.type !== 'star' && obj.type !== 'constellation' && obj.type !== 'living_world') {
           drawStationaryIndicator(ctx, proj.x, proj.y, renderSize, this.colorMuted);
         }
       }
