@@ -13,7 +13,12 @@ export class AutoFitCalculator {
     activeSphere: CrystalSphere | null
   ): { zoom: number; pan: { x: number; y: number } } {
     
-    const isPrimary = (o: CelestialObject) => !o.orbitedObjectName;
+    const isPrimary = (obj: CelestialObject) => {
+      if (!obj.orbitedObjectName) return true;
+      const parent = objects.find((p: any) => p.name === obj.orbitedObjectName);
+      if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
+      return false;
+    };
 
     const visibleObjects = objects.filter((o: any) => !o.isHidden);
     
