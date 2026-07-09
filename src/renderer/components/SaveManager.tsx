@@ -22,6 +22,20 @@ import { ScaleManager } from '../utils/ScaleManager';
 import { shapeManager } from '../utils/ShapeManager';
 import { getElementColor } from '../utils/canvasRenderer';
 
+import fireSvgUrl from '../../../assets/elements/fire.svg';
+import waterSvgUrl from '../../../assets/elements/water.svg';
+import earthSvgUrl from '../../../assets/elements/earth.svg';
+import airSvgUrl from '../../../assets/elements/air.svg';
+import mixedSvgUrl from '../../../assets/elements/mixed.svg';
+
+const elementSvgUrls: Record<string, string> = {
+  fire: fireSvgUrl,
+  water: waterSvgUrl,
+  earth: earthSvgUrl,
+  air: airSvgUrl,
+  mixed: mixedSvgUrl,
+};
+
 interface SaveManagerProps {
   onCollapse?: () => void;
 }
@@ -620,7 +634,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                   width: '16px',
                                   height: '16px',
                                   backgroundColor: getElementColor(obj.elementAffinity) || '#fff',
-                                  WebkitMaskImage: `url(/images/elements/${obj.elementAffinity}.svg)`,
+                                  WebkitMaskImage: `url(${elementSvgUrls[obj.elementAffinity] || ''})`,
                                   WebkitMaskSize: 'contain',
                                   WebkitMaskRepeat: 'no-repeat',
                                   WebkitMaskPosition: 'center',
