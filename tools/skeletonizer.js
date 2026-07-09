@@ -87,11 +87,16 @@ function extractGraph(grid, width, height) {
 function decimateGraph(graph, targetNodes) {
     let { points, edges } = graph;
     
-    // Convert to a mutable structure
-    let nodes = points.map((p, i) => ({ id: i, x: p.x, y: p.y, edges: new Set(p.edges) }));
-    
-    // A simple decimation algorithm: collapse the shortest edges first,
-    // merging the nodes, until we reach the target node count.
+    // Ensure points have an edges Set
+    let nodes = points.map((p, i) => ({ id: i, x: p.x, y: p.y, edges: new Set(p.edges || []) }));
+    if (!points[0].edges) {
+        for (let e of edges) {
+            let u = points.indexOf(e.p1);
+            let v = points.indexOf(e.p2);
+            nodes[u].edges.add(v);
+            nodes[v].edges.add(u);
+        }
+    }
     
     // Filter out isolated nodes
     let activeNodes = new Set(nodes.map(n => n.id));
@@ -215,16 +220,19 @@ async function generateSkeletonData(jimpImg) {
     const baseGraph = extractGraph(grid, width, height);
     
     // 5. Generate Multi-Resolution Solutions
-    // The user wants 1 to 1 mapping for every complexity level up to the max wireframe possible.
-    // We'll cap the max possible at 100 to prevent massive JSONs, but realistically 100 is more than enough for a UI slider.
-    const maxNodes = Math.min(baseGraph.points.length, 100); 
+    // We generate exactly 20 levels. Level 1 = 5 nodes, Level 2 = 10 nodes ... Level 20 = 100 nodes.
+    const maxNodes = 100; 
     const solutions = {};
     
-    let currentGraph = baseGraph.points.length > maxNodes ? decimateGraph(baseGraph, maxNodes) : baseGraph;
+    // Always run through decimateGraph at least once to ensure edges are converted from integer indices to Point objects
+    let currentGraph = decimateGraph(baseGraph, Math.min(baseGraph.points.length, maxNodes));
     
-    for (let target = currentGraph.points.length; target >= 1; target--) {
-        currentGraph = decimateGraph(currentGraph, target);
-        solutions[target] = currentGraph;
+    for (let level = 20; level >= 1; level--) {
+        let targetNodes = level * 5;
+        if (currentGraph.points.length > targetNodes) {
+            currentGraph = decimateGraph(currentGraph, targetNodes);
+        }
+        solutions[level] = currentGraph;
     }
     
     return solutions;

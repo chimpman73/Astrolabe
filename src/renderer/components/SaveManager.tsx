@@ -813,11 +813,12 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               <input
                                 type="number"
                                 step="1"
-                                min="2"
+                                min="1"
+                                max="20"
                                 className="editor-input"
-                                value={obj.constellationDetail ?? 10}
-                                onChange={e => handleUpdateObject(index, { constellationDetail: parseInt(e.target.value, 10) || 10 })}
-                                title="How many segments to break the SVG path into."
+                                value={obj.constellationDetail ?? 1}
+                                onChange={e => handleUpdateObject(index, { constellationDetail: parseInt(e.target.value, 10) || 1 })}
+                                title="Complexity Level (1 to 20)."
                               />
                             </div>
                             <div className="editor-form-group">
