@@ -30,20 +30,18 @@ export class AutoFitCalculator {
     }
     
     let maxDist = 0.1;
-    let absoluteMaxDist = 0.1;
     
     objects.forEach((o: any) => {
       if (!isPrimary(o)) return;
       const reach = ScaleManager.getPhysicalReachAU(o);
       if (o.affectsShellBoundary !== false && reach > maxDist) maxDist = reach;
-      if (reach > absoluteMaxDist) absoluteMaxDist = reach;
     });
     
     const isCustom = activeSphere?.shellBoundaryType === 'custom' || activeSphere?.shellBoundaryType === 'relativeMargin';
     const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
     
     const shellRadius = maxDist * shellScale;
-    const viewRadius = Math.max(absoluteMaxDist, shellRadius);
+    const viewRadius = shellRadius;
     
     // We offset the pan down by 25px so the title isn't hidden.
     // To prevent the bottom from clipping due to this offset, the maximum 
