@@ -20,6 +20,7 @@ import {
 import { CelestialObject, CelestialObjectType, WorldShape, ElementAffinity, SizeClass } from '../../types/astrolabe';
 import { ScaleManager } from '../utils/ScaleManager';
 import { shapeManager } from '../utils/ShapeManager';
+import { getElementColor } from '../utils/canvasRenderer';
 
 interface SaveManagerProps {
   onCollapse?: () => void;
@@ -609,7 +610,26 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
 
                         {/* Element Affinity */}
                         <div className="editor-form-group">
-                          <label>Element Affinity</label>
+                          <label>
+                            Element Affinity
+                            {obj.elementAffinity && (
+                              <span
+                                style={{
+                                  display: 'inline-block',
+                                  marginLeft: '8px',
+                                  width: '16px',
+                                  height: '16px',
+                                  backgroundColor: getElementColor(obj.elementAffinity) || '#fff',
+                                  WebkitMaskImage: `url(/images/elements/${obj.elementAffinity}.svg)`,
+                                  WebkitMaskSize: 'contain',
+                                  WebkitMaskRepeat: 'no-repeat',
+                                  WebkitMaskPosition: 'center',
+                                  verticalAlign: 'middle',
+                                }}
+                                title={`${obj.elementAffinity} icon`}
+                              />
+                            )}
+                          </label>
                           <select
                             className="editor-select"
                             value={obj.elementAffinity ?? ''}
