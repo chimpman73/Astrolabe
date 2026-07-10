@@ -11,6 +11,15 @@ import airSvgUrl from '../../../assets/elements/air.svg';
 import mixedSvgUrl from '../../../assets/elements/mixed.svg';
 import noneSvgUrl from '../../../assets/elements/none.svg';
 
+import starObjSvgUrl from '../../../assets/objects/star.svg';
+import planetObjSvgUrl from '../../../assets/objects/planet.svg';
+import moonObjSvgUrl from '../../../assets/objects/moon.svg';
+import asteroidObjSvgUrl from '../../../assets/objects/asteroid.svg';
+import stationObjSvgUrl from '../../../assets/objects/station.svg';
+import cloudObjSvgUrl from '../../../assets/objects/cloud.svg';
+import livingWorldObjSvgUrl from '../../../assets/objects/living_world.svg';
+import customObjSvgUrl from '../../../assets/objects/custom.svg';
+
 export class VellumNavigationChartRenderer implements INavigationChartRenderer {
   private readonly colorBg = '#f9f5e8';
   private readonly colorGrid = 'rgba(94, 79, 60, 0.05)';
@@ -33,7 +42,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
 
   private imagesLoaded = false;
   private loadCount = 0;
-  private readonly totalImages = 5 + 6;
+  private readonly totalImages = 5 + 6 + 8;
   private forceRedraw?: () => void;
 
   constructor(forceRedraw?: () => void) {
@@ -67,7 +76,15 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       earth: earthSvgUrl,
       air: airSvgUrl,
       mixed: mixedSvgUrl,
-      none: noneSvgUrl
+      none: noneSvgUrl,
+      star: starObjSvgUrl,
+      planet: planetObjSvgUrl,
+      moon: moonObjSvgUrl,
+      asteroid: asteroidObjSvgUrl,
+      station: stationObjSvgUrl,
+      cloud: cloudObjSvgUrl,
+      living_world: livingWorldObjSvgUrl,
+      custom: customObjSvgUrl
     };
 
     for (const [key, src] of Object.entries(svgSources)) {
@@ -136,15 +153,21 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
 
     ctx.save();
     
-    // Drop shadow for the paper
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
-    ctx.shadowBlur = 30;
-    ctx.shadowOffsetX = 10;
-    ctx.shadowOffsetY = 15;
+    if (!context.isExport) {
+      // Drop shadow for the paper
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+      ctx.shadowBlur = 30;
+      ctx.shadowOffsetX = 10;
+      ctx.shadowOffsetY = 15;
+    }
 
     // Draw the main parchment paper body
     ctx.beginPath();
-    ctx.roundRect(bounds.x, bounds.y, bounds.width, bounds.height, 10);
+    if (context.isExport) {
+      ctx.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+    } else {
+      ctx.roundRect(bounds.x, bounds.y, bounds.width, bounds.height, 10);
+    }
     
     if (this.bgPattern) {
       ctx.fillStyle = this.bgPattern;
@@ -155,10 +178,11 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     ctx.fill();
     ctx.shadowColor = 'transparent'; // Turn off shadow for remaining items
 
-    // Draw the wooden rolled rods on left and right
-    const rodWidth = Math.max(30, bounds.width * 0.03); // rod width scales slightly with paper size
-    
-    // Left rod
+    if (!context.isExport) {
+      // Draw the wooden rolled rods on left and right
+      const rodWidth = Math.max(30, bounds.width * 0.03); // rod width scales slightly with paper size
+      
+      // Left rod
     const leftRodGradient = ctx.createLinearGradient(bounds.x - rodWidth, 0, bounds.x, 0);
     leftRodGradient.addColorStop(0, '#2e1909');
     leftRodGradient.addColorStop(0.3, '#5c3314');
@@ -177,10 +201,11 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     rightRodGradient.addColorStop(0.7, '#5c3314');
     rightRodGradient.addColorStop(1, '#2e1909');
     
-    ctx.fillStyle = rightRodGradient;
-    ctx.beginPath();
-    ctx.roundRect(bounds.x + bounds.width, bounds.y - 10, rodWidth, bounds.height + 20, 5);
-    ctx.fill();
+      ctx.fillStyle = rightRodGradient;
+      ctx.beginPath();
+      ctx.roundRect(bounds.x + bounds.width, bounds.y - 10, rodWidth, bounds.height + 20, 5);
+      ctx.fill();
+    }
 
     ctx.restore();
   }
@@ -422,7 +447,8 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     ctx.fillText(scaleLabel, barX + (scaleBarWidth / 2), barY - 8);
   }
 
-  drawForeground({ ctx, width, height }: MapStyleContext): void {
+  drawForeground({ ctx, width, height, isExport }: MapStyleContext): void {
+    if (isExport) return;
     if (!this.imagesLoaded || !this.woodDeskImage.complete) return;
 
     ctx.save();
@@ -493,13 +519,13 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     let curY = shellProj.y - bounds.shellRadiusPx;
 
     ctx.fillStyle = this.colorStroke;
-    ctx.font = `bold ${48 * z}px 'Mephisto', 'Cinzel', serif`;
+    ctx.font = `bold ${48 * z}px 'Elan', 'Cinzel', serif`;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top'; // use top so it precisely aligns with the shell's top edge
     ctx.fillText((activeSphere?.sphereName || 'CRYSTAL SPHERE').toUpperCase(), startX, curY);
 
     curY += 50 * z;
-    ctx.font = `normal ${24 * z}px 'Mephisto', 'Outfit', sans-serif`;
+    ctx.font = `normal ${24 * z}px 'Elan', 'Outfit', sans-serif`;
     ctx.fillStyle = '#5e4f3c';
     ctx.fillText(`System Directory — Epoch: Day ${currentSystemDate}`, startX, curY);
 
@@ -522,7 +548,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       }
 
       const iconSize = 30 * z;
-      const textOffsetX = 100 * z;
+      const textOffsetX = 140 * z;
 
       // Draw Orbit Icon manually via Canvas
       ctx.save();
@@ -577,18 +603,28 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
         ctx.restore();
       }
 
+      // Draw Object Type Icon
+      const typeIconName = obj.type || 'custom';
+      const typeIcon = this.svgIcons[typeIconName];
+      if (typeIcon && typeIcon.complete && typeIcon.naturalWidth > 0) {
+        ctx.save();
+        ctx.translate(startX + 95 * z, curY + 15 * z);
+        ctx.drawImage(typeIcon, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+        ctx.restore();
+      }
+
       // Draw details
       ctx.fillStyle = this.colorStroke;
-      ctx.font = `bold ${32 * z}px 'Mephisto', 'Cinzel', serif`;
+      ctx.font = `bold ${32 * z}px 'Elan', 'Cinzel', serif`;
       ctx.fillText(obj.name, startX + textOffsetX, curY);
 
       curY += 35 * z;
-      ctx.font = `italic ${20 * z}px 'Mephisto', 'Outfit', sans-serif`;
+      ctx.font = `italic ${20 * z}px 'Elan', 'Outfit', sans-serif`;
       ctx.fillStyle = '#5e4f3c';
       
       const period = calculateSystemPositions([obj], 0)[obj.name]?.period || 0;
       ctx.fillText(
-        `${obj.type.toUpperCase()} | Dist: ${obj.distanceOrbited.toFixed(2)} AU | Period: ${Math.round(period)} Days`,
+        `Dist: ${obj.distanceOrbited.toFixed(2)} AU | Period: ${Math.round(period)} Days`,
         startX + textOffsetX,
         curY
       );

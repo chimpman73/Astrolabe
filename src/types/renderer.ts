@@ -37,6 +37,7 @@ export interface MapStyleContext {
   project: (x: number, y: number) => { x: number; y: number };
   decorations?: ParchmentDecoration[];
   fontsLoaded?: boolean;
+  isExport?: boolean;
 }
 
 export interface ParchmentDecoration {

@@ -195,3 +195,9 @@ This file tracks the design, development, and integration tasks for the Astrolab
   * Removed `branchExtent` property from schema and UI.
   * Tied branch maximum extent directly to standard `sizeClass` and `physicalSize` calculations.
   * Removed central solid planet sphere from `LivingWorldRenderer`.
+
+- [x] **AST-034: Vellum Directory Symbology & Export Polish**
+  * Swapped the 'Mephisto' font for 'Elan' in the Vellum Navigation Chart directory.
+  * Created 8 new hollow-ink SVG geometric symbols for Celestial Object Types (star, planet, moon, asteroid, station, cloud, living_world, custom).
+  * Removed textual object-type prefixes from the directory list, appending the Object Type SVG icon instead.
+  * Fixed image export bug to strictly bound exports to the vellum canvas (`exportWidth = paperWidthPx`), stripping out the wood desk background.

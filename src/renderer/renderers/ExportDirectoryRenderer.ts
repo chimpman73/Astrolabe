@@ -50,9 +50,9 @@ export async function exportNavigationChart({
   const paperWidthPx = shellRadiusPx * 2 + paddingPx * 2 + directoryWidthPx;
   const paperHeightPx = shellRadiusPx * 2 + paddingPx * 2;
   
-  // Include room for the wooden rods or outer margin (approx 6% padding)
-  const exportWidth = Math.round(paperWidthPx * 1.06);
-  const exportHeight = Math.round(paperHeightPx * 1.06);
+  // Use exact paper dimensions for the export
+  const exportWidth = Math.round(paperWidthPx);
+  const exportHeight = Math.round(paperHeightPx);
 
   const exportCanvas = document.createElement('canvas');
   exportCanvas.width = exportWidth;
@@ -87,7 +87,8 @@ export async function exportNavigationChart({
     currentSystemDate,
     isPrimary,
     project,
-    fontsLoaded: true // assuming fonts are loaded for export
+    fontsLoaded: true, // assuming fonts are loaded for export
+    isExport: true
   };
 
   // Render the view

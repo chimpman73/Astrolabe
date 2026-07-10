@@ -152,7 +152,7 @@
       "orbitedObjectName": "Soltan",
       "distanceOrbited": 44,
       "initialAngle": 235,
-      "orbitalPeriodDays": 365,
+      "orbitalPeriodDays": 645,
       "elementAffinity": "earth",
       "affectsShellBoundary": false,
       "isDMOnly": true
