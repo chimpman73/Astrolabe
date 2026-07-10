@@ -32,6 +32,7 @@ export interface MapStyleContext {
   visibleObjects: CelestialObject[];
   positions: Record<string, { x: number; y: number; angle: number; period: number }>;
   activeSphere: import('./astrolabe').CrystalSphere | null;
+  currentSystemDate: number;
   isPrimary: (obj: CelestialObject) => boolean;
   project: (x: number, y: number) => { x: number; y: number };
   decorations?: ParchmentDecoration[];

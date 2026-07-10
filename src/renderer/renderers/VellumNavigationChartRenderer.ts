@@ -2,6 +2,14 @@ import { ParchmentDecoration, MapStyleContext, INavigationChartRenderer } from '
 import { CelestialObject } from '../../types/astrolabe';
 import { drawSolidBody, drawStationaryIndicator, getBodyColors, getElementColor } from '../utils/canvasRenderer';
 import { ScaleManager } from '../utils/ScaleManager';
+import { calculateSystemPositions } from '../utils/orbitMath';
+
+import fireSvgUrl from '../../../assets/elements/fire.svg';
+import waterSvgUrl from '../../../assets/elements/water.svg';
+import earthSvgUrl from '../../../assets/elements/earth.svg';
+import airSvgUrl from '../../../assets/elements/air.svg';
+import mixedSvgUrl from '../../../assets/elements/mixed.svg';
+import noneSvgUrl from '../../../assets/elements/none.svg';
 
 export class VellumNavigationChartRenderer implements INavigationChartRenderer {
   private readonly colorBg = '#f9f5e8';
@@ -20,16 +28,19 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
   private stainCoffee = new Image();
   private stainBurn = new Image();
   
+  // Icons
+  private svgIcons: Record<string, HTMLImageElement> = {};
+
   private imagesLoaded = false;
   private loadCount = 0;
-  private readonly totalImages = 5;
+  private readonly totalImages = 5 + 6;
   private forceRedraw?: () => void;
 
   constructor(forceRedraw?: () => void) {
     this.forceRedraw = forceRedraw;
     const onLoad = () => {
       this.loadCount++;
-      if (this.loadCount === this.totalImages) {
+      if (this.loadCount >= this.totalImages) {
         this.imagesLoaded = true;
         this.forceRedraw?.();
       }
@@ -49,6 +60,23 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
 
     this.stainBurn.src = '/images/stain_burn.png';
     this.stainBurn.onload = onLoad;
+
+    const svgSources: Record<string, string> = {
+      fire: fireSvgUrl,
+      water: waterSvgUrl,
+      earth: earthSvgUrl,
+      air: airSvgUrl,
+      mixed: mixedSvgUrl,
+      none: noneSvgUrl
+    };
+
+    for (const [key, src] of Object.entries(svgSources)) {
+      const img = new Image();
+      img.src = src;
+      img.onload = onLoad;
+      img.onerror = onLoad; 
+      this.svgIcons[key] = img;
+    }
   }
 
   private getScrollBounds(context: MapStyleContext) {
@@ -64,15 +92,27 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     
     // 25% padding ensures the 24px title has room to breathe horizontally
     const paddingPx = shellRadiusPx * 0.25;
-    const paperWidthPx = shellRadiusPx * 2 + paddingPx * 2;
+    
+    // Extend directory to the left by 1.0 * shellRadiusPx (which is 0.5 * diameter)
+    const directoryWidthPx = shellRadiusPx;
+    
+    const paperWidthPx = shellRadiusPx * 2 + paddingPx * 2 + directoryWidthPx;
     const paperHeightPx = shellRadiusPx * 2 + paddingPx * 2;
     
     const centerProj = context.project(0, 0);
+    
+    // Center was previously `centerProj.x - (shellRadiusPx * 2 + paddingPx * 2) / 2`. 
+    // Now we shift left by the directory width.
+    const originalLeft = centerProj.x - (shellRadiusPx * 2 + paddingPx * 2) / 2;
+    
     return {
-      x: centerProj.x - paperWidthPx / 2,
+      x: originalLeft - directoryWidthPx,
       y: centerProj.y - paperHeightPx / 2,
       width: paperWidthPx,
-      height: paperHeightPx
+      height: paperHeightPx,
+      directoryWidthPx,
+      shellRadiusPx,
+      paddingPx
     };
   }
 
@@ -417,7 +457,145 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
 
     this.drawShell(context, shellRadius, shellProj);
     this.drawBodies(context, context.visibleObjects);
+    
+    const bounds = this.getScrollBounds(context);
+    this.drawSystemDirectory(context, bounds);
+    
     this.drawScaleBar(context);
     this.drawForeground(context);
+  }
+
+  private drawSystemDirectory(context: MapStyleContext, bounds: any): void {
+    const { ctx, activeSphere, visibleObjects, currentSystemDate, project } = context;
+    if (!this.imagesLoaded) return;
+
+    ctx.save();
+    
+    // Base zoom multiplier for text. 
+    // This makes the text scale perfectly with the directory width (which is 1x shellRadiusPx).
+    // A value of 800 means if the column is 400px wide, 'z' is 0.5 (Title: 24px, Name: 16px)
+    const z = bounds.shellRadiusPx / 800; 
+
+    // Draw divider line
+    const dividerX = bounds.x + bounds.directoryWidthPx + bounds.paddingPx * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(dividerX, bounds.y + bounds.paddingPx);
+    ctx.lineTo(dividerX, bounds.y + bounds.height - bounds.paddingPx);
+    ctx.strokeStyle = '#c8b185';
+    ctx.lineWidth = 4 * z;
+    ctx.stroke();
+
+    // Render Directory Header
+    const startX = bounds.x + bounds.paddingPx;
+    
+    const shellProj = project(0, 0);
+    // Start at the exact same height as the crystal shell
+    let curY = shellProj.y - bounds.shellRadiusPx;
+
+    ctx.fillStyle = this.colorStroke;
+    ctx.font = `bold ${48 * z}px 'Mephisto', 'Cinzel', serif`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top'; // use top so it precisely aligns with the shell's top edge
+    ctx.fillText((activeSphere?.sphereName || 'CRYSTAL SPHERE').toUpperCase(), startX, curY);
+
+    curY += 50 * z;
+    ctx.font = `normal ${24 * z}px 'Mephisto', 'Outfit', sans-serif`;
+    ctx.fillStyle = '#5e4f3c';
+    ctx.fillText(`System Directory — Epoch: Day ${currentSystemDate}`, startX, curY);
+
+    curY += 80 * z;
+
+    // Render primary planets (no moons)
+    const directoryObjects = visibleObjects.filter((o) => o.type !== 'moon');
+    
+    directoryObjects.forEach((obj) => {
+      if (curY > bounds.y + bounds.height - bounds.paddingPx) return; // Bounds limit
+
+      // Determine Orbital Symbol
+      let orbitIconType = 'standard';
+      if (obj.orbitedObjectName === null || obj.distanceOrbited === 0) {
+        orbitIconType = 'central';
+      } else if (obj.isStationary) {
+        orbitIconType = 'fixed';
+      } else if ((obj.orbitEccentricity || 0) > 0) {
+        orbitIconType = 'elliptical';
+      }
+
+      const iconSize = 30 * z;
+      const textOffsetX = 100 * z;
+
+      // Draw Orbit Icon manually via Canvas
+      ctx.save();
+      ctx.translate(startX + 15 * z, curY + 15 * z);
+      
+      const R = iconSize / 2 - 2 * z;
+      ctx.strokeStyle = this.colorStroke;
+      ctx.fillStyle = this.colorStroke;
+      ctx.lineWidth = 1.5 * z;
+
+      ctx.beginPath();
+      if (orbitIconType === 'central') {
+        ctx.arc(0, 0, R, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, R * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (orbitIconType === 'standard') {
+        ctx.arc(0, 0, R, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        const px = Math.cos(-Math.PI / 4) * R;
+        const py = Math.sin(-Math.PI / 4) * R;
+        ctx.arc(px, py, R * 0.6, 0, Math.PI * 2); // Increased planet size
+        ctx.fill();
+      } else if (orbitIconType === 'elliptical') {
+        ctx.ellipse(0, 0, R, R * 0.5, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        const px = Math.cos(-Math.PI / 4) * R;
+        const py = Math.sin(-Math.PI / 4) * R * 0.5;
+        ctx.arc(px, py, R * 0.6, 0, Math.PI * 2); // Increased planet size
+        ctx.fill();
+      } else if (orbitIconType === 'fixed') {
+        ctx.arc(0, 0, R, 0, Math.PI * 2);
+        ctx.stroke();
+        const px = Math.cos(-Math.PI / 4) * R;
+        const py = Math.sin(-Math.PI / 4) * R;
+        ctx.translate(px, py);
+        ctx.rotate(-Math.PI / 4); // Rotate to point radially outward
+        ctx.fillRect(-R * 0.6, -R * 0.2, R * 1.2, R * 0.4); // Rectangular hash
+      }
+      ctx.restore();
+
+      // Draw Element Icon
+      const elemIconName = obj.elementAffinity || 'none';
+      const elemIcon = this.svgIcons[elemIconName];
+      if (elemIcon && elemIcon.complete && elemIcon.naturalWidth > 0) {
+        ctx.save();
+        ctx.translate(startX + 55 * z, curY + 15 * z);
+        ctx.drawImage(elemIcon, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+        ctx.restore();
+      }
+
+      // Draw details
+      ctx.fillStyle = this.colorStroke;
+      ctx.font = `bold ${32 * z}px 'Mephisto', 'Cinzel', serif`;
+      ctx.fillText(obj.name, startX + textOffsetX, curY);
+
+      curY += 35 * z;
+      ctx.font = `italic ${20 * z}px 'Mephisto', 'Outfit', sans-serif`;
+      ctx.fillStyle = '#5e4f3c';
+      
+      const period = calculateSystemPositions([obj], 0)[obj.name]?.period || 0;
+      ctx.fillText(
+        `${obj.type.toUpperCase()} | Dist: ${obj.distanceOrbited.toFixed(2)} AU | Period: ${Math.round(period)} Days`,
+        startX + textOffsetX,
+        curY
+      );
+
+      curY += 60 * z; // Spacing for next item
+    });
+
+    ctx.restore();
   }
 }

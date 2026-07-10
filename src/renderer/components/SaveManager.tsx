@@ -29,6 +29,7 @@ import waterSvgUrl from '../../../assets/elements/water.svg';
 import earthSvgUrl from '../../../assets/elements/earth.svg';
 import airSvgUrl from '../../../assets/elements/air.svg';
 import mixedSvgUrl from '../../../assets/elements/mixed.svg';
+import noneSvgUrl from '../../../assets/elements/none.svg';
 
 const elementSvgUrls: Record<string, string> = {
   fire: fireSvgUrl,
@@ -36,6 +37,7 @@ const elementSvgUrls: Record<string, string> = {
   earth: earthSvgUrl,
   air: airSvgUrl,
   mixed: mixedSvgUrl,
+  none: noneSvgUrl,
 };
 
 interface SaveManagerProps {
@@ -699,6 +701,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                             <option value="earth">🪨 Earth</option>
                             <option value="air">💨 Air</option>
                             <option value="mixed">🌿 Mixed</option>
+                            <option value="none">⋄ No Affinity</option>
                           </select>
                         </div>
 

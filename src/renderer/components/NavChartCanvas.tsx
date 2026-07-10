@@ -74,11 +74,15 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     
     // 25% padding ensures the 24px title has room to breathe horizontally
     const paddingModel = shellRadiusModel * 0.25;
-    const paperWidthModel = shellRadiusModel * 2 + paddingModel * 2;
-    const totalWidthModel = paperWidthModel * 1.06; // rod margins
-    const totalHeightModel = paperWidthModel;
+    const directoryWidthModel = shellRadiusModel; // 0.5 * diameter = 1.0 * radius
     
-    return { width: totalWidthModel, height: totalHeightModel };
+    const paperWidthModel = shellRadiusModel * 2 + paddingModel * 2 + directoryWidthModel;
+    const paperHeightModel = shellRadiusModel * 2 + paddingModel * 2;
+    
+    const totalWidthModel = paperWidthModel * 1.06; // rod margins
+    const totalHeightModel = paperHeightModel * 1.06;
+    
+    return { width: totalWidthModel, height: totalHeightModel, directoryWidthModel };
   }, [objects, activeSphere, mapTheme]);
 
   const minZoomLimit = useMemo(() => {
@@ -96,12 +100,16 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     const deskMargin = 40;
     
     let minX, maxX, minY, maxY;
+    
+    // Adjust the center offset because the parchment is asymmetrical
+    const dirOffset = (panLimits.directoryWidthModel * z) / 2;
+    
     if (paperW <= dimensions.width) {
-      minX = dimensions.width / 2;
-      maxX = dimensions.width / 2;
+      minX = dimensions.width / 2 + dirOffset;
+      maxX = dimensions.width / 2 + dirOffset;
     } else {
-      minX = dimensions.width - deskMargin - paperW / 2;
-      maxX = paperW / 2 + deskMargin;
+      minX = dimensions.width - deskMargin - paperW / 2 + dirOffset;
+      maxX = paperW / 2 + deskMargin + dirOffset;
     }
     
     if (paperH <= dimensions.height) {
@@ -239,6 +247,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
       visibleObjects: activeVisibleObjects,
       positions,
       activeSphere,
+      currentSystemDate,
       isPrimary,
       project,
       decorations,

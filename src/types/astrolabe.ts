@@ -3,7 +3,7 @@ export type CelestialObjectType =
   | 'station' | 'cloud' | 'custom' | 'living_world' | 'constellation';
 
 export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular' | 'elliptical' | 'ring' | 'cylinder' | 'ship' | 'rectangular' | 'castle' | 'skull' | 'custom' | 'hollow_world';
-export type ElementAffinity = 'fire' | 'water' | 'earth' | 'air' | 'mixed';
+export type ElementAffinity = 'fire' | 'water' | 'earth' | 'air' | 'mixed' | 'none';
 export type OrbitDirection = 'prograde' | 'retrograde';
 export type SizeClass = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J';
 export type SizeUnit = 'miles' | 'AU';
