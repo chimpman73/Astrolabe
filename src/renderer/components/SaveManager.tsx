@@ -426,7 +426,6 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                         <option value="cloud">☁️ Cloud</option>
                         <option value="living_world">🌳 Living World</option>
                         <option value="constellation">✨ Constellation</option>
-                        <option value="custom">⚙️ Custom (Legacy)</option>
                       </select>
                     </div>
 
@@ -576,6 +575,44 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                           </div>
                         </div>
 
+                        {/* Advanced Orbit */}
+                        <div className="editor-form-group" style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px dashed var(--color-border-parchment)' }}>
+                          <label className="text-[10px] text-[var(--color-accent-gold)]">Advanced Orbit</label>
+                          <div className="flex flex-col gap-2 mt-2">
+                            <div>
+                              <label style={{ fontSize: '9px', opacity: 0.8 }}>Eccentricity (0.0 to 0.99)</label>
+                              <div className="flex gap-2 items-center">
+                                <input 
+                                  type="range"
+                                  min="0"
+                                  max="0.99"
+                                  step="0.01"
+                                  className="flex-1"
+                                  value={obj.orbitEccentricity || 0}
+                                  onChange={e => handleUpdateObject(index, { orbitEccentricity: parseFloat(e.target.value) || 0 })}
+                                />
+                                <span className="text-[9px] w-6">{obj.orbitEccentricity?.toFixed(2) || '0.00'}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <label style={{ fontSize: '9px', opacity: 0.8 }}>Rotation (Degrees)</label>
+                              <input 
+                                type="number"
+                                step="any"
+                                className="editor-input"
+                                value={obj.orbitRotation || 0}
+                                onChange={e => handleUpdateObject(index, { orbitRotation: parseFloat(e.target.value) || 0 })}
+                              />
+                            </div>
+                            {(obj.orbitEccentricity || 0) > 0 && (
+                              <div className="flex justify-between text-[9px] text-[var(--color-text-muted)] mt-1 border-t border-[var(--color-border-parchment)] pt-1">
+                                <span>Periapsis: {(obj.distanceOrbited * (1 - (obj.orbitEccentricity || 0))).toFixed(2)} AU</span>
+                                <span>Apoapsis: {(obj.distanceOrbited * (1 + (obj.orbitEccentricity || 0))).toFixed(2)} AU</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
                         {/* World Shape (not shown for cloud-type objects) */}
                         {obj.type !== 'cloud' && obj.type !== 'living_world' && obj.type !== 'constellation' && (
                           <div className="editor-form-group">
@@ -605,6 +642,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 <option value="irregular">✦ Irregular</option>
                                 <option value="elliptical">⬭ Elliptical</option>
                                 <option value="rectangular">▭ Rectangular</option>
+                                <option value="hollow_world">◎ Hollow World</option>
                                 <option value="custom">⚙️ Custom SVG</option>
                               </select>
                             )}

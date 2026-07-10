@@ -1,7 +1,7 @@
 {
   "sphereName": "Realmspace",
   "currentCampaignDate": "2026-07-05",
-  "currentSystemDate": 2614,
+  "currentSystemDate": 4303,
   "objects": [
     {
       "name": "Sol",
@@ -713,9 +713,9 @@
       "name": "K'Thoutek",
       "type": "asteroid",
       "size": 1,
-      "description": "A newly added planetary body.",
+      "description": "K'Thoutek is a large cometary body about 300 miles (483 kilometers) in diameter, and is primarily made up of iron and frozen water. It travels around the Sun in an extremely elliptical orbit that is almost perpendicular to the ecliptic, coming as close as 15 million miles (24 million kilometers) to the sun, and travelling as far away as 200 million miles (322 million kilometers). It takes K'Thoutek just over 237 years to complete one revolution around the sun.[",
       "orbitedObjectName": "Sol",
-      "distanceOrbited": 20,
+      "distanceOrbited": 10.05,
       "initialAngle": 111,
       "orbitalPeriodDays": 60000,
       "affectsShellBoundary": false,
@@ -723,38 +723,46 @@
       "isDMOnly": true,
       "sizeClass": "D",
       "physicalSize": 1000,
-      "sizeUnit": "miles"
+      "sizeUnit": "miles",
+      "orbitEccentricity": 0.99,
+      "orbitRotation": -44,
+      "elementAffinity": "water"
     },
     {
       "name": "King Killer Star",
       "type": "asteroid",
       "size": 1,
-      "description": "A newly added planetary body.",
+      "description": "The King-Killer Star is a reddish cometary body that orbits the Sun and periodically appears in the skies of Toril. In localized regions, the King-Killer Star is visible every few decades, while every few hundred years it is visible across the continent of Faerûn. The King-Killer Star is linked to the Dracorage mythal, and its appearances in the skies of Toril causes dragons to go mad with rage, destroying and killing without reason.",
       "orbitedObjectName": "Sol",
-      "distanceOrbited": 23,
-      "initialAngle": 0,
+      "distanceOrbited": 13,
+      "initialAngle": 2,
       "orbitalPeriodDays": 50000,
       "affectsShellBoundary": false,
       "isDMOnly": true,
       "sizeClass": "D",
       "physicalSize": 1000,
-      "sizeUnit": "miles"
+      "sizeUnit": "miles",
+      "isStationary": false,
+      "orbitDirection": "prograde",
+      "orbitEccentricity": 0.8,
+      "orbitRotation": -136
     },
     {
       "name": "Skull of the Void",
       "type": "station",
       "size": 3,
-      "description": "A newly added planetary body.",
-      "orbitedObjectName": null,
+      "description": "The Skull of the Void is located about 50 million miles (80 million kilometers) from the crystal shell, and remains in a fixed position relative to the sun. The object is 12 miles (19 km) high and 10 miles (16 km) wide and resembles a human skull exactly. The enormous structure appears to be made of bone, and is able to repair itself if damaged in any way. It also constantly generates its own air supply.",
+      "orbitedObjectName": "Sol",
       "distanceOrbited": 30,
       "initialAngle": 254,
-      "orbitalPeriodDays": 365,
+      "orbitalPeriodDays": 0,
       "affectsShellBoundary": false,
       "worldShape": "skull",
       "isDMOnly": true,
       "sizeClass": "D",
       "physicalSize": 1000,
-      "sizeUnit": "miles"
+      "sizeUnit": "miles",
+      "isStationary": true
     }
   ]
 }

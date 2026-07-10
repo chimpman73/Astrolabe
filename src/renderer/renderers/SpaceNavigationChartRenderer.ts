@@ -74,7 +74,19 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
 
       if (orbitRadius > 0) {
         ctx.beginPath();
-        ctx.arc(parentProj.x, parentProj.y, orbitRadius, 0, 2 * Math.PI);
+        const e = Math.min(Math.max(obj.orbitEccentricity || 0, 0), 0.99);
+        const rotRad = ((obj.orbitRotation || 0) * Math.PI) / 180;
+        
+        if (e <= 0) {
+          ctx.arc(parentProj.x, parentProj.y, orbitRadius, 0, 2 * Math.PI);
+        } else {
+          const c = orbitRadius * e;
+          const cx = parentProj.x - c * Math.cos(rotRad);
+          const cy = parentProj.y - c * Math.sin(rotRad);
+          const b = orbitRadius * Math.sqrt(1 - e * e);
+          ctx.ellipse(cx, cy, orbitRadius, b, rotRad, 0, 2 * Math.PI);
+        }
+        
         const isPrimaryOrbit = isPrimary(obj);
         ctx.lineWidth = isPrimaryOrbit ? 1.2 : 0.75;
         ctx.strokeStyle = isPrimaryOrbit ? this.colorOrbit : this.colorOrbitDash;

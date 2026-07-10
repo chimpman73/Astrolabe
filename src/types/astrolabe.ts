@@ -2,7 +2,7 @@ export type CelestialObjectType =
   | 'star' | 'planet' | 'moon' | 'asteroid'
   | 'station' | 'cloud' | 'custom' | 'living_world' | 'constellation';
 
-export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular' | 'elliptical' | 'ring' | 'cylinder' | 'ship' | 'rectangular' | 'castle' | 'skull' | 'custom';
+export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular' | 'elliptical' | 'ring' | 'cylinder' | 'ship' | 'rectangular' | 'castle' | 'skull' | 'custom' | 'hollow_world';
 export type ElementAffinity = 'fire' | 'water' | 'earth' | 'air' | 'mixed';
 export type OrbitDirection = 'prograde' | 'retrograde';
 export type SizeClass = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J';
@@ -21,6 +21,12 @@ export interface CelestialObject {
   distanceOrbited: number; // radius from parent in AU or system units
   initialAngle: number; // angle in degrees at t=0
   orbitalPeriodDays?: number; // optional orbital override
+  
+  // --- Orbit Extensions ---
+  /** Eccentricity of the orbit (0.0 to 0.99). 0 is a circle. */
+  orbitEccentricity?: number;
+  /** Rotation of the orbit (Argument of Periapsis) in degrees. */
+  orbitRotation?: number;
 
   // --- Fantasy Extensions ---
   /** If true, the object is completely hidden from map canvases (but still affects boundary calculations). */

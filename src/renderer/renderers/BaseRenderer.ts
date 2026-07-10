@@ -65,6 +65,11 @@ export abstract class BaseRenderer {
         ctx.moveTo(x + s * 0.6, y);
         ctx.arc(x, y, s * 0.6, 0, 2 * Math.PI, true);
         break;
+      case 'hollow_world':
+        ctx.arc(x, y, s, 0, 2 * Math.PI, false);
+        ctx.moveTo(x + s * 0.3, y);
+        ctx.arc(x, y, s * 0.3, 0, 2 * Math.PI, true); // Much thicker crust
+        break;
       case 'cylinder': {
         const r = s * 0.5;
         const L = s * 0.8;
@@ -153,6 +158,12 @@ export abstract class BaseRenderer {
     
     ctx.fillStyle = bodyFill;
     ctx.lineWidth = obj.type === 'star' ? 2 : 1.5;
+    
+    // If it's a hollow shape and it's small, thin the stroke so the hole remains visible
+    if ((shape === 'hollow_world' || shape === 'ring') && size < 6) {
+      ctx.lineWidth = Math.min(ctx.lineWidth, size * 0.15);
+    }
+    
     ctx.strokeStyle = bodyStroke;
     
     if (shape === 'custom' && obj.customShapeName) {

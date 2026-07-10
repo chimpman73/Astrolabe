@@ -34,13 +34,35 @@ export function calculateAngle(
 }
 
 /**
- * Converts polar distance and angle to 2D Cartesian offset coordinates.
+ * Converts polar distance (semi-major axis) and angle to 2D Cartesian offset coordinates,
+ * supporting Keplerian elliptical orbits.
  */
-export function calculateCoordinates(distance: number, angleDegrees: number): { x: number; y: number } {
+export function calculateCoordinates(
+  distance: number, 
+  angleDegrees: number,
+  eccentricity: number = 0,
+  rotationDegrees: number = 0
+): { x: number; y: number } {
   const rad = (angleDegrees * Math.PI) / 180;
+  
+  if (eccentricity <= 0) {
+    return {
+      x: distance * Math.cos(rad),
+      y: distance * Math.sin(rad),
+    };
+  }
+
+  // Constrain eccentricity to valid elliptical bounds (0 to <1)
+  const e = Math.min(Math.max(eccentricity, 0), 0.99);
+  const rotRad = (rotationDegrees * Math.PI) / 180;
+
+  // Polar equation of an ellipse relative to its focus:
+  // r = (a * (1 - e^2)) / (1 + e * cos(theta - rotRad))
+  const r = (distance * (1 - e * e)) / (1 + e * Math.cos(rad - rotRad));
+
   return {
-    x: distance * Math.cos(rad),
-    y: distance * Math.sin(rad),
+    x: r * Math.cos(rad),
+    y: r * Math.sin(rad),
   };
 }
 
@@ -79,7 +101,7 @@ export function calculateSystemPositions(
 
     // If it has no parent, it orbits the central star at coordinate (0, 0)
     if (!obj.orbitedObjectName || obj.orbitedObjectName === name) {
-      const rel = calculateCoordinates(obj.distanceOrbited, angle);
+      const rel = calculateCoordinates(obj.distanceOrbited, angle, obj.orbitEccentricity, obj.orbitRotation);
       const res = { x: rel.x, y: rel.y, angle, period };
       results[name] = res;
       return res;
@@ -87,7 +109,7 @@ export function calculateSystemPositions(
 
     // Resolve parent global position recursively
     const parentPos = resolve(obj.orbitedObjectName);
-    const rel = calculateCoordinates(obj.distanceOrbited, angle);
+    const rel = calculateCoordinates(obj.distanceOrbited, angle, obj.orbitEccentricity, obj.orbitRotation);
     const res = {
       x: parentPos.x + rel.x,
       y: parentPos.y + rel.y,
