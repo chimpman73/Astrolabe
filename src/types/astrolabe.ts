@@ -98,6 +98,8 @@ export interface CrystalSphere {
   currentSystemDate: number; // elapsed days from start epoch
   shellBoundaryType?: 'double' | 'relativeMargin' | 'custom'; // 'double' = maxDist * 2, 'relativeMargin' = maxDist * 1.2, 'custom' = uses shellCustomScale
   shellCustomScale?: number;
+  orbitalDrawStrength?: number;
+  navChartPlanetSizeOffset?: number;
   objects: CelestialObject[];
 }
 

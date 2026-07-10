@@ -173,5 +173,7 @@
       "orbitRotation": 180,
       "isDMOnly": true
     }
-  ]
+  ],
+  "orbitalDrawStrength": 2.9,
+  "navChartPlanetSizeOffset": 0
 }

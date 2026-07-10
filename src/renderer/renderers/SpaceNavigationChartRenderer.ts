@@ -55,7 +55,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
     // No decorations in space mode
   }
 
-  drawOrbits({ ctx, activeZoom, positions, project, isPrimary }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
+  drawOrbits({ ctx, activeZoom, positions, project, isPrimary, activeSphere }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
     activeVisibleObjects.forEach((obj) => {
       if (obj.type === 'constellation') return;
       
@@ -88,9 +88,20 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
         }
         
         const isPrimaryOrbit = isPrimary(obj);
-        ctx.lineWidth = isPrimaryOrbit ? 1.2 : 0.75;
-        ctx.strokeStyle = isPrimaryOrbit ? this.colorOrbit : this.colorOrbitDash;
+        ctx.lineWidth = isPrimaryOrbit ? 1.5 : 1.0;
+        
+        const strength = activeSphere?.orbitalDrawStrength ?? 1.0;
+        const dashLength = isPrimaryOrbit ? 3 : 2;
+        const gapLength = isPrimaryOrbit ? 4 : 5;
+        
+        const baseAlpha = isPrimaryOrbit ? 0.15 : 0.3;
+        const finalAlpha = Math.min(1.0, baseAlpha * strength);
+        const rgb = isPrimaryOrbit ? '255, 255, 255' : '68, 128, 230';
+        
+        ctx.setLineDash([dashLength, gapLength]);
+        ctx.strokeStyle = `rgba(${rgb}, ${finalAlpha})`;
         ctx.stroke();
+        ctx.setLineDash([]);
       }
     });
   }
@@ -118,7 +129,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
     );
   }
 
-  drawBodies({ ctx, activeZoom, positions, project }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
+  drawBodies({ ctx, activeZoom, positions, project, activeSphere }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
     activeVisibleObjects.forEach((obj) => {
       const pos = positions[obj.name];
       if (!pos) return;
@@ -130,7 +141,9 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
       }
       const parentProj = project(px, py);
       const proj = project(pos.x, pos.y);
-      const renderSize = ScaleManager.getNavChartVisualRadius(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles', activeZoom);
+      const baseRenderSize = ScaleManager.getNavChartVisualRadius(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles', activeZoom);
+      const isScalableType = ['planet', 'moon', 'asteroid', 'star'].includes(obj.type);
+      const renderSize = Math.max(1, baseRenderSize + (isScalableType ? (activeSphere?.navChartPlanetSizeOffset ?? 0) : 0));
 
       if (obj.type === 'cloud') {
         if (obj.distanceOrbited <= 0) return;
