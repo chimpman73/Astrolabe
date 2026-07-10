@@ -6,8 +6,6 @@ import { ScaleManager } from '../utils/ScaleManager';
 export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
   private readonly colorBg = '#06070a';
   private readonly colorGrid = 'rgba(255, 255, 255, 0.03)';
-  private readonly colorOrbit = 'rgba(255, 255, 255, 0.15)';
-  private readonly colorOrbitDash = 'rgba(68, 128, 230, 0.3)';
   private readonly colorStroke = '#ffffff';
   private readonly colorMuted = '#888d9e';
   private readonly colorGold = '#e2b34a';

@@ -23,8 +23,6 @@ import customObjSvgUrl from '../../../assets/objects/custom.svg';
 export class VellumNavigationChartRenderer implements INavigationChartRenderer {
   private readonly colorBg = '#f9f5e8';
   private readonly colorGrid = 'rgba(94, 79, 60, 0.05)';
-  private readonly colorOrbit = 'rgba(94, 79, 60, 0.18)';
-  private readonly colorOrbitDash = 'rgba(143, 50, 36, 0.25)';
   private readonly colorStroke = '#2b2316';
   private readonly colorMuted = '#7c694e';
   private readonly colorGold = '#b58315';
@@ -545,7 +543,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     curY += 80 * z;
 
     // Render primary planets (no moons)
-    const directoryObjects = visibleObjects.filter((o) => o.type !== 'moon');
+    const directoryObjects = visibleObjects.filter((o) => o.type !== 'moon' && o.type !== 'constellation');
     
     directoryObjects.forEach((obj) => {
       if (curY > bounds.y + bounds.height - bounds.paddingPx) return; // Bounds limit

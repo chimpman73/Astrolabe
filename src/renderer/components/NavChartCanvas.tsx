@@ -163,8 +163,18 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
-  const visibleObjects = objects.filter((o: any) => !o.isHidden && (viewMode === 'DM' || !o.isDMOnly));
-  
+  const isGroupHidden = (groupName?: string) => {
+    if (!groupName) return false;
+    const group = objects.find((o: any) => o.type === 'group' && o.name === groupName);
+    return group ? (group.isHidden || (viewMode !== 'DM' && group.isDMOnly)) : false;
+  };
+
+  const visibleObjects = objects.filter((o: any) => 
+    o.type !== 'group' &&
+    !o.isHidden && 
+    (viewMode === 'DM' || !o.isDMOnly) &&
+    !isGroupHidden(o.groupName)
+  );  
   // Resolve positions
   const positions = calculateSystemPositions(objects, currentSystemDate);
 

@@ -77,8 +77,12 @@ The application saves and loads system states via JSON configuration files store
         },
         "type": {
           "type": "string",
-          "enum": ["star", "planet", "moon", "asteroid", "station", "custom", "cloud", "living_world", "constellation"],
-          "description": "Category of the celestial body."
+          "enum": ["star", "planet", "moon", "asteroid", "station", "custom", "cloud", "living_world", "constellation", "group"],
+          "description": "Category of the celestial body. 'group' is a structural type used for organizing UI and cascading visibility properties."
+        },
+        "groupName": {
+          "type": "string",
+          "description": "If provided, indicates that this object is nested within the group matching this name."
         },
         "worldShape": {
           "type": "string",

@@ -24,7 +24,8 @@
       "constellationStarMinSizeClass": "D",
       "constellationStarMaxSizeClass": "F",
       "constellationFillAlpha": 0.25,
-      "constellationFlipX": false
+      "constellationFlipX": false,
+      "groupName": "Constellation Group"
     },
     {
       "name": "Chimera",
@@ -43,7 +44,8 @@
       "constellationDetail": 5,
       "constellationStarCount": 15,
       "constellationStarMinSizeClass": "C",
-      "constellationStarMaxSizeClass": "E"
+      "constellationStarMaxSizeClass": "E",
+      "groupName": "Constellation Group"
     },
     {
       "name": "Minotaur",
@@ -63,7 +65,8 @@
       "constellationDetail": 15,
       "constellationStarMinSizeClass": "C",
       "constellationStarMaxSizeClass": "F",
-      "constellationStarCount": 17
+      "constellationStarCount": 17,
+      "groupName": "Constellation Group"
     },
     {
       "name": "Kraken",
@@ -83,7 +86,8 @@
       "constellationDetail": 20,
       "constellationStarCount": 19,
       "constellationStarMinSizeClass": "C",
-      "constellationStarMaxSizeClass": "F"
+      "constellationStarMaxSizeClass": "F",
+      "groupName": "Constellation Group"
     },
     {
       "name": "Pegasus",
@@ -103,7 +107,8 @@
       "constellationDetail": 20,
       "constellationStarMaxSizeClass": "E",
       "constellationStarMinSizeClass": "B",
-      "constellationStarCount": 15
+      "constellationStarCount": 15,
+      "groupName": "Constellation Group"
     },
     {
       "name": "Treant",
@@ -123,7 +128,8 @@
       "constellationDetail": 20,
       "constellationStarCount": 23,
       "constellationStarMinSizeClass": "C",
-      "constellationStarMaxSizeClass": "E"
+      "constellationStarMaxSizeClass": "E",
+      "groupName": "Constellation Group"
     },
     {
       "name": "Sphinx",
@@ -143,7 +149,8 @@
       "isStationary": true,
       "customShapeName": "sphinx_silhouette_1783562397445",
       "constellationStarMinSizeClass": "C",
-      "constellationStarMaxSizeClass": "E"
+      "constellationStarMaxSizeClass": "E",
+      "groupName": "Constellation Group"
     },
     {
       "name": "Dragon",
@@ -163,7 +170,21 @@
       "isStationary": true,
       "customShapeName": "dragon_silhouette_1783562307820",
       "constellationStarMinSizeClass": "C",
-      "constellationStarMaxSizeClass": "E"
+      "constellationStarMaxSizeClass": "E",
+      "groupName": "Constellation Group"
+    },
+    {
+      "name": "Constellation Group",
+      "type": "group",
+      "description": "A structural group for celestial bodies.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 0,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 0,
+      "affectsShellBoundary": false,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "The Sun",

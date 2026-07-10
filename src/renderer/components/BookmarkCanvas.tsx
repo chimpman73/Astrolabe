@@ -37,13 +37,19 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
     return false;
   };
 
+  const isGroupHidden = (groupName?: string) => {
+    if (!groupName) return false;
+    const group = activeSphere?.objects.find((o) => o.type === 'group' && o.name === groupName);
+    return group ? (group.isHidden || (viewMode !== 'DM' && group.isDMOnly)) : false;
+  };
+
   const isValidBookmarkObject = (obj: any) => 
-    obj.distanceOrbited >= 0 && isPrimary(obj) && obj.type !== 'constellation';
+    obj.distanceOrbited >= 0 && isPrimary(obj) && obj.type !== 'constellation' && obj.type !== 'group';
 
   // Filter objects to only those that orbit the central point (0,0) or orbit a body at (0,0)
   const planetaryObjects = activeSphere
     ? activeSphere.objects.filter((obj) => 
-        isValidBookmarkObject(obj) && !obj.isHidden && (viewMode === 'DM' || !obj.isDMOnly)
+        isValidBookmarkObject(obj) && !obj.isHidden && (viewMode === 'DM' || !obj.isDMOnly) && !isGroupHidden(obj.groupName)
       )
     : [];
 

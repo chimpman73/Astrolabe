@@ -201,3 +201,18 @@ This file tracks the design, development, and integration tasks for the Astrolab
   * Created 8 new hollow-ink SVG geometric symbols for Celestial Object Types (star, planet, moon, asteroid, station, cloud, living_world, custom).
   * Removed textual object-type prefixes from the directory list, appending the Object Type SVG icon instead.
   * Fixed image export bug to strictly bound exports to the vellum canvas (`exportWidth = paperWidthPx`), stripping out the wood desk background.
+
+### Phase 10: Editor & UI Improvements
+- [x] **AST-035: System Editor Enhancements**
+  * Converted the System Configuration pane into an expandable accordion card (default expanded for new systems).
+  * Added a `planetBaseSizeOffset` slider to independently adjust rendering sizes of planets strictly on the Nav Chart.
+  * Added an `orbitalDrawStrength` alpha-opacity slider to configure the visual prominence of dashed orbital lines.
+  
+- [x] **AST-036: System Editor Object Groups**
+  * Added structural `group` type to schema to allow nesting of celestial objects inside foldable "Folders".
+  * Refactored `SaveManager.tsx` UI to decouple group expansion state (`expandedGroups`) from object expansion state (`expandedIndex`).
+  * Implemented drag-and-drop system to assign objects to groups by dropping onto the Group card, or pull them out via a designated root-level dropzone.
+  * Cascaded `isHidden` and `isDMOnly` attributes from groups down to all nested objects, auto-filtering them from Nav Chart and Bookmark Canvas.
+  
+- [x] **AST-037: Directory Filtering Fixes**
+  * Filtered out `constellation` object types from the Vellum Directory left-hand list, as they belong strictly in the background space.

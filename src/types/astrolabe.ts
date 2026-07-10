@@ -1,6 +1,6 @@
 export type CelestialObjectType =
   | 'star' | 'planet' | 'moon' | 'asteroid'
-  | 'station' | 'cloud' | 'custom' | 'living_world' | 'constellation';
+  | 'station' | 'cloud' | 'custom' | 'living_world' | 'constellation' | 'group';
 
 export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular' | 'elliptical' | 'ring' | 'cylinder' | 'ship' | 'rectangular' | 'castle' | 'skull' | 'custom' | 'hollow_world';
 export type ElementAffinity = 'fire' | 'water' | 'earth' | 'air' | 'mixed' | 'none';
@@ -16,6 +16,8 @@ export interface CelestialObject {
   sizeUnit?: SizeUnit;
   /** @deprecated The old visual size property. Use physicalSize instead. */
   size?: number;
+  // Structural hierarchy
+  groupName?: string;
   description: string;
   orbitedObjectName: string | null;
   distanceOrbited: number; // radius from parent in AU or system units

@@ -18,6 +18,7 @@ import {
   Sparkles,
   Satellite,
   Hexagon,
+  Folder,
 } from 'lucide-react';
 import { CelestialObject, CelestialObjectType, WorldShape, ElementAffinity, SizeClass } from '../../types/astrolabe';
 import { ScaleManager } from '../utils/ScaleManager';
@@ -56,6 +57,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
   } = useSystemStore();
 
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [isSystemConfigExpanded, setIsSystemConfigExpanded] = useState<boolean>(true);
@@ -136,6 +138,21 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
     setToastMessage({ type: 'success', text: `Added new celestial body "${newObj.name}"` });
   };
 
+  const handleAddGroup = () => {
+    const newObj: CelestialObject = {
+      name: `New Group ${activeSphere.objects.filter(o => o.type === 'group').length + 1}`,
+      type: 'group',
+      description: 'A structural group for celestial bodies.',
+      orbitedObjectName: null,
+      distanceOrbited: 0,
+      initialAngle: 0,
+      orbitalPeriodDays: 0,
+    };
+    addCelestialObject(newObj);
+    setExpandedIndex(activeSphere.objects.length);
+    setToastMessage({ type: 'success', text: `Added new group "${newObj.name}"` });
+  };
+
   const handleDeleteObject = (index: number, name: string) => {
     if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
 
@@ -168,6 +185,8 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
         return <Satellite className="w-3.5 h-3.5 text-slate-400 dark:text-slate-300" />;
       case 'asteroid':
         return <Hexagon className="w-3.5 h-3.5 text-orange-400 dark:text-orange-300" />;
+      case 'group':
+        return <Folder className="w-3.5 h-3.5 text-[var(--color-accent-gold)]" />;
       default:
         return <Globe className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />;
     }
@@ -322,55 +341,99 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
           </h5>
         </div>
 
-        {/* Action Button: Add Body */}
-        <button onClick={handleAddObject} className="add-body-btn">
-          <Plus className="w-3.5 h-3.5" /> Add Celestial Body
-        </button>
+        {/* Action Button: Add Body & Group */}
+        <div className="flex gap-2">
+          <button onClick={handleAddObject} className="add-body-btn flex-1">
+            <Plus className="w-3.5 h-3.5" /> Add Celestial Body
+          </button>
+          <button onClick={handleAddGroup} className="add-body-btn flex-1" style={{ backgroundColor: 'var(--color-bg-base)' }}>
+            <Folder className="w-3.5 h-3.5" /> Add Group
+          </button>
+        </div>
 
         {/* Dynamic Accordion list of bodies */}
-        <div className="save-manager-list">
-          {activeSphere.objects.map((obj, index) => {
-            const isExpanded = expandedIndex === index;
-            
-            return (
-              <div 
-                key={'celestial-obj-' + index} 
-                className={`editor-card ${draggedIndex === index ? 'opacity-50' : ''} ${
-                  dragOverIndex === index 
-                    ? (draggedIndex !== null && draggedIndex < index 
-                        ? 'border-b-2 border-b-[var(--color-accent-gold)]' 
-                        : 'border-t-2 border-t-[var(--color-accent-gold)]') 
-                    : ''
-                }`}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  e.dataTransfer.dropEffect = 'move';
-                  if (dragOverIndex !== index) {
-                    setDragOverIndex(index);
-                  }
-                }}
-                onDragLeave={() => {
-                  if (dragOverIndex === index) {
+        <div className="save-manager-list pb-8">
+          {(() => {
+            const renderOrder: {obj: CelestialObject, index: number, isChild: boolean, parentExpanded: boolean}[] = [];
+            activeSphere.objects.forEach((obj, index) => {
+              if (!obj.groupName) {
+                renderOrder.push({obj, index, isChild: false, parentExpanded: true});
+                if (obj.type === 'group') {
+                  const isGroupExpanded = expandedGroups[obj.name] !== false;
+                  activeSphere.objects.forEach((child, childIndex) => {
+                    if (child.groupName === obj.name) {
+                      renderOrder.push({obj: child, index: childIndex, isChild: true, parentExpanded: isGroupExpanded});
+                    }
+                  });
+                }
+              }
+            });
+
+            return renderOrder.map(({ obj, index, isChild, parentExpanded }) => {
+              if (isChild && !parentExpanded) return null;
+              const isExpanded = obj.type === 'group' ? (expandedGroups[obj.name] !== false) : (expandedIndex === index);
+              
+              return (
+                <div 
+                  key={'celestial-obj-' + index} 
+                  className={`editor-card ${isChild ? 'ml-4 border-l-2 border-l-[var(--color-accent-gold)]' : ''} ${draggedIndex === index ? 'opacity-50' : ''} ${
+                    dragOverIndex === index 
+                      ? (draggedIndex !== null && draggedIndex < index 
+                          ? 'border-b-2 border-b-[var(--color-accent-gold)]' 
+                          : 'border-t-2 border-t-[var(--color-accent-gold)]') 
+                      : ''
+                  }`}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    if (dragOverIndex !== index) {
+                      setDragOverIndex(index);
+                    }
+                  }}
+                  onDragLeave={() => {
+                    if (dragOverIndex === index) {
+                      setDragOverIndex(null);
+                    }
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (draggedIndex !== null && draggedIndex !== index) {
+                      const draggedObj = activeSphere.objects[draggedIndex];
+                      
+                      // If dropping a group onto another object, groups cannot be nested, so they stay at root
+                      if (draggedObj.type === 'group') {
+                        updateCelestialObject(draggedIndex, { groupName: undefined });
+                      } 
+                      // If dropping onto a group header, move into that group
+                      else if (obj.type === 'group') {
+                        updateCelestialObject(draggedIndex, { groupName: obj.name });
+                      } 
+                      // If dropping onto a child or root object, inherit its group
+                      else {
+                        updateCelestialObject(draggedIndex, { groupName: obj.groupName || undefined });
+                      }
+                      
+                      reorderCelestialObjects(draggedIndex, index);
+                    }
+                    setDraggedIndex(null);
                     setDragOverIndex(null);
-                  }
-                }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  if (draggedIndex !== null && draggedIndex !== index) {
-                    reorderCelestialObjects(draggedIndex, index);
-                  }
-                  setDraggedIndex(null);
-                  setDragOverIndex(null);
-                }}
-              >
+                  }}
+                >
                 
                 {/* Accordion Card Header */}
                 <div 
-                  onClick={() => setExpandedIndex(isExpanded ? null : index)}
+                  onClick={() => {
+                    if (obj.type === 'group') {
+                      setExpandedGroups(prev => ({ ...prev, [obj.name]: prev[obj.name] === false ? true : false }));
+                    } else {
+                      setExpandedIndex(isExpanded ? null : index);
+                    }
+                  }}
                   className="editor-card-header"
                   draggable
                   onDragStart={(e) => {
-                    setExpandedIndex(null);
+                    if (obj.type !== 'group') setExpandedIndex(null);
                     setDraggedIndex(index);
                     e.dataTransfer.effectAllowed = 'move';
                   }}
@@ -413,20 +476,22 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                   <div className="editor-card-body">
                     
                     <div className="flex items-center gap-4 mb-3">
-                      <div className="flex items-center gap-2 cursor-pointer">
-                        <input 
-                          type="checkbox"
-                          id={`boundary-check-${index}`}
-                          checked={obj.affectsShellBoundary ?? true}
-                          onChange={e => handleUpdateObject(index, { affectsShellBoundary: e.target.checked })}
-                          className="cursor-pointer"
-                        />
-                        <label htmlFor={`boundary-check-${index}`} className="text-[var(--color-text-muted)] text-sm cursor-pointer select-none">
-                          ⛶ Affects Shell Boundary
-                        </label>
-                      </div>
+                      {obj.type !== 'group' && (
+                        <div className="flex items-center gap-2 cursor-pointer">
+                          <input 
+                            type="checkbox"
+                            id={`boundary-check-${index}`}
+                            checked={obj.affectsShellBoundary ?? true}
+                            onChange={e => handleUpdateObject(index, { affectsShellBoundary: e.target.checked })}
+                            className="cursor-pointer"
+                          />
+                          <label htmlFor={`boundary-check-${index}`} className="text-[var(--color-text-muted)] text-sm cursor-pointer select-none">
+                            ⛶ Affects Shell Boundary
+                          </label>
+                        </div>
+                      )}
 
-                      <div className="flex items-center gap-2 cursor-pointer border-l border-[var(--color-border-parchment)] pl-4">
+                      <div className={`flex items-center gap-2 cursor-pointer ${obj.type !== 'group' ? 'border-l border-[var(--color-border-parchment)] pl-4' : ''}`}>
                         <input 
                           type="checkbox"
                           id={`dm-only-check-${index}`}
@@ -450,8 +515,10 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                       />
                     </div>
 
-                    <div className="editor-form-group">
-                      <label>Type</label>
+                    {obj.type !== 'group' && (
+                      <>
+                        <div className="editor-form-group">
+                          <label>Type</label>
                       <select 
                         className="editor-select"
                         value={obj.type}
@@ -1018,22 +1085,72 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                             </div>
                           </>
                         )}
+                      </>
+                    )}
 
+                    {obj.type !== 'group' && (
+                      <div className="editor-form-group">
+                        <label>Description</label>
+                        <textarea 
+                          className="editor-textarea"
+                          value={obj.description || ''}
+                          onChange={e => handleUpdateObject(index, { description: e.target.value })}
+                        />
+                      </div>
+                    )}
 
-                    <div className="editor-form-group">
-                      <label>Description</label>
-                      <textarea 
-                        className="editor-textarea"
-                        value={obj.description || ''}
-                        onChange={e => handleUpdateObject(index, { description: e.target.value })}
-                      />
-                    </div>
+                    {obj.type === 'group' && (() => {
+                      const children = activeSphere.objects.filter(o => o.groupName === obj.name);
+                      return (
+                        <div className="editor-form-group mt-2">
+                           <label className="text-[var(--color-text-main)] mb-2 font-bold block">Group Contents</label>
+                           {children.length === 0 ? (
+                              <div className="p-4 border border-dashed border-[var(--color-border-parchment)] rounded text-center text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">
+                                Empty Group
+                              </div>
+                           ) : (
+                              <div className="flex flex-col gap-1.5 p-2.5 bg-[#f5efdf] dark:bg-[#12151c] rounded border border-[var(--color-border-parchment)]">
+                                {children.map(c => (
+                                  <div key={c.name} className="flex items-center gap-2 text-xs text-[var(--color-text-main)]">
+                                    {renderTypeIcon(c.type)} {c.name}
+                                  </div>
+                                ))}
+                              </div>
+                           )}
+                        </div>
+                      );
+                    })()}
 
                   </div>
                 )}
               </div>
             );
-          })}
+            });
+          })()}
+
+          {/* Root Dropzone to drag objects out of groups */}
+          <div 
+            className={`h-10 mt-4 border-2 border-dashed rounded flex items-center justify-center text-xs font-bold transition-colors ${dragOverIndex === -1 ? 'border-[var(--color-accent-gold)] bg-[var(--color-bg-light)] text-[var(--color-accent-gold)]' : 'border-[var(--color-border-parchment)] text-[var(--color-text-muted)]'}`}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'move';
+              if (dragOverIndex !== -1) setDragOverIndex(-1);
+            }}
+            onDragLeave={() => {
+              if (dragOverIndex === -1) setDragOverIndex(null);
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (draggedIndex !== null) {
+                updateCelestialObject(draggedIndex, { groupName: undefined });
+                reorderCelestialObjects(draggedIndex, activeSphere.objects.length - 1);
+              }
+              setDraggedIndex(null);
+              setDragOverIndex(null);
+            }}
+          >
+            Drop here to move to Root level
+          </div>
         </div>
 
       </div>
