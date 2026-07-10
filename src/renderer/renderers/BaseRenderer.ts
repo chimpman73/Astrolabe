@@ -4,7 +4,7 @@ import { shapeManager } from '../utils/ShapeManager';
 export abstract class BaseRenderer {
   public abstract draw(context: RenderContext): void;
 
-  protected drawShapePath(ctx: CanvasRenderingContext2D, shape: string, x: number, y: number, s: number, customShapeName?: string): void {
+  protected drawShapePath(ctx: CanvasRenderingContext2D, shape: string, x: number, y: number, s: number, customShapeName?: string): Path2D | void {
     ctx.beginPath();
     switch (shape) {
       case 'disc': {
@@ -136,20 +136,7 @@ export abstract class BaseRenderer {
         if (customShapeName) {
           const path = shapeManager.getCachedPath(customShapeName);
           if (path) {
-            ctx.save();
-            ctx.translate(x, y);
-            // Assuming default SVGs are roughly 100x100 viewBox centered around (0,0) or (50,50). 
-            // We'll scale it to match 's' (radius). If the SVG is 100x100 (0..100), we center it.
-            // A simple scale transform. Let's just scale by s / 50 and translate -50, -50.
-            const scale = s / 50;
-            ctx.scale(scale, scale);
-            ctx.translate(-50, -50);
-            
-            // Note: ctx.fill(path) works, but since we are doing beginPath above, this logic is tricky. 
-            // Let's just draw the path. Wait, if we use path2D, we don't use beginPath. 
-            // I'll adjust the logic in drawBaseSolid to handle path2D returns.
-            ctx.restore();
-            return; // We handle custom in drawBaseSolid because Path2D requires ctx.fill(path)
+            return path;
           }
         }
         // Fallback to sphere
@@ -173,9 +160,19 @@ export abstract class BaseRenderer {
       if (path) {
         ctx.save();
         ctx.translate(x, y);
-        const scale = size / 50;
+        
+        const bounds = (shapeManager as any).getCachedBounds?.(obj.customShapeName);
+        let cx = 50, cy = 50, maxDim = 100;
+        if (bounds && bounds.w > 0 && bounds.h > 0) {
+          cx = bounds.x + bounds.w / 2;
+          cy = bounds.y + bounds.h / 2;
+          maxDim = Math.max(bounds.w, bounds.h);
+        }
+        
+        const scale = (2 * size) / maxDim;
         ctx.scale(scale, scale);
-        ctx.translate(-50, -50);
+        ctx.translate(-cx, -cy);
+        
         ctx.fill(path);
         ctx.stroke(path);
         ctx.restore();

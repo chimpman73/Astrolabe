@@ -124,8 +124,10 @@
       "isStationary": false,
       "orbitDirection": "prograde",
       "sizeClass": "I",
-      "physicalSize": 1000000,
-      "sizeUnit": "miles"
+      "physicalSize": 2000000,
+      "sizeUnit": "miles",
+      "worldShape": "custom",
+      "customShapeName": "fish"
     }
   ],
   "shellBoundaryType": "double",

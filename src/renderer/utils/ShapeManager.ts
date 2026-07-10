@@ -8,6 +8,7 @@ class ShapeManager {
   private stringCache: Map<string, string> = new Map();
   private graphCache: Map<string, ConstellationData> = new Map();
   private skeletonCache: Map<string, Record<number, ConstellationData>> = new Map();
+  private boundsCache: Map<string, {x: number, y: number, w: number, h: number}> = new Map();
   private outlineStrategy = new OutlineStrategy();
   private internalStrategy = new InternalGeometricStrategy();
   private initialized = false;
@@ -34,6 +35,11 @@ class ShapeManager {
   public getCachedPath(shapeName: string): Path2D | null {
     if (!shapeName) return null;
     return this.pathCache.get(shapeName) || null;
+  }
+
+  public getCachedBounds(shapeName: string): {x: number, y: number, w: number, h: number} | null {
+    if (!shapeName) return null;
+    return this.boundsCache.get(shapeName) || null;
   }
 
   public getConstellationData(
@@ -102,6 +108,31 @@ class ShapeManager {
             }
           } catch (e) {
             // Silently ignore if a shape doesn't have a skeleton file
+          }
+
+          // Compute bounding box using SVG DOM
+          const svgNamespace = "http://www.w3.org/2000/svg";
+          const svgElement = document.createElementNS(svgNamespace, "svg");
+          const pathElement = document.createElementNS(svgNamespace, "path");
+          pathElement.setAttribute("d", pathData);
+          svgElement.appendChild(pathElement);
+          svgElement.style.position = 'absolute';
+          svgElement.style.visibility = 'hidden';
+          svgElement.style.width = '0px';
+          svgElement.style.height = '0px';
+          document.body.appendChild(svgElement);
+          try {
+            const bbox = pathElement.getBBox();
+            this.boundsCache.set(shapeName, {
+              x: bbox.x,
+              y: bbox.y,
+              w: bbox.width,
+              h: bbox.height
+            });
+          } catch(e) {
+            console.warn('Failed to get BBox for', shapeName);
+          } finally {
+            document.body.removeChild(svgElement);
           }
 
           const path2d = new Path2D(pathData);

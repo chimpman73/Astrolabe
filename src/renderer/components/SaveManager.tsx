@@ -16,6 +16,8 @@ import {
   Eye,
   EyeOff,
   Sparkles,
+  Satellite,
+  Hexagon,
 } from 'lucide-react';
 import { CelestialObject, CelestialObjectType, WorldShape, ElementAffinity, SizeClass } from '../../types/astrolabe';
 import { ScaleManager } from '../utils/ScaleManager';
@@ -159,6 +161,10 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
         return <TreeDeciduous className="w-3.5 h-3.5 text-green-600 dark:text-green-500" />;
       case 'constellation':
         return <Sparkles className="w-3.5 h-3.5 text-purple-400" />;
+      case 'station':
+        return <Satellite className="w-3.5 h-3.5 text-slate-400 dark:text-slate-300" />;
+      case 'asteroid':
+        return <Hexagon className="w-3.5 h-3.5 text-orange-400 dark:text-orange-300" />;
       default:
         return <Globe className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />;
     }
