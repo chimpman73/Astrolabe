@@ -868,7 +868,8 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     curY += 50 * z;
     ctx.font = `normal ${24 * z}px 'Elan', 'Outfit', sans-serif`;
     ctx.fillStyle = '#5e4f3c';
-    ctx.fillText(`System Directory — Epoch: Day ${currentSystemDate}`, startX, curY);
+    const shellRadiusAU = bounds.shellRadiusPx / context.activeZoom;
+    ctx.fillText(`Radius: ${shellRadiusAU.toFixed(2)} AU`, startX, curY);
 
     curY += 80 * z;
 
