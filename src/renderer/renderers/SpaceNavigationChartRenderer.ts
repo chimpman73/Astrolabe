@@ -559,17 +559,8 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
               if (img && img.complete && img.naturalWidth > 0) {
                   // White tint for space mode svg icons
                   ctx.save();
-                  const offscreen = document.createElement('canvas');
-                  offscreen.width = iconSize;
-                  offscreen.height = iconSize;
-                  const offCtx = offscreen.getContext('2d');
-                  if (offCtx) {
-                      offCtx.drawImage(img, 0, 0, iconSize, iconSize);
-                      offCtx.globalCompositeOperation = 'source-in';
-                      offCtx.fillStyle = '#ffffff';
-                      offCtx.fillRect(0, 0, iconSize, iconSize);
-                      ctx.drawImage(offscreen, startX, startY - iconSize/2, iconSize, iconSize);
-                  }
+                  ctx.filter = 'brightness(0) invert(1)';
+                  ctx.drawImage(img, startX, startY - iconSize/2, iconSize, iconSize);
                   ctx.restore();
               }
           } else if (item.type === 'draw') {
@@ -777,17 +768,8 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
       if (elemIcon && elemIcon.complete && elemIcon.naturalWidth > 0) {
         ctx.save();
         ctx.translate(startX + 55 * z, curY + 15 * z);
-        const offscreen = document.createElement('canvas');
-        offscreen.width = iconSize;
-        offscreen.height = iconSize;
-        const offCtx = offscreen.getContext('2d');
-        if (offCtx) {
-            offCtx.drawImage(elemIcon, 0, 0, iconSize, iconSize);
-            offCtx.globalCompositeOperation = 'source-in';
-            offCtx.fillStyle = '#ffffff';
-            offCtx.fillRect(0, 0, iconSize, iconSize);
-            ctx.drawImage(offscreen, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
-        }
+        ctx.filter = 'brightness(0) invert(1)';
+        ctx.drawImage(elemIcon, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
         ctx.restore();
       }
 
@@ -796,17 +778,8 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
       if (typeIcon && typeIcon.complete && typeIcon.naturalWidth > 0) {
         ctx.save();
         ctx.translate(startX + 100 * z, curY + 15 * z);
-        const offscreen = document.createElement('canvas');
-        offscreen.width = iconSize;
-        offscreen.height = iconSize;
-        const offCtx = offscreen.getContext('2d');
-        if (offCtx) {
-            offCtx.drawImage(typeIcon, 0, 0, iconSize, iconSize);
-            offCtx.globalCompositeOperation = 'source-in';
-            offCtx.fillStyle = '#ffffff';
-            offCtx.fillRect(0, 0, iconSize, iconSize);
-            ctx.drawImage(offscreen, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
-        }
+        ctx.filter = 'brightness(0) invert(1)';
+        ctx.drawImage(typeIcon, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
         ctx.restore();
       }
 
