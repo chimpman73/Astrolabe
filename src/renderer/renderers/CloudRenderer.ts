@@ -2,20 +2,7 @@ import { BaseRenderer } from './BaseRenderer';
 import { RenderContext } from '../../types/renderer';
 import { ScaleManager } from '../utils/ScaleManager';
 
-class PRNG {
-  private seed: number;
-  constructor(str: string) {
-    let h = 0;
-    for (let i = 0; i < str.length; i++) h = Math.imul(31, h) + str.charCodeAt(i) | 0;
-    this.seed = h;
-  }
-  next() {
-    let t = this.seed += 0x6D2B79F5;
-    t = Math.imul(t ^ t >>> 15, t | 1);
-    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  }
-}
+import { PRNG } from '../utils/PRNG';
 
 export class CloudRenderer extends BaseRenderer {
   public draw(context: RenderContext): void {

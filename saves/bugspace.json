@@ -1,7 +1,7 @@
 {
   "sphereName": "Bugspace",
   "currentCampaignDate": "2026-07-03",
-  "currentSystemDate": 0,
+  "currentSystemDate": 116,
   "objects": [
     {
       "name": "World Tree",
@@ -131,5 +131,7 @@
     }
   ],
   "shellBoundaryType": "double",
-  "shellCustomScale": 1.05
+  "shellCustomScale": 1.05,
+  "navTitleStrike": true,
+  "navChartPlanetSizeOffset": 0
 }

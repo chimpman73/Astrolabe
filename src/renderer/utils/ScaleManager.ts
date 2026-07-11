@@ -1,14 +1,15 @@
 import { SizeClass, SizeUnit, CelestialObject } from '../../types/astrolabe';
-import { IVisualScaleStrategy, HybridScaleStrategy } from './VisualScaleStrategy';
+import { IVisualScaleStrategy } from './IVisualScaleStrategy';
+import { HybridScaleStrategy } from './HybridScaleStrategy';
 
 export class ScaleManager {
   public static readonly AU_IN_MILES = 92955807;
 
   // Active strategy for Nav Chart zoomable scaling
-  private static navChartStrategy: IVisualScaleStrategy = new HybridScaleStrategy();
+  static #navChartStrategy: IVisualScaleStrategy = new HybridScaleStrategy();
 
   public static setNavChartStrategy(strategy: IVisualScaleStrategy) {
-    this.navChartStrategy = strategy;
+    this.#navChartStrategy = strategy;
   }
 
   public static milesToAu(miles: number): number {
@@ -86,7 +87,7 @@ export class ScaleManager {
    * delegated to the currently active IVisualScaleStrategy.
    */
   public static getNavChartVisualRadius(sizeClass: SizeClass, physicalSize: number, unit: SizeUnit, zoomLevel: number): number {
-    return this.navChartStrategy.getVisualRadius(sizeClass, physicalSize, unit, zoomLevel);
+    return this.#navChartStrategy.getVisualRadius(sizeClass, physicalSize, unit, zoomLevel);
   }
 
   /**

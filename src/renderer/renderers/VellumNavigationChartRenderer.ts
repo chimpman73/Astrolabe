@@ -22,53 +22,53 @@ import livingWorldObjSvgUrl from '../../../assets/objects/living_world.svg';
 import customObjSvgUrl from '../../../assets/objects/custom.svg';
 
 export class VellumNavigationChartRenderer implements INavigationChartRenderer {
-  private readonly colorBg = '#f9f5e8';
-  private readonly colorVellumAverage = '#e0caa6'; // Accurately sampled average color of parchment.jpg
-  private readonly colorGrid = 'rgba(94, 79, 60, 0.05)';
-  private readonly colorStroke = '#2b2316';
-  private readonly colorMuted = '#7c694e';
-  private readonly colorGold = '#b58315';
+  readonly #colorBg = '#f9f5e8';
+  readonly #colorVellumAverage = '#e0caa6'; // Accurately sampled average color of parchment.jpg
+  readonly #colorGrid = 'rgba(94, 79, 60, 0.05)';
+  readonly #colorStroke = '#2b2316';
+  readonly #colorMuted = '#7c694e';
+  readonly #colorGold = '#b58315';
 
-  private bgPattern: CanvasPattern | null = null;
-  private woodPattern: CanvasPattern | null = null;
-  private bgImage = new Image();
-  private woodDeskImage = new Image();
-  private stainInk = new Image();
-  private stainCoffee = new Image();
-  private stainBurn = new Image();
+  #bgPattern: CanvasPattern | null = null;
+  #woodPattern: CanvasPattern | null = null;
+  #bgImage = new Image();
+  #woodDeskImage = new Image();
+  #stainInk = new Image();
+  #stainCoffee = new Image();
+  #stainBurn = new Image();
   
   // Icons
-  private svgIcons: Record<string, HTMLImageElement> = {};
+  #svgIcons: Record<string, HTMLImageElement> = {};
 
-  private imagesLoaded = false;
-  private loadCount = 0;
-  private readonly totalImages = 5 + 6 + 8;
-  private forceRedraw?: () => void;
+  #imagesLoaded = false;
+  #loadCount = 0;
+  readonly #totalImages = 5 + 6 + 8;
+  #forceRedraw?: () => void;
 
   constructor(forceRedraw?: () => void) {
-    this.forceRedraw = forceRedraw;
+    this.#forceRedraw = forceRedraw;
     const onLoad = () => {
-      this.loadCount++;
-      if (this.loadCount >= this.totalImages) {
-        this.imagesLoaded = true;
-        this.forceRedraw?.();
+      this.#loadCount++;
+      if (this.#loadCount >= this.#totalImages) {
+        this.#imagesLoaded = true;
+        this.#forceRedraw?.();
       }
     };
 
-    this.bgImage.src = '/images/vellum_bg.png';
-    this.bgImage.onload = onLoad;
+    this.#bgImage.src = '/images/vellum_bg.png';
+    this.#bgImage.onload = onLoad;
 
-    this.woodDeskImage.src = '/images/wood_desk.png';
-    this.woodDeskImage.onload = onLoad;
+    this.#woodDeskImage.src = '/images/wood_desk.png';
+    this.#woodDeskImage.onload = onLoad;
 
-    this.stainInk.src = '/images/stain_ink.png';
-    this.stainInk.onload = onLoad;
+    this.#stainInk.src = '/images/stain_ink.png';
+    this.#stainInk.onload = onLoad;
 
-    this.stainCoffee.src = '/images/stain_coffee.png';
-    this.stainCoffee.onload = onLoad;
+    this.#stainCoffee.src = '/images/stain_coffee.png';
+    this.#stainCoffee.onload = onLoad;
 
-    this.stainBurn.src = '/images/stain_burn.png';
-    this.stainBurn.onload = onLoad;
+    this.#stainBurn.src = '/images/stain_burn.png';
+    this.#stainBurn.onload = onLoad;
 
     const svgSources: Record<string, string> = {
       fire: fireSvgUrl,
@@ -92,11 +92,11 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       img.src = src;
       img.onload = onLoad;
       img.onerror = onLoad; 
-      this.svgIcons[key] = img;
+      this.#svgIcons[key] = img;
     }
   }
 
-  private getScrollBounds(context: MapStyleContext) {
+  #getScrollBounds(context: MapStyleContext) {
     let maxDist = 0.1;
     context.objects.forEach((o: any) => {
       if (!context.isPrimary(o) || o.affectsShellBoundary === false) return;
@@ -138,18 +138,18 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     // 1. Clear the entire canvas to transparent
     ctx.clearRect(0, 0, width, height);
 
-    if (!this.imagesLoaded || !this.bgImage.complete || !this.woodDeskImage.complete) {
+    if (!this.#imagesLoaded || !this.#bgImage.complete || !this.#woodDeskImage.complete) {
       return;
     }
 
-    if (!this.bgPattern) {
-      this.bgPattern = ctx.createPattern(this.bgImage, 'repeat');
+    if (!this.#bgPattern) {
+      this.#bgPattern = ctx.createPattern(this.#bgImage, 'repeat');
     }
-    if (!this.woodPattern) {
-      this.woodPattern = ctx.createPattern(this.woodDeskImage, 'repeat');
+    if (!this.#woodPattern) {
+      this.#woodPattern = ctx.createPattern(this.#woodDeskImage, 'repeat');
     }
 
-    const bounds = this.getScrollBounds(context);
+    const bounds = this.#getScrollBounds(context);
 
     ctx.save();
     
@@ -169,10 +169,10 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       ctx.roundRect(bounds.x, bounds.y, bounds.width, bounds.height, 10);
     }
     
-    if (this.bgPattern) {
-      ctx.fillStyle = this.bgPattern;
+    if (this.#bgPattern) {
+      ctx.fillStyle = this.#bgPattern;
     } else {
-      ctx.fillStyle = this.colorBg;
+      ctx.fillStyle = this.#colorBg;
     }
     
     ctx.fill();
@@ -211,7 +211,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
   }
 
   drawGrid({ ctx, width, height, activePan }: MapStyleContext): void {
-    ctx.strokeStyle = this.colorGrid;
+    ctx.strokeStyle = this.#colorGrid;
     ctx.lineWidth = 1;
     const gridSize = 80;
     
@@ -234,7 +234,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
   }
 
   drawDecorations({ ctx, activeZoom, project, decorations }: MapStyleContext): void {
-    if (!this.imagesLoaded || !decorations) return;
+    if (!this.#imagesLoaded || !decorations) return;
 
     ctx.save();
     // Multiply blend mode simulates ink/coffee soaking into parchment
@@ -244,9 +244,9 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     decorations.forEach((dec: ParchmentDecoration) => {
       const proj = project(dec.x, dec.y);
       let img: HTMLImageElement | null = null;
-      if (dec.type === 'ink') img = this.stainInk;
-      if (dec.type === 'coffee') img = this.stainCoffee;
-      if (dec.type === 'burn') img = this.stainBurn;
+      if (dec.type === 'ink') img = this.#stainInk;
+      if (dec.type === 'coffee') img = this.#stainCoffee;
+      if (dec.type === 'burn') img = this.#stainBurn;
 
       if (img && img.complete) {
         ctx.save();
@@ -361,7 +361,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     ctx.restore();
 
     ctx.font = `bold 24px 'Elan', 'Cinzel', serif`;
-    ctx.fillStyle = this.colorStroke;
+    ctx.fillStyle = this.#colorStroke;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
     ctx.fillText(
@@ -399,14 +399,14 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
           false, parentProj.x, parentProj.y, orbitR, pos.angle
         );
       } else {
-        const { bodyFill, bodyStroke } = getBodyColors(obj, true, this.colorBg, this.colorStroke, this.colorGold);
+        const { bodyFill, bodyStroke } = getBodyColors(obj, true, this.#colorBg, this.#colorStroke, this.#colorGold);
         const orbitR = obj.distanceOrbited * activeZoom;
         drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, bodyFill, bodyStroke, false, activeZoom,
           false, parentProj.x, parentProj.y, orbitR, pos.angle
         );
 
         if (obj.isStationary && obj.type !== 'star' && obj.type !== 'constellation' && obj.type !== 'living_world') {
-          drawStationaryIndicator(ctx, proj.x, proj.y, renderSize, this.colorMuted);
+          drawStationaryIndicator(ctx, proj.x, proj.y, renderSize, this.#colorMuted);
         }
       }
 
@@ -426,7 +426,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
           
           if (activeSphere?.navTitleStrike) {
             ctx.save();
-            ctx.strokeStyle = this.colorVellumAverage;
+            ctx.strokeStyle = this.#colorVellumAverage;
             ctx.lineWidth = starFontSize * 0.15;
             ctx.lineJoin = 'round';
             ctx.strokeText(obj.name, proj.x, proj.y);
@@ -442,14 +442,14 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
           
           if (activeSphere?.navTitleStrike) {
             ctx.save();
-            ctx.strokeStyle = this.colorVellumAverage;
+            ctx.strokeStyle = this.#colorVellumAverage;
             ctx.lineWidth = fontSize * 0.15 + 1; // slightly thicker than standard to ensure legibility
             ctx.lineJoin = 'round';
             ctx.strokeText(obj.name, proj.x, titleY);
             ctx.restore();
           }
           
-          ctx.fillStyle = this.colorStroke;
+          ctx.fillStyle = this.#colorStroke;
           ctx.fillText(obj.name, proj.x, titleY);
         }
       }
@@ -470,7 +470,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     ctx.lineTo(barX + scaleBarWidth, barY);
     ctx.lineTo(barX + scaleBarWidth, barY - 5);
     
-    ctx.strokeStyle = this.colorStroke;
+    ctx.strokeStyle = this.#colorStroke;
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -483,7 +483,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     }
 
     ctx.font = `500 10px 'Elan', 'Outfit', sans-serif`;
-    ctx.fillStyle = this.colorStroke;
+    ctx.fillStyle = this.#colorStroke;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
     ctx.fillText(scaleLabel, barX + (scaleBarWidth / 2), barY - 8);
@@ -491,14 +491,14 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
 
   drawForeground({ ctx, width, height, isExport }: MapStyleContext): void {
     if (isExport) return;
-    if (!this.imagesLoaded || !this.woodDeskImage.complete) return;
+    if (!this.#imagesLoaded || !this.#woodDeskImage.complete) return;
 
     ctx.save();
     // destination-over draws behind existing canvas content
     ctx.globalCompositeOperation = 'destination-over';
     
-    if (this.woodPattern) {
-      ctx.fillStyle = this.woodPattern;
+    if (this.#woodPattern) {
+      ctx.fillStyle = this.#woodPattern;
       ctx.fillRect(0, 0, width, height);
     }
     
@@ -525,16 +525,16 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
 
     this.drawShell(context, shellRadius, shellProj);
     this.drawBodies(context, context.visibleObjects);
-    this.drawNotes(context, context.visibleObjects);
+    this.#drawNotes(context, context.visibleObjects);
     
-    const bounds = this.getScrollBounds(context);
-    this.drawSystemDirectory(context, bounds);
+    const bounds = this.#getScrollBounds(context);
+    this.#drawSystemDirectory(context, bounds);
     
     this.drawScaleBar(context);
     this.drawForeground(context);
   }
 
-  private drawNotes({ ctx, activeZoom, project, selectedObjectIndex, objects }: MapStyleContext, visibleObjects: CelestialObject[]): void {
+  #drawNotes({ ctx, activeZoom, project, selectedObjectIndex, objects }: MapStyleContext, visibleObjects: CelestialObject[]): void {
     const notes = visibleObjects.filter(o => o.type === 'note');
     if (notes.length === 0) return;
 
@@ -558,7 +558,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       ctx.scale(activeZoom, activeZoom);
 
       ctx.font = `${fontSize}px '${fontFamily}', sans-serif`;
-      ctx.fillStyle = this.colorStroke;
+      ctx.fillStyle = this.#colorStroke;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
@@ -628,7 +628,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
         ctx.save();
         drawPolyPath();
         ctx.setLineDash([5 / activeZoom, 5 / activeZoom]);
-        ctx.strokeStyle = this.colorStroke;
+        ctx.strokeStyle = this.#colorStroke;
         ctx.lineWidth = 1 / activeZoom;
         ctx.stroke();
         ctx.restore();
@@ -644,7 +644,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       ctx.restore();
 
       if (isSelected) {
-         ctx.fillStyle = this.colorStroke;
+         ctx.fillStyle = this.#colorStroke;
          const r = 5 / activeZoom;
          ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
          ctx.beginPath(); ctx.arc(tl.x, tl.y, r, 0, Math.PI * 2); ctx.fill();
@@ -658,7 +658,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
          ctx.beginPath();
          ctx.moveTo(tr.x, tr.y);
          ctx.lineTo(tr.x + 20, tr.y - 20);
-         ctx.strokeStyle = this.colorStroke;
+         ctx.strokeStyle = this.#colorStroke;
          ctx.lineWidth = 1 / activeZoom;
          ctx.setLineDash([2 / activeZoom, 2 / activeZoom]);
          ctx.stroke();
@@ -670,9 +670,9 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     ctx.restore();
   }
 
-  private drawSystemDirectory(context: MapStyleContext, bounds: any): void {
+  #drawSystemDirectory(context: MapStyleContext, bounds: any): void {
     const { ctx, activeSphere, visibleObjects, currentSystemDate, project } = context;
-    if (!this.imagesLoaded) return;
+    if (!this.#imagesLoaded) return;
 
     ctx.save();
     
@@ -697,7 +697,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     // Start at the exact same height as the crystal shell
     let curY = shellProj.y - bounds.shellRadiusPx;
 
-    ctx.fillStyle = this.colorStroke;
+    ctx.fillStyle = this.#colorStroke;
     ctx.font = `bold ${48 * z}px 'Elan', 'Cinzel', serif`;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top'; // use top so it precisely aligns with the shell's top edge
@@ -734,8 +734,8 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       ctx.translate(startX + 15 * z, curY + 15 * z);
       
       const R = iconSize / 2 - 2 * z;
-      ctx.strokeStyle = this.colorStroke;
-      ctx.fillStyle = this.colorStroke;
+      ctx.strokeStyle = this.#colorStroke;
+      ctx.fillStyle = this.#colorStroke;
       ctx.lineWidth = 1.5 * z;
 
       ctx.beginPath();
@@ -774,7 +774,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
 
       // Draw Element Icon
       const elemIconName = obj.elementAffinity || 'none';
-      const elemIcon = this.svgIcons[elemIconName];
+      const elemIcon = this.#svgIcons[elemIconName];
       if (elemIcon && elemIcon.complete && elemIcon.naturalWidth > 0) {
         ctx.save();
         ctx.translate(startX + 55 * z, curY + 15 * z);
@@ -784,7 +784,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
 
       // Draw Object Type Icon
       const typeIconName = obj.type || 'custom';
-      const typeIcon = this.svgIcons[typeIconName];
+      const typeIcon = this.#svgIcons[typeIconName];
       if (typeIcon && typeIcon.complete && typeIcon.naturalWidth > 0) {
         ctx.save();
         ctx.translate(startX + 95 * z, curY + 15 * z);
@@ -793,7 +793,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       }
 
       // Draw details
-      ctx.fillStyle = this.colorStroke;
+      ctx.fillStyle = this.#colorStroke;
       ctx.font = `bold ${32 * z}px 'Elan', 'Cinzel', serif`;
       ctx.fillText(obj.name, startX + textOffsetX, curY);
 

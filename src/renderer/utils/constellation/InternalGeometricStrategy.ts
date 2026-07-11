@@ -1,38 +1,7 @@
 import { IConstellationStrategy, ConstellationData, ConstellationPoint, ConstellationEdge } from './ConstellationStrategy';
 
-class PRNG {
-  private seed: number;
-  constructor(str: string) {
-    let h = 0;
-    for (let i = 0; i < str.length; i++) h = Math.imul(31, h) + str.charCodeAt(i) | 0;
-    this.seed = h;
-  }
-  next() {
-    let t = this.seed += 0x6D2B79F5;
-    t = Math.imul(t ^ t >>> 15, t | 1);
-    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  }
-}
-
-class UnionFind {
-  parent: number[];
-  constructor(size: number) {
-    this.parent = Array.from({ length: size }, (_, i) => i);
-  }
-  find(i: number): number {
-    if (this.parent[i] === i) return i;
-    this.parent[i] = this.find(this.parent[i]);
-    return this.parent[i];
-  }
-  union(i: number, j: number): void {
-    const rootI = this.find(i);
-    const rootJ = this.find(j);
-    if (rootI !== rootJ) {
-      this.parent[rootI] = rootJ;
-    }
-  }
-}
+import { PRNG } from '../PRNG';
+import { UnionFind } from '../UnionFind';
 
 export class InternalGeometricStrategy implements IConstellationStrategy {
   public generate(

@@ -20,7 +20,7 @@ function hashString(str: string) {
 }
 
 export class LivingWorldRenderer extends BaseRenderer {
-  private static geometryCache = new Map<string, { 
+  static #geometryCache = new Map<string, { 
     branches: Record<number, Path2D>, 
     leavesData: {x: number, y: number, rand: number}[], 
     maxRadius: number,
@@ -47,7 +47,7 @@ export class LivingWorldRenderer extends BaseRenderer {
     const cacheKey = `${baseSeed}_${levels}_${density}_${bendFactor}_${obj.hasLeaves}`;
     
     // Generate normalized geometry (scale = 1) if not cached
-    if (!LivingWorldRenderer.geometryCache.has(cacheKey)) {
+    if (!LivingWorldRenderer.#geometryCache.has(cacheKey)) {
       const branchPaths: Record<number, Path2D> = {};
       const leavesData: {x: number, y: number, rand: number}[] = [];
       
@@ -139,7 +139,7 @@ export class LivingWorldRenderer extends BaseRenderer {
       const radiusTracker = { value: 0 };
       traverseTree(0, 0, 0, unscaledInitial, 1, baseSeed, radiusTracker);
       
-      LivingWorldRenderer.geometryCache.set(cacheKey, {
+      LivingWorldRenderer.#geometryCache.set(cacheKey, {
         branches: branchPaths,
         leavesData: leavesData,
         maxRadius: radiusTracker.value
@@ -147,7 +147,7 @@ export class LivingWorldRenderer extends BaseRenderer {
     }
     
     // Retrieve cached geometry
-    const cachedGeometry = LivingWorldRenderer.geometryCache.get(cacheKey)!;
+    const cachedGeometry = LivingWorldRenderer.#geometryCache.get(cacheKey)!;
     
     // Calculate the scale required to match the target pixels on screen
     const scale = branchLengthPixels / cachedGeometry.maxRadius;

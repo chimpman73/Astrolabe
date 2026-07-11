@@ -5,19 +5,19 @@ import { drawSolidBody, drawStationaryIndicator, getBodyColors, getElementColor 
 import { ScaleManager } from '../utils/ScaleManager';
 
 export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
-  private readonly colorBg = '#06070a';
-  private readonly colorGrid = 'rgba(255, 255, 255, 0.03)';
-  private readonly colorStroke = '#ffffff';
-  private readonly colorMuted = '#888d9e';
-  private readonly colorGold = '#e2b34a';
+  readonly #colorBg = '#06070a';
+  readonly #colorGrid = 'rgba(255, 255, 255, 0.03)';
+  readonly #colorStroke = '#ffffff';
+  readonly #colorMuted = '#888d9e';
+  readonly #colorGold = '#e2b34a';
 
   drawBackground({ ctx, width, height }: MapStyleContext): void {
-    ctx.fillStyle = this.colorBg;
+    ctx.fillStyle = this.#colorBg;
     ctx.fillRect(0, 0, width, height);
   }
 
   drawGrid({ ctx, width, height, activePan }: MapStyleContext): void {
-    ctx.strokeStyle = this.colorGrid;
+    ctx.strokeStyle = this.#colorGrid;
     ctx.lineWidth = 1;
     const gridSize = 80;
     
@@ -109,7 +109,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
   drawShell({ ctx, activeSphere }: MapStyleContext, shellRadius: number, shellProj: { x: number; y: number }): void {
     ctx.beginPath();
     ctx.arc(shellProj.x, shellProj.y, Math.max(0, shellRadius), 0, 2 * Math.PI);
-    ctx.strokeStyle = this.colorStroke;
+    ctx.strokeStyle = this.#colorStroke;
     ctx.lineWidth = 3;
     ctx.stroke();
     
@@ -119,7 +119,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
     ctx.stroke();
 
     ctx.font = `bold 24px 'Elan', 'Cinzel', serif`;
-    ctx.fillStyle = this.colorStroke;
+    ctx.fillStyle = this.#colorStroke;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
     ctx.fillText(
@@ -157,14 +157,14 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
           true, parentProj.x, parentProj.y, orbitR, pos.angle
         );
       } else {
-        const { bodyFill, bodyStroke } = getBodyColors(obj, false, this.colorBg, this.colorStroke, this.colorGold);
+        const { bodyFill, bodyStroke } = getBodyColors(obj, false, this.#colorBg, this.#colorStroke, this.#colorGold);
         const orbitR = obj.distanceOrbited * activeZoom;
         drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, bodyFill, bodyStroke, false, activeZoom,
           true, parentProj.x, parentProj.y, orbitR, pos.angle
         );
 
         if (obj.isStationary && obj.type !== 'star' && obj.type !== 'constellation' && obj.type !== 'living_world') {
-          drawStationaryIndicator(ctx, proj.x, proj.y, renderSize, this.colorMuted);
+          drawStationaryIndicator(ctx, proj.x, proj.y, renderSize, this.#colorMuted);
         }
       }
 
@@ -184,7 +184,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
           
           if (activeSphere?.navTitleStrike) {
             ctx.save();
-            ctx.strokeStyle = this.colorBg;
+            ctx.strokeStyle = this.#colorBg;
             ctx.lineWidth = starFontSize * 0.15;
             ctx.lineJoin = 'round';
             ctx.strokeText(obj.name, proj.x, proj.y);
@@ -200,14 +200,14 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
           
           if (activeSphere?.navTitleStrike) {
             ctx.save();
-            ctx.strokeStyle = this.colorBg;
+            ctx.strokeStyle = this.#colorBg;
             ctx.lineWidth = fontSize * 0.15 + 1;
             ctx.lineJoin = 'round';
             ctx.strokeText(obj.name, proj.x, titleY);
             ctx.restore();
           }
           
-          ctx.fillStyle = this.colorStroke;
+          ctx.fillStyle = this.#colorStroke;
           ctx.fillText(obj.name, proj.x, titleY);
         }
       }
@@ -228,7 +228,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
     ctx.lineTo(barX + scaleBarWidth, barY);
     ctx.lineTo(barX + scaleBarWidth, barY - 5);
     
-    ctx.strokeStyle = this.colorStroke;
+    ctx.strokeStyle = this.#colorStroke;
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -241,7 +241,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
     }
 
     ctx.font = `500 10px 'Elan', 'Outfit', sans-serif`;
-    ctx.fillStyle = this.colorStroke;
+    ctx.fillStyle = this.#colorStroke;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
     ctx.fillText(scaleLabel, barX + (scaleBarWidth / 2), barY - 8);
@@ -251,7 +251,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
     // No foreground in space mode
   }
 
-  private drawNotes({ ctx, activeZoom, project, selectedObjectIndex, objects }: MapStyleContext, visibleObjects: CelestialObject[]): void {
+  #drawNotes({ ctx, activeZoom, project, selectedObjectIndex, objects }: MapStyleContext, visibleObjects: CelestialObject[]): void {
     const notes = visibleObjects.filter(o => o.type === 'note');
     if (notes.length === 0) return;
 
@@ -407,7 +407,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
 
     this.drawShell(context, shellRadius, shellProj);
     this.drawBodies(context, context.visibleObjects);
-    this.drawNotes(context, context.visibleObjects);
+    this.#drawNotes(context, context.visibleObjects);
     this.drawScaleBar(context);
     this.drawForeground();
   }
