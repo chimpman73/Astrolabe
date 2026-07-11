@@ -45,7 +45,7 @@ export async function exportNavigationChart({
   
   const shellRadiusPx = maxDist * shellScale * exportZoom;
   const paddingPx = shellRadiusPx * 0.25;
-  const directoryWidthPx = isParchment ? shellRadiusPx : 0;
+  const directoryWidthPx = shellRadiusPx;
   
   const paperWidthPx = shellRadiusPx * 2 + paddingPx * 2 + directoryWidthPx;
   const paperHeightPx = shellRadiusPx * 2 + paddingPx * 2;

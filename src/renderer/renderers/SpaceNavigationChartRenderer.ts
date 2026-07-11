@@ -642,7 +642,183 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
     this.drawBodies(context, context.visibleObjects);
     this.#drawNotes(context, context.visibleObjects);
     this.#drawLegends(context, context.visibleObjects);
+    
+    const bounds = this.#getScrollBounds(context);
+    this.#drawSystemDirectory(context, bounds);
+    
     this.drawScaleBar(context);
     this.drawForeground();
+  }
+
+  #getScrollBounds(context: MapStyleContext): any {
+    let maxDist = 0.1;
+    context.objects.forEach((o: any) => {
+      if (!context.isPrimary(o) || o.affectsShellBoundary === false) return;
+      const reach = ScaleManager.getPhysicalReachAU(o);
+      if (reach > maxDist) maxDist = reach;
+    });
+    const shellScale = (context.activeSphere?.shellBoundaryType === 'custom' || context.activeSphere?.shellBoundaryType === 'relativeMargin') 
+      ? (context.activeSphere?.shellCustomScale ?? 1.2) : 2.0;
+    const shellRadiusPx = maxDist * shellScale * context.activeZoom;
+    
+    const paddingPx = shellRadiusPx * 0.25;
+    const directoryWidthPx = shellRadiusPx;
+    
+    const paperWidthPx = shellRadiusPx * 2 + paddingPx * 2 + directoryWidthPx;
+    const paperHeightPx = shellRadiusPx * 2 + paddingPx * 2;
+    
+    const centerProj = context.project(0, 0);
+    const originalLeft = centerProj.x - (shellRadiusPx * 2 + paddingPx * 2) / 2;
+    
+    return {
+      x: originalLeft - directoryWidthPx,
+      y: centerProj.y - paperHeightPx / 2,
+      width: paperWidthPx,
+      height: paperHeightPx,
+      directoryWidthPx,
+      shellRadiusPx,
+      paddingPx
+    };
+  }
+
+  #drawSystemDirectory(context: MapStyleContext, bounds: any): void {
+    const { ctx, activeSphere, visibleObjects, currentSystemDate, project } = context;
+    if (!this.#imagesLoaded) return;
+
+    ctx.save();
+    
+    const z = bounds.shellRadiusPx / 800; 
+    const dividerX = bounds.x + bounds.directoryWidthPx + bounds.paddingPx * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(dividerX, bounds.y + bounds.paddingPx);
+    ctx.lineTo(dividerX, bounds.y + bounds.height - bounds.paddingPx);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.lineWidth = 4 * z;
+    ctx.stroke();
+
+    const startX = bounds.x + bounds.paddingPx;
+    const shellProj = project(0, 0);
+    let curY = shellProj.y - bounds.shellRadiusPx;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `bold ${48 * z}px 'Elan', 'Cinzel', serif`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText((activeSphere?.sphereName || 'CRYSTAL SPHERE').toUpperCase(), startX, curY);
+
+    curY += 50 * z;
+    ctx.font = `normal ${24 * z}px 'Elan', 'Outfit', sans-serif`;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.fillText(`System Directory — Epoch: Day ${currentSystemDate}`, startX, curY);
+
+    curY += 80 * z;
+
+    const directoryObjects = visibleObjects.filter((o) => o.type !== 'moon' && o.type !== 'constellation' && o.type !== 'note' && o.type !== 'legend');
+    
+    directoryObjects.forEach((obj) => {
+      if (curY > bounds.y + bounds.height - bounds.paddingPx) return;
+
+      let orbitIconType = 'standard';
+      if (obj.orbitedObjectName === null || obj.distanceOrbited === 0) {
+        orbitIconType = 'central';
+      } else if (obj.isStationary) {
+        orbitIconType = 'fixed';
+      } else if ((obj.orbitEccentricity || 0) > 0) {
+        orbitIconType = 'elliptical';
+      }
+
+      const iconSize = 30 * z;
+      const textOffsetX = 140 * z;
+
+      ctx.save();
+      ctx.translate(startX + 15 * z, curY + 15 * z);
+      
+      const R = iconSize / 2 - 2 * z;
+      ctx.strokeStyle = '#ffffff';
+      ctx.fillStyle = '#ffffff';
+      ctx.lineWidth = 1.5 * z;
+
+      ctx.beginPath();
+      if (orbitIconType === 'central') {
+        ctx.arc(0, 0, R, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, R * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (orbitIconType === 'standard') {
+        ctx.arc(0, 0, R, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        const px = Math.cos(-Math.PI / 4) * R;
+        const py = Math.sin(-Math.PI / 4) * R;
+        ctx.arc(px, py, R * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (orbitIconType === 'elliptical') {
+        ctx.ellipse(0, 0, R, R * 0.5, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        const px = Math.cos(-Math.PI / 4) * R;
+        const py = Math.sin(-Math.PI / 4) * R * 0.5;
+        ctx.arc(px, py, R * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (orbitIconType === 'fixed') {
+        ctx.arc(0, 0, R, 0, Math.PI * 2);
+        ctx.stroke();
+        const px = Math.cos(-Math.PI / 4) * R;
+        const py = Math.sin(-Math.PI / 4) * R;
+        ctx.translate(px, py);
+        ctx.rotate(-Math.PI / 4);
+        ctx.fillRect(-R * 0.6, -R * 0.2, R * 1.2, R * 0.4);
+      }
+      ctx.restore();
+
+      const elemIconName = obj.elementAffinity || 'none';
+      const elemIcon = this.#svgIcons[elemIconName];
+      if (elemIcon && elemIcon.complete && elemIcon.naturalWidth > 0) {
+        ctx.save();
+        ctx.translate(startX + 55 * z, curY + 15 * z);
+        const offscreen = document.createElement('canvas');
+        offscreen.width = iconSize;
+        offscreen.height = iconSize;
+        const offCtx = offscreen.getContext('2d');
+        if (offCtx) {
+            offCtx.drawImage(elemIcon, 0, 0, iconSize, iconSize);
+            offCtx.globalCompositeOperation = 'source-in';
+            offCtx.fillStyle = '#ffffff';
+            offCtx.fillRect(0, 0, iconSize, iconSize);
+            ctx.drawImage(offscreen, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+        }
+        ctx.restore();
+      }
+
+      const typeIconName = obj.type || 'custom';
+      const typeIcon = this.#svgIcons[typeIconName];
+      if (typeIcon && typeIcon.complete && typeIcon.naturalWidth > 0) {
+        ctx.save();
+        ctx.translate(startX + 100 * z, curY + 15 * z);
+        const offscreen = document.createElement('canvas');
+        offscreen.width = iconSize;
+        offscreen.height = iconSize;
+        const offCtx = offscreen.getContext('2d');
+        if (offCtx) {
+            offCtx.drawImage(typeIcon, 0, 0, iconSize, iconSize);
+            offCtx.globalCompositeOperation = 'source-in';
+            offCtx.fillStyle = '#ffffff';
+            offCtx.fillRect(0, 0, iconSize, iconSize);
+            ctx.drawImage(offscreen, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+        }
+        ctx.restore();
+      }
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `500 ${28 * z}px 'Elan', 'Outfit', sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(obj.name.toUpperCase(), startX + textOffsetX, curY + 15 * z);
+
+      curY += 60 * z;
+    });
+
+    ctx.restore();
   }
 }
