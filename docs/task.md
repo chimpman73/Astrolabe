@@ -49,6 +49,7 @@ This file tracks the design, development, and integration tasks for the Astrolab
 | **AST-041** | Decorative Google Fonts | Low | `Done` | Imported 15 script/fantasy Google Fonts for Map Notes usage. |
 | **AST-042** | Export & Rendering Bug Fixes | Low | `Done` | Fixed high-res export element scaling, title alignment overlaps, and group expansion state. |
 | **AST-043** | Coding Standards Compliance | High | `Done` | Refactored frontend classes to use `#` for encapsulation and strictly enforce one class per file. |
+| **AST-044** | Legend Object | High | `Done` | Implement dynamic on-canvas map legends for Planets, Orbits, and Elements. |
 
 ---
 
@@ -263,3 +264,11 @@ This file tracks the design, development, and integration tasks for the Astrolab
   * Split `VisualScaleStrategy.ts` into multiple distinct strategy files to enforce One Class Per File.
   * Extracted inline `PRNG` and `UnionFind` helper classes into centralized utility files.
   * Verified 100% compliance with `coding_standards.md` across both frontend and backend (`src/renderer` and `src/main`).
+
+### Phase 12: Advanced Charting Features
+- [x] **AST-044: Legend Object**
+  * Added `legend` object type for map legends.
+  * Implemented customizable scaling, dynamic positioning, and PC/DM visibility states.
+  * Supported 'full' vs 'partial' modes across 3 legend types: Planets, Orbits, Elements.
+  * Excluded legends from planetary/orbit drawing logic and directory lists.
+  * Passed export scale offsets deeply into CloudRenderer to maintain accurate nested asteroid sizing on image export.

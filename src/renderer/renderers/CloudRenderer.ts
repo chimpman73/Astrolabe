@@ -118,6 +118,9 @@ export class CloudRenderer extends BaseRenderer {
         scaledBaseSize = ScaleManager.getBookmarkVisualRadius(baseSizeClass) * (bookmarkWidth ? bookmarkWidth / 300 : 1);
       } else {
         scaledBaseSize = ScaleManager.getNavChartVisualRadius(baseSizeClass, basePhysicalSize, 'miles', context.zoom || 1);
+        if (context.isExport) {
+          scaledBaseSize *= (context.exportScale || 2.5);
+        }
       }
 
       ctx.save();

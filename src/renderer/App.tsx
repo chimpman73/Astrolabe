@@ -72,9 +72,19 @@ const App: React.FC = () => {
     shapeManager.init().then(() => setShapesLoaded(true));
   }, []);
 
-  // Auto-load first file if directory is selected and no sphere is active
+  // Auto-load last file if directory is selected and no sphere is active
   useEffect(() => {
     if (savesList.length > 0 && !activeSphere) {
+      const lastLoaded = localStorage.getItem('astrolabe_last_loaded_file');
+      const normalize = (p: string) => p.replace(/\\/g, '/').toLowerCase();
+      
+      if (lastLoaded) {
+        const match = savesList.find(s => normalize(s.fullPath) === normalize(lastLoaded));
+        if (match) {
+          loadSphere(match.fullPath);
+          return;
+        }
+      }
       loadSphere(savesList[0].fullPath);
     }
   }, [savesList, activeSphere, loadSphere]);

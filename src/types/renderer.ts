@@ -20,6 +20,8 @@ export interface RenderContext {
   bookmarkWidth?: number; // width in Bookmark view
   bookmarkR?: number; // distance to center in bookmark view
   bookmarkCenterY?: number; // y coordinate of center in bookmark view
+  isExport?: boolean;
+  exportScale?: number;
 }
 
 export interface MapStyleContext {

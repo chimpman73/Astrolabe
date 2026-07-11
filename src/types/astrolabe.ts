@@ -1,6 +1,6 @@
 export type CelestialObjectType =
   | 'star' | 'planet' | 'moon' | 'asteroid'
-  | 'station' | 'cloud' | 'custom' | 'living_world' | 'constellation' | 'group' | 'note';
+  | 'station' | 'cloud' | 'custom' | 'living_world' | 'constellation' | 'group' | 'note' | 'legend';
 
 export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular' | 'elliptical' | 'ring' | 'cylinder' | 'ship' | 'rectangular' | 'castle' | 'skull' | 'custom' | 'hollow_world';
 export type ElementAffinity = 'fire' | 'water' | 'earth' | 'air' | 'mixed' | 'none';
@@ -115,6 +115,22 @@ export interface CelestialObject {
     bl: { x: number; y: number };
     br: { x: number; y: number };
   };
+
+  // --- Legend Extensions ---
+  /** For legend types: what the legend displays. */
+  legendType?: 'OrbitType' | 'ElementalAffinity' | 'PlanetType';
+  /** For legend types: whether to show all possible icons or just the ones present in the system. */
+  legendMode?: 'full' | 'partial';
+  /** For legend types: distance from the system center in AU. */
+  legendDistanceAU?: number;
+  /** For legend types: placement angle from the center (0-360 degrees). */
+  legendAngle?: number;
+  /** For legend types: font size in pixels. */
+  legendFontSize?: number;
+  /** For legend types: CSS font-family string. */
+  legendFontFamily?: string;
+  /** For legend types: overall scale multiplier. */
+  legendScale?: number;
 }
 
 export interface CrystalSphere {

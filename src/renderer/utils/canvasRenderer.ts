@@ -20,7 +20,9 @@ export const drawSolidBody = (
   orbitAngle?: number,
   bookmarkWidth?: number,
   bookmarkR?: number,
-  bookmarkCenterY?: number
+  bookmarkCenterY?: number,
+  isExport?: boolean,
+  exportScale?: number
 ) => {
   const renderer = CelestialRendererFactory.getRenderer(obj.type);
   
@@ -38,7 +40,8 @@ export const drawSolidBody = (
 
   renderer.draw({
     ctx, x, y, obj, size, bodyFill, bodyStroke, drawEquatorialDetail, zoom,
-    isBookmarkView, parentX, parentY, orbitRadius, orbitAngle, bookmarkWidth, bookmarkR, bookmarkCenterY
+    isBookmarkView, parentX, parentY, orbitRadius, orbitAngle, bookmarkWidth, bookmarkR, bookmarkCenterY,
+    isExport, exportScale
   });
 
   ctx.restore();

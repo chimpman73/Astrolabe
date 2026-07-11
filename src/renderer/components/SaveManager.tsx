@@ -467,7 +467,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                   <div className="editor-card-body">
                     
                     <div className="flex items-center gap-4 mb-3">
-                      {obj.type !== 'group' && obj.type !== 'note' && (
+                      {obj.type !== 'group' && obj.type !== 'note' && obj.type !== 'legend' && (
                         <div className="flex items-center gap-2 cursor-pointer">
                           <input 
                             type="checkbox"
@@ -537,10 +537,11 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                         <option value="living_world">🌳 Living World</option>
                         <option value="constellation">✨ Constellation</option>
                         <option value="note">📝 Map Note</option>
+                        <option value="legend">🗺️ Legend</option>
                       </select>
                     </div>
 
-                    {obj.type !== 'note' && (
+                    {obj.type !== 'note' && obj.type !== 'legend' && (
                       <>
                         <div className="editor-form-group">
                           <label>Size Class</label>
@@ -600,7 +601,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                       </>
                     )}
 
-                    {obj.type !== 'note' && (
+                    {obj.type !== 'note' && obj.type !== 'legend' && (
                       <>
                         <div className="editor-form-group">
                           <label>Orbiting Parent</label>
@@ -732,7 +733,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                     )}
 
                     {/* World Shape (not shown for cloud-type objects) */}
-                        {obj.type !== 'cloud' && obj.type !== 'living_world' && obj.type !== 'constellation' && obj.type !== 'note' && (
+                        {obj.type !== 'cloud' && obj.type !== 'living_world' && obj.type !== 'constellation' && obj.type !== 'note' && obj.type !== 'legend' && (
                           <div className="editor-form-group">
                             <label>World Shape</label>
                             {obj.type === 'station' ? (
@@ -785,7 +786,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                         )}
 
                         {/* Element Affinity */}
-                        {obj.type !== 'note' && (
+                        {obj.type !== 'note' && obj.type !== 'legend' && (
                           <div className="editor-form-group">
                             <label>
                               Element Affinity
@@ -1190,10 +1191,103 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                             </div>
                           </>
                         )}
+
+                        {/* Legend Config */}
+                        {obj.type === 'legend' && (
+                          <>
+                            <div className="editor-form-group">
+                              <label>Distance from Center (AU)</label>
+                              <input
+                                type="number"
+                                step="0.1"
+                                min="0"
+                                className="editor-input"
+                                value={obj.legendDistanceAU ?? 0}
+                                onChange={e => handleUpdateObject(index, { legendDistanceAU: parseFloat(e.target.value) || 0 })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Angle (Degrees)</label>
+                              <input
+                                type="number"
+                                step="1"
+                                min="0"
+                                max="360"
+                                className="editor-input"
+                                value={obj.legendAngle ?? 0}
+                                onChange={e => handleUpdateObject(index, { legendAngle: parseFloat(e.target.value) || 0 })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Legend Type</label>
+                              <select
+                                className="editor-select"
+                                value={obj.legendType || 'PlanetType'}
+                                onChange={e => handleUpdateObject(index, { legendType: e.target.value as any })}
+                              >
+                                <option value="PlanetType">Planet Type</option>
+                                <option value="OrbitType">Orbit Type</option>
+                                <option value="ElementalAffinity">Elemental Affinity</option>
+                              </select>
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Legend Mode</label>
+                              <select
+                                className="editor-select"
+                                value={obj.legendMode || 'partial'}
+                                onChange={e => handleUpdateObject(index, { legendMode: e.target.value as any })}
+                              >
+                                <option value="full">Full (All Icons)</option>
+                                <option value="partial">Partial (Present in System)</option>
+                              </select>
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Font Family</label>
+                              <select
+                                className="editor-select"
+                                value={obj.legendFontFamily || 'Elan'}
+                                onChange={e => handleUpdateObject(index, { legendFontFamily: e.target.value })}
+                              >
+                                <option value="Elan">Elan</option>
+                                <option value="Mephisto">Mephisto</option>
+                                <option value="Cinzel">Cinzel</option>
+                                <option value="Architects Daughter">Architects Daughter</option>
+                                <option value="Caveat">Caveat</option>
+                                <option value="Kalam">Kalam</option>
+                                <option value="MedievalSharp">MedievalSharp</option>
+                                <option value="Grenze Gotisch">Grenze Gotisch</option>
+                              </select>
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Font Size (px)</label>
+                              <input
+                                type="number"
+                                step="1"
+                                min="8"
+                                max="144"
+                                className="editor-input"
+                                value={obj.legendFontSize ?? 16}
+                                onChange={e => handleUpdateObject(index, { legendFontSize: parseInt(e.target.value, 10) || 16 })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Scale Multiplier</label>
+                              <input
+                                type="number"
+                                step="0.1"
+                                min="0.1"
+                                max="10.0"
+                                className="editor-input"
+                                value={obj.legendScale ?? 1.0}
+                                onChange={e => handleUpdateObject(index, { legendScale: parseFloat(e.target.value) || 1.0 })}
+                              />
+                            </div>
+                          </>
+                        )}
                       </>
                     )}
 
-                    {obj.type !== 'group' && (
+                    {obj.type !== 'group' && obj.type !== 'legend' && (
                       <div className="editor-form-group">
                         <label>{obj.type === 'note' ? 'Note Text' : 'Description'}</label>
                         <textarea 

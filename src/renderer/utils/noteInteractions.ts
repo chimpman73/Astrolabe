@@ -26,14 +26,21 @@ export function getNoteCorners(note: CelestialObject) {
 }
 
 export function getNoteNodes(
-  note: CelestialObject,
+  obj: CelestialObject,
   zoom: number,
   pan: { x: number; y: number }
 ): NoteNodes {
-  const corners = getNoteCorners(note);
-  const dist = note.noteDistanceAU || 0;
-  const angle = note.noteAngle || 0;
-  const rot = note.noteRotation || 0;
+  const isLegend = obj.type === 'legend';
+  const corners = isLegend ? {
+    tl: { x: -20, y: -20 },
+    tr: { x: 20, y: -20 },
+    bl: { x: -20, y: 20 },
+    br: { x: 20, y: 20 },
+  } : getNoteCorners(obj);
+  
+  const dist = isLegend ? (obj.legendDistanceAU || 0) : (obj.noteDistanceAU || 0);
+  const angle = isLegend ? (obj.legendAngle || 0) : (obj.noteAngle || 0);
+  const rot = isLegend ? 0 : (obj.noteRotation || 0);
 
   // Note position in local space
   const rad = (angle * Math.PI) / 180;

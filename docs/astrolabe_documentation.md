@@ -77,8 +77,8 @@ The application saves and loads system states via JSON configuration files store
         },
         "type": {
           "type": "string",
-          "enum": ["star", "planet", "moon", "asteroid", "station", "custom", "cloud", "living_world", "constellation", "group", "note"],
-          "description": "Category of the celestial body. 'group' is a structural type. 'note' is a purely visual map label."
+          "enum": ["star", "planet", "moon", "asteroid", "station", "custom", "cloud", "living_world", "constellation", "group", "note", "legend"],
+          "description": "Category of the celestial body. 'group' is a structural type. 'note' and 'legend' are purely visual map labels."
         },
         "groupName": {
           "type": "string",
@@ -117,7 +117,7 @@ The application saves and loads system states via JSON configuration files store
         },
         "description": {
           "type": "string",
-          "description": "A brief narrative description of the body."
+          "description": "A brief narrative description of the body. (Ignored for legend types)."
         },
         "orbitedObjectName": {
           "type": ["string", "null"],
@@ -272,6 +272,39 @@ The application saves and loads system states via JSON configuration files store
             "bl": { "type": "object", "properties": { "x": { "type": "number" }, "y": { "type": "number" } } },
             "br": { "type": "object", "properties": { "x": { "type": "number" }, "y": { "type": "number" } } }
           }
+        },
+        "legendType": {
+          "type": "string",
+          "enum": ["PlanetType", "OrbitType", "ElementalAffinity"],
+          "description": "The category of legend to draw."
+        },
+        "legendMode": {
+          "type": "string",
+          "enum": ["full", "partial"],
+          "description": "Whether to list all icons (full) or only those currently in the system (partial)."
+        },
+        "legendDistanceAU": {
+          "type": "number",
+          "description": "For legend types: absolute distance from the system center in AU."
+        },
+        "legendAngle": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360,
+          "description": "For legend types: placement angle from the center (0-360 degrees)."
+        },
+        "legendFontSize": {
+          "type": "number",
+          "minimum": 1,
+          "description": "For legend types: font size in pixels. It remains fixed regardless of zoom."
+        },
+        "legendFontFamily": {
+          "type": "string",
+          "description": "For legend types: CSS font-family string."
+        },
+        "legendScale": {
+          "type": "number",
+          "description": "For legend types: overall native scale multiplier."
         }
       }
     }

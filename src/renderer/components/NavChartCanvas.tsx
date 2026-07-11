@@ -277,7 +277,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (selectedObjectIndex !== null) {
       const selectedObject = objects[selectedObjectIndex];
-      if (selectedObject && selectedObject.type === 'note') {
+      if (selectedObject && (selectedObject.type === 'note' || selectedObject.type === 'legend')) {
         const rect = canvasRef.current?.getBoundingClientRect();
         if (rect) {
           const mouseX = e.clientX - rect.left;
@@ -313,8 +313,8 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
         const dWorldX = dx / zoom;
         const dWorldY = dy / zoom;
         
-        const dist = initialNote.noteDistanceAU || 0;
-        const angle = initialNote.noteAngle || 0;
+        const dist = initialNote.type === 'legend' ? (initialNote.legendDistanceAU || 0) : (initialNote.noteDistanceAU || 0);
+        const angle = initialNote.type === 'legend' ? (initialNote.legendAngle || 0) : (initialNote.noteAngle || 0);
         const rad = (angle * Math.PI) / 180;
         
         const initialWorldX = Math.cos(rad) * dist;
@@ -327,11 +327,18 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
         let newAngle = (Math.atan2(newWorldY, newWorldX) * 180) / Math.PI;
         if (newAngle < 0) newAngle += 360;
         
-        updateCelestialObject(selectedObjectIndex, {
-          noteDistanceAU: newDist,
-          noteAngle: newAngle,
-        });
-      } else if (id === 'rotate') {
+        if (initialNote.type === 'legend') {
+          updateCelestialObject(selectedObjectIndex, {
+            legendDistanceAU: newDist,
+            legendAngle: newAngle,
+          });
+        } else {
+          updateCelestialObject(selectedObjectIndex, {
+            noteDistanceAU: newDist,
+            noteAngle: newAngle,
+          });
+        }
+      } else if (id === 'rotate' && initialNote.type === 'note') {
          const centerScreenX = pan.x + (Math.cos((initialNote.noteAngle || 0) * Math.PI / 180) * (initialNote.noteDistanceAU || 0)) * zoom;
          const centerScreenY = pan.y + (Math.sin((initialNote.noteAngle || 0) * Math.PI / 180) * (initialNote.noteDistanceAU || 0)) * zoom;
          
@@ -344,7 +351,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
          if (newRot < 0) newRot += 360;
          
          updateCelestialObject(selectedObjectIndex, { noteRotation: newRot });
-      } else if (id === 'tl' || id === 'tr' || id === 'bl' || id === 'br') {
+      } else if ((id === 'tl' || id === 'tr' || id === 'bl' || id === 'br') && initialNote.type === 'note') {
          const centerScreenX = pan.x + (Math.cos((initialNote.noteAngle || 0) * Math.PI / 180) * (initialNote.noteDistanceAU || 0)) * zoom;
          const centerScreenY = pan.y + (Math.sin((initialNote.noteAngle || 0) * Math.PI / 180) * (initialNote.noteDistanceAU || 0)) * zoom;
          

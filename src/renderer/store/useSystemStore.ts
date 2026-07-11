@@ -133,6 +133,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
             activeSphere: migratedSphere,
             currentSystemDate: migratedSphere.currentSystemDate || 0,
           });
+          localStorage.setItem('astrolabe_last_loaded_file', filePath);
           return true;
         } else {
           get().setToastMessage({ type: 'error', text: res.error || 'Failed to load system' });
@@ -163,6 +164,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
       try {
         const res = await window.astrolabeAPI.saveJsonFile(filePath, dataToSave);
         if (res.success) {
+          localStorage.setItem('astrolabe_last_loaded_file', filePath);
           // Refresh saves directory to show updated state
           await get().loadSavesList();
           return true;

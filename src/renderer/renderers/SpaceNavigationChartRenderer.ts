@@ -4,12 +4,70 @@ import { getNoteCorners } from '../utils/noteInteractions';
 import { drawSolidBody, drawStationaryIndicator, getBodyColors, getElementColor } from '../utils/canvasRenderer';
 import { ScaleManager } from '../utils/ScaleManager';
 
+import fireSvgUrl from '../../../assets/elements/fire.svg';
+import waterSvgUrl from '../../../assets/elements/water.svg';
+import earthSvgUrl from '../../../assets/elements/earth.svg';
+import airSvgUrl from '../../../assets/elements/air.svg';
+import mixedSvgUrl from '../../../assets/elements/mixed.svg';
+import noneSvgUrl from '../../../assets/elements/none.svg';
+
+import starObjSvgUrl from '../../../assets/objects/star.svg';
+import planetObjSvgUrl from '../../../assets/objects/planet.svg';
+import moonObjSvgUrl from '../../../assets/objects/moon.svg';
+import asteroidObjSvgUrl from '../../../assets/objects/asteroid.svg';
+import stationObjSvgUrl from '../../../assets/objects/station.svg';
+import cloudObjSvgUrl from '../../../assets/objects/cloud.svg';
+import livingWorldObjSvgUrl from '../../../assets/objects/living_world.svg';
+import customObjSvgUrl from '../../../assets/objects/custom.svg';
+
 export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
   readonly #colorBg = '#06070a';
   readonly #colorGrid = 'rgba(255, 255, 255, 0.03)';
   readonly #colorStroke = '#ffffff';
   readonly #colorMuted = '#888d9e';
   readonly #colorGold = '#e2b34a';
+
+  #svgIcons: Record<string, HTMLImageElement> = {};
+  #imagesLoaded = false;
+  #loadCount = 0;
+  readonly #totalImages = 14;
+  #forceRedraw?: () => void;
+
+  constructor(forceRedraw?: () => void) {
+    this.#forceRedraw = forceRedraw;
+    const onLoad = () => {
+      this.#loadCount++;
+      if (this.#loadCount >= this.#totalImages) {
+        this.#imagesLoaded = true;
+        this.#forceRedraw?.();
+      }
+    };
+
+    const svgSources: Record<string, string> = {
+      fire: fireSvgUrl,
+      water: waterSvgUrl,
+      earth: earthSvgUrl,
+      air: airSvgUrl,
+      mixed: mixedSvgUrl,
+      none: noneSvgUrl,
+      star: starObjSvgUrl,
+      planet: planetObjSvgUrl,
+      moon: moonObjSvgUrl,
+      asteroid: asteroidObjSvgUrl,
+      station: stationObjSvgUrl,
+      cloud: cloudObjSvgUrl,
+      living_world: livingWorldObjSvgUrl,
+      custom: customObjSvgUrl
+    };
+
+    for (const [key, src] of Object.entries(svgSources)) {
+      const img = new Image();
+      img.src = src;
+      img.onload = onLoad;
+      img.onerror = onLoad; 
+      this.#svgIcons[key] = img;
+    }
+  }
 
   drawBackground({ ctx, width, height }: MapStyleContext): void {
     ctx.fillStyle = this.#colorBg;
@@ -56,7 +114,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
 
   drawOrbits({ ctx, activeZoom, positions, project, isPrimary, activeSphere, isExport }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
     activeVisibleObjects.forEach((obj) => {
-      if (obj.type === 'constellation' || obj.type === 'note') return;
+      if (obj.type === 'constellation' || obj.type === 'note' || obj.type === 'legend') return;
       
       let px = 0;
       let py = 0;
@@ -133,7 +191,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
     const exportScale = isExport ? 2.5 : 1.0;
     
     activeVisibleObjects.forEach((obj) => {
-      if (obj.type === 'note') return;
+      if (obj.type === 'note' || obj.type === 'legend') return;
       const pos = positions[obj.name];
       if (!pos) return;
 
@@ -154,13 +212,13 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
         const cloudFill = getElementColor(obj.elementAffinity || null) || '#808080';
         
         drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, cloudFill, '#505050', false, activeZoom,
-          true, parentProj.x, parentProj.y, orbitR, pos.angle
+          false, parentProj.x, parentProj.y, orbitR, pos.angle, undefined, undefined, undefined, isExport, exportScale
         );
       } else {
         const { bodyFill, bodyStroke } = getBodyColors(obj, false, this.#colorBg, this.#colorStroke, this.#colorGold);
         const orbitR = obj.distanceOrbited * activeZoom;
         drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, bodyFill, bodyStroke, false, activeZoom,
-          true, parentProj.x, parentProj.y, orbitR, pos.angle
+          false, parentProj.x, parentProj.y, orbitR, pos.angle, undefined, undefined, undefined, isExport, exportScale
         );
 
         if (obj.isStationary && obj.type !== 'star' && obj.type !== 'constellation' && obj.type !== 'living_world') {
@@ -387,6 +445,174 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
     ctx.restore();
   }
 
+  #drawLegends({ ctx, activeZoom, project, selectedObjectIndex, objects }: MapStyleContext, visibleObjects: CelestialObject[]): void {
+    if (!this.#imagesLoaded) return;
+    const legends = visibleObjects.filter(o => o.type === 'legend');
+    if (legends.length === 0) return;
+
+    // Filter used attributes for partial legends
+    const usedElements = new Set<string>();
+    const usedTypes = new Set<string>();
+    const usedOrbits = new Set<string>();
+    objects.forEach(o => {
+        if (o.type === 'note' || o.type === 'legend' || o.type === 'moon' || o.type === 'constellation') return;
+        usedElements.add(o.elementAffinity || 'none');
+        usedTypes.add(o.type);
+        if (o.orbitedObjectName === null || o.distanceOrbited === 0) usedOrbits.add('central');
+        else if (o.isStationary) usedOrbits.add('fixed');
+        else if ((o.orbitEccentricity || 0) > 0) usedOrbits.add('elliptical');
+        else usedOrbits.add('standard');
+    });
+
+    ctx.save();
+    legends.forEach(legend => {
+      const dist = legend.legendDistanceAU || 0;
+      const angle = legend.legendAngle || 0;
+      const fontSize = legend.legendFontSize || 16;
+      const fontFamily = legend.legendFontFamily || 'Elan';
+      
+      const rad = (angle * Math.PI) / 180;
+      const proj = project(Math.cos(rad) * dist, Math.sin(rad) * dist);
+      const lScale = legend.legendScale ?? 1.0;
+
+      ctx.save();
+      ctx.translate(proj.x, proj.y);
+      ctx.scale(activeZoom * lScale, activeZoom * lScale);
+
+      ctx.font = `bold ${fontSize}px '${fontFamily}', sans-serif`;
+      let title = 'Legend';
+      if (legend.legendType === 'PlanetType') title = 'Planets';
+      else if (legend.legendType === 'OrbitType') title = 'Orbits';
+      else if (legend.legendType === 'ElementalAffinity') title = 'Elements';
+
+      const titleWidth = ctx.measureText(title).width;
+      
+      const items: { key: string, label: string, type: 'svg' | 'draw' }[] = [];
+      
+      const addSvgItem = (key: string, label: string, condition: boolean) => {
+          if (legend.legendMode === 'full' || condition) items.push({ key, label, type: 'svg' });
+      };
+      const addDrawItem = (key: string, label: string, condition: boolean) => {
+          if (legend.legendMode === 'full' || condition) items.push({ key, label, type: 'draw' });
+      };
+
+      if (legend.legendType === 'ElementalAffinity') {
+          addSvgItem('fire', 'Fire', usedElements.has('fire'));
+          addSvgItem('water', 'Water', usedElements.has('water'));
+          addSvgItem('earth', 'Earth', usedElements.has('earth'));
+          addSvgItem('air', 'Air', usedElements.has('air'));
+          addSvgItem('mixed', 'Mixed', usedElements.has('mixed'));
+          addSvgItem('none', 'No Affinity', usedElements.has('none'));
+      } else if (legend.legendType === 'PlanetType') {
+          addSvgItem('star', 'Star', usedTypes.has('star'));
+          addSvgItem('planet', 'Planet', usedTypes.has('planet'));
+          addSvgItem('moon', 'Moon', usedTypes.has('moon'));
+          addSvgItem('asteroid', 'Asteroid', usedTypes.has('asteroid'));
+          addSvgItem('station', 'Station', usedTypes.has('station'));
+          addSvgItem('cloud', 'Cloud', usedTypes.has('cloud'));
+          addSvgItem('living_world', 'Living World', usedTypes.has('living_world'));
+      } else if (legend.legendType === 'OrbitType') {
+          addDrawItem('central', 'Central', usedOrbits.has('central'));
+          addDrawItem('standard', 'Standard', usedOrbits.has('standard'));
+          addDrawItem('elliptical', 'Elliptical', usedOrbits.has('elliptical'));
+          addDrawItem('fixed', 'Stationary', usedOrbits.has('fixed'));
+      }
+
+      ctx.font = `${fontSize * 0.8}px '${fontFamily}', sans-serif`;
+      let maxItemWidth = 0;
+      items.forEach(item => {
+          const w = ctx.measureText(item.label).width;
+          if (w > maxItemWidth) maxItemWidth = w;
+      });
+
+      const iconSize = fontSize * 1.2;
+      const padding = fontSize;
+      const lineSpacing = fontSize * 1.5;
+      const boxWidth = Math.max(titleWidth, iconSize + fontSize * 0.5 + maxItemWidth) + padding * 2;
+      const boxHeight = padding * 2 + fontSize + (items.length > 0 ? fontSize * 0.5 + items.length * lineSpacing : 0);
+
+      // Draw Border Box (no fill)
+      ctx.strokeStyle = this.#colorStroke;
+      ctx.lineWidth = 1 / activeZoom;
+      ctx.beginPath();
+      ctx.roundRect(-boxWidth/2, -boxHeight/2, boxWidth, boxHeight, 5 / activeZoom);
+      ctx.stroke();
+
+      // Draw Title
+      ctx.fillStyle = this.#colorStroke;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.font = `bold ${fontSize}px '${fontFamily}', sans-serif`;
+      ctx.fillText(title, 0, -boxHeight/2 + padding);
+
+      // Draw Items
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.font = `${fontSize * 0.8}px '${fontFamily}', sans-serif`;
+      
+      const startX = -boxWidth/2 + padding;
+      let startY = -boxHeight/2 + padding + fontSize + fontSize * 0.5 + iconSize/2;
+
+      items.forEach(item => {
+          if (item.type === 'svg') {
+              const img = this.#svgIcons[item.key];
+              if (img && img.complete && img.naturalWidth > 0) {
+                  // White tint for space mode svg icons
+                  ctx.save();
+                  // Simple approach: we don't have a reliable SVG tint without masking, but we can draw them normally.
+                  // For space mode, the colors from the SVGs are usually okay, but ideally we'd want them white.
+                  // Astrolabe's standard icons are white with transparency anyway, so it should be fine.
+                  ctx.drawImage(img, startX, startY - iconSize/2, iconSize, iconSize);
+                  ctx.restore();
+              }
+          } else if (item.type === 'draw') {
+              ctx.save();
+              ctx.translate(startX + iconSize/2, startY);
+              const R = iconSize * 0.4;
+              ctx.strokeStyle = this.#colorStroke;
+              ctx.fillStyle = this.#colorStroke;
+              ctx.lineWidth = 1.5 / activeZoom;
+              
+              ctx.beginPath();
+              if (item.key === 'central') {
+                ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(0, 0, R * 0.5, 0, Math.PI * 2); ctx.fill();
+              } else if (item.key === 'standard') {
+                ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(Math.cos(-Math.PI / 4) * R, Math.sin(-Math.PI / 4) * R, R * 0.6, 0, Math.PI * 2); ctx.fill();
+              } else if (item.key === 'elliptical') {
+                ctx.ellipse(0, 0, R, R * 0.5, 0, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(Math.cos(-Math.PI / 4) * R, Math.sin(-Math.PI / 4) * R * 0.5, R * 0.6, 0, Math.PI * 2); ctx.fill();
+              } else if (item.key === 'fixed') {
+                ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.stroke();
+                ctx.translate(Math.cos(-Math.PI / 4) * R, Math.sin(-Math.PI / 4) * R);
+                ctx.rotate(-Math.PI / 4);
+                ctx.fillRect(-R * 0.6, -R * 0.2, R * 1.2, R * 0.4);
+              }
+              ctx.restore();
+          }
+          
+          ctx.fillText(item.label, startX + iconSize + fontSize * 0.5, startY);
+          startY += lineSpacing;
+      });
+
+      // Draw selection indicator
+      const isSelected = selectedObjectIndex !== null && objects[selectedObjectIndex]?.name === legend.name;
+      if (isSelected) {
+          ctx.fillStyle = this.#colorStroke;
+          ctx.beginPath();
+          const r = 5 / (activeZoom * lScale);
+          ctx.arc(0, 0, r, 0, Math.PI * 2);
+          ctx.fill();
+      }
+
+      ctx.restore();
+    });
+    ctx.restore();
+  }
+
   render(context: MapStyleContext): void {
     this.drawBackground(context);
     this.drawGrid(context);
@@ -408,6 +634,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
     this.drawShell(context, shellRadius, shellProj);
     this.drawBodies(context, context.visibleObjects);
     this.#drawNotes(context, context.visibleObjects);
+    this.#drawLegends(context, context.visibleObjects);
     this.drawScaleBar(context);
     this.drawForeground();
   }
