@@ -38,6 +38,7 @@ export interface MapStyleContext {
   decorations?: ParchmentDecoration[];
   fontsLoaded?: boolean;
   isExport?: boolean;
+  selectedObjectIndex: number | null;
 }
 
 export interface ParchmentDecoration {

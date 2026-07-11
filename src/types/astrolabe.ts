@@ -1,6 +1,6 @@
 export type CelestialObjectType =
   | 'star' | 'planet' | 'moon' | 'asteroid'
-  | 'station' | 'cloud' | 'custom' | 'living_world' | 'constellation' | 'group';
+  | 'station' | 'cloud' | 'custom' | 'living_world' | 'constellation' | 'group' | 'note';
 
 export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular' | 'elliptical' | 'ring' | 'cylinder' | 'ship' | 'rectangular' | 'castle' | 'skull' | 'custom' | 'hollow_world';
 export type ElementAffinity = 'fire' | 'water' | 'earth' | 'air' | 'mixed' | 'none';
@@ -92,6 +92,29 @@ export interface CelestialObject {
   constellationFillAlpha?: number;
   /** For constellation types: whether to flip the rendering horizontally. */
   constellationFlipX?: boolean;
+
+  // --- Note Extensions ---
+  /** For note types: distance from the system center in AU. */
+  noteDistanceAU?: number;
+  /** For note types: placement angle from the center (0-360 degrees). */
+  noteAngle?: number;
+  /** For note types: rotation of the text (in degrees). */
+  noteRotation?: number;
+  /** For note types: font size in pixels (rendered statically regardless of camera zoom). */
+  noteFontSize?: number;
+  /** For note types: CSS font-family string. */
+  noteFontFamily?: string;
+  /** For note types: maximum width in pixels before text wraps to the next line. */
+  noteMaxWidth?: number;
+  /** For note types: maximum height in pixels. If text exceeds this, it is clipped. */
+  noteMaxHeight?: number;
+  /** For note types: custom 4-node polygon offsets. Overrides noteMaxWidth and noteMaxHeight. */
+  noteCorners?: {
+    tl: { x: number; y: number };
+    tr: { x: number; y: number };
+    bl: { x: number; y: number };
+    br: { x: number; y: number };
+  };
 }
 
 export interface CrystalSphere {

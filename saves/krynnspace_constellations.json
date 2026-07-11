@@ -184,7 +184,8 @@
       "affectsShellBoundary": false,
       "sizeClass": "D",
       "physicalSize": 1000,
-      "sizeUnit": "miles"
+      "sizeUnit": "miles",
+      "isHidden": false
     },
     {
       "name": "The Sun",

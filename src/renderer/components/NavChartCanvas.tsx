@@ -5,6 +5,8 @@ import { ScaleManager } from '../utils/ScaleManager';
 import { AutoFitCalculator } from '../utils/AutoFitCalculator';
 import { VellumNavigationChartRenderer } from '../renderers/VellumNavigationChartRenderer';
 import { SpaceNavigationChartRenderer } from '../renderers/SpaceNavigationChartRenderer';
+import { getNoteNodes, hitTestNoteNodes, NoteNodeId, getNoteCorners } from '../utils/noteInteractions';
+import { CelestialObject } from '../../types/astrolabe';
 import { exportNavigationChart } from '../renderers/ExportDirectoryRenderer';
 import { MapStyleContext } from '../../types/renderer';
 
@@ -28,6 +30,8 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     setToastMessage,
     viewMode,
     decorations,
+    selectedObjectIndex,
+    updateCelestialObject,
   } = useSystemStore();
 
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -162,6 +166,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [activeNodeDrag, setActiveNodeDrag] = useState<{ id: NoteNodeId, initialNote: CelestialObject, initialMouse: {x: number, y: number} } | null>(null);
 
   const isGroupHidden = (groupName?: string) => {
     if (!groupName) return false;
@@ -261,7 +266,8 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
       isPrimary,
       project,
       decorations,
-      fontsLoaded
+      fontsLoaded,
+      selectedObjectIndex,
     };
 
     renderer.render(context);
@@ -269,11 +275,105 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   }, [activeSphere, currentSystemDate, zoom, pan, mapTheme, objects, positions, dimensions, fontsLoaded, decorations, forceRenderState]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (selectedObjectIndex !== null) {
+      const selectedObject = objects[selectedObjectIndex];
+      if (selectedObject && selectedObject.type === 'note') {
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (rect) {
+          const mouseX = e.clientX - rect.left;
+          const mouseY = e.clientY - rect.top;
+          
+          const nodes = getNoteNodes(selectedObject, zoom, pan);
+          const hit = hitTestNoteNodes(mouseX, mouseY, nodes);
+          if (hit) {
+            setActiveNodeDrag({ id: hit, initialNote: selectedObject, initialMouse: { x: mouseX, y: mouseY } });
+            return;
+          }
+        }
+      }
+    }
+
     setIsDragging(true);
     setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (activeNodeDrag && selectedObjectIndex !== null) {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      
+      const dx = mouseX - activeNodeDrag.initialMouse.x;
+      const dy = mouseY - activeNodeDrag.initialMouse.y;
+      
+      const { id, initialNote } = activeNodeDrag;
+      
+      if (id === 'center') {
+        const dWorldX = dx / zoom;
+        const dWorldY = dy / zoom;
+        
+        const dist = initialNote.noteDistanceAU || 0;
+        const angle = initialNote.noteAngle || 0;
+        const rad = (angle * Math.PI) / 180;
+        
+        const initialWorldX = Math.cos(rad) * dist;
+        const initialWorldY = Math.sin(rad) * dist;
+        
+        const newWorldX = initialWorldX + dWorldX;
+        const newWorldY = initialWorldY + dWorldY;
+        
+        const newDist = Math.sqrt(newWorldX * newWorldX + newWorldY * newWorldY);
+        let newAngle = (Math.atan2(newWorldY, newWorldX) * 180) / Math.PI;
+        if (newAngle < 0) newAngle += 360;
+        
+        updateCelestialObject(selectedObjectIndex, {
+          noteDistanceAU: newDist,
+          noteAngle: newAngle,
+        });
+      } else if (id === 'rotate') {
+         const centerScreenX = pan.x + (Math.cos((initialNote.noteAngle || 0) * Math.PI / 180) * (initialNote.noteDistanceAU || 0)) * zoom;
+         const centerScreenY = pan.y + (Math.sin((initialNote.noteAngle || 0) * Math.PI / 180) * (initialNote.noteDistanceAU || 0)) * zoom;
+         
+         const mouseAngle = Math.atan2(mouseY - centerScreenY, mouseX - centerScreenX);
+         
+         const halfW = (initialNote.noteMaxWidth || 250) / 2;
+         const halfH = (initialNote.noteMaxHeight || 250) / 2;
+         const corners = getNoteCorners(initialNote);
+         const localAngle = Math.atan2(corners.tr.y - 20, corners.tr.x + 20);
+         
+         let newRot = (mouseAngle - localAngle) * 180 / Math.PI;
+         if (newRot < 0) newRot += 360;
+         
+         updateCelestialObject(selectedObjectIndex, { noteRotation: newRot });
+      } else if (id === 'tl' || id === 'tr' || id === 'bl' || id === 'br') {
+         const centerScreenX = pan.x + (Math.cos((initialNote.noteAngle || 0) * Math.PI / 180) * (initialNote.noteDistanceAU || 0)) * zoom;
+         const centerScreenY = pan.y + (Math.sin((initialNote.noteAngle || 0) * Math.PI / 180) * (initialNote.noteDistanceAU || 0)) * zoom;
+         
+         const screenDx = mouseX - centerScreenX;
+         const screenDy = mouseY - centerScreenY;
+         
+         const rotRad = (initialNote.noteRotation || 0) * Math.PI / 180;
+         const localDx = screenDx * Math.cos(-rotRad) - screenDy * Math.sin(-rotRad);
+         const localDy = screenDx * Math.sin(-rotRad) + screenDy * Math.cos(-rotRad);
+         
+         const corners = getNoteCorners(initialNote);
+         const newCorners = {
+           tl: { ...corners.tl },
+           tr: { ...corners.tr },
+           bl: { ...corners.bl },
+           br: { ...corners.br },
+         };
+         
+         newCorners[id] = { x: Math.round(localDx), y: Math.round(localDy) };
+         
+         updateCelestialObject(selectedObjectIndex, {
+           noteCorners: newCorners,
+         });
+      }
+      return;
+    }
+
     if (!isDragging) return;
     setPan(() => constrainPan({
       x: e.clientX - dragStart.x,
@@ -283,6 +383,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
 
   const handleMouseUpOrLeave = () => {
     setIsDragging(false);
+    setActiveNodeDrag(null);
   };
 
   const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {

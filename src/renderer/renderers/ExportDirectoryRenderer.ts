@@ -88,7 +88,8 @@ export async function exportNavigationChart({
     isPrimary,
     project,
     fontsLoaded: true, // assuming fonts are loaded for export
-    isExport: true
+    isExport: true,
+    selectedObjectIndex: null,
   };
 
   // Render the view

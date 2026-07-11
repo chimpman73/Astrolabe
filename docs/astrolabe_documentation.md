@@ -77,8 +77,8 @@ The application saves and loads system states via JSON configuration files store
         },
         "type": {
           "type": "string",
-          "enum": ["star", "planet", "moon", "asteroid", "station", "custom", "cloud", "living_world", "constellation", "group"],
-          "description": "Category of the celestial body. 'group' is a structural type used for organizing UI and cascading visibility properties."
+          "enum": ["star", "planet", "moon", "asteroid", "station", "custom", "cloud", "living_world", "constellation", "group", "note"],
+          "description": "Category of the celestial body. 'group' is a structural type. 'note' is a purely visual map label."
         },
         "groupName": {
           "type": "string",
@@ -229,6 +229,49 @@ The application saves and loads system states via JSON configuration files store
         "constellationFlipX": {
           "type": "boolean",
           "description": "For constellation types: whether to perfectly mirror the constellation horizontally."
+        },
+        "noteDistanceAU": {
+          "type": "number",
+          "description": "For note types: absolute distance from the system center in AU."
+        },
+        "noteAngle": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360,
+          "description": "For note types: placement angle from the center (0-360 degrees)."
+        },
+        "noteRotation": {
+          "type": "number",
+          "description": "For note types: rotation of the text in degrees."
+        },
+        "noteFontSize": {
+          "type": "number",
+          "minimum": 1,
+          "description": "For note types: font size in pixels. It remains fixed regardless of zoom."
+        },
+        "noteFontFamily": {
+          "type": "string",
+          "description": "For note types: CSS font-family string."
+        },
+        "noteMaxWidth": {
+          "type": "number",
+          "minimum": 50,
+          "description": "For note types: maximum width in pixels before the text automatically wraps to a new line."
+        },
+        "noteMaxHeight": {
+          "type": "number",
+          "minimum": 50,
+          "description": "For note types: maximum height in pixels. If text exceeds this, it is clipped."
+        },
+        "noteCorners": {
+          "type": "object",
+          "description": "For note types: custom 4-node polygon offsets. Overrides noteMaxWidth and noteMaxHeight.",
+          "properties": {
+            "tl": { "type": "object", "properties": { "x": { "type": "number" }, "y": { "type": "number" } } },
+            "tr": { "type": "object", "properties": { "x": { "type": "number" }, "y": { "type": "number" } } },
+            "bl": { "type": "object", "properties": { "x": { "type": "number" }, "y": { "type": "number" } } },
+            "br": { "type": "object", "properties": { "x": { "type": "number" }, "y": { "type": "number" } } }
+          }
         }
       }
     }

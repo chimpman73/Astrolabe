@@ -1,5 +1,6 @@
 import { MapStyleContext, INavigationChartRenderer } from '../../types/renderer';
-import { CelestialObject } from '../../types/astrolabe';
+import { AstrolabeSystem, CelestialObject, PlanetTheme, RingData } from '../../types/astrolabe';
+import { getNoteCorners } from '../utils/noteInteractions';
 import { drawSolidBody, drawStationaryIndicator, getBodyColors, getElementColor } from '../utils/canvasRenderer';
 import { ScaleManager } from '../utils/ScaleManager';
 
@@ -55,7 +56,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
 
   drawOrbits({ ctx, activeZoom, positions, project, isPrimary, activeSphere }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
     activeVisibleObjects.forEach((obj) => {
-      if (obj.type === 'constellation') return;
+      if (obj.type === 'constellation' || obj.type === 'note') return;
       
       let px = 0;
       let py = 0;
@@ -129,6 +130,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
 
   drawBodies({ ctx, activeZoom, positions, project, activeSphere }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
     activeVisibleObjects.forEach((obj) => {
+      if (obj.type === 'note') return;
       const pos = positions[obj.name];
       if (!pos) return;
 
@@ -221,6 +223,141 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
     // No foreground in space mode
   }
 
+  private drawNotes({ ctx, activeZoom, project, selectedObjectIndex, objects }: MapStyleContext, visibleObjects: CelestialObject[]): void {
+    const notes = visibleObjects.filter(o => o.type === 'note');
+    if (notes.length === 0) return;
+
+    ctx.save();
+    notes.forEach(note => {
+      const dist = note.noteDistanceAU || 0;
+      const angle = note.noteAngle || 0;
+      const rot = note.noteRotation || 0;
+      const fontSize = note.noteFontSize || 16;
+      const fontFamily = note.noteFontFamily || 'Elan';
+      
+      const rad = (angle * Math.PI) / 180;
+      const x = Math.cos(rad) * dist;
+      const y = Math.sin(rad) * dist;
+      
+      const proj = project(x, y);
+
+      ctx.save();
+      ctx.translate(proj.x, proj.y);
+      ctx.rotate((rot * Math.PI) / 180);
+
+      // Notes are always drawn at their absolute fixed font size, completely ignoring activeZoom.
+      ctx.font = `${fontSize}px '${fontFamily}', sans-serif`;
+      ctx.fillStyle = '#ffffff'; // White for space mode
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      const corners = getNoteCorners(note);
+      const tl = corners.tl;
+      const tr = corners.tr;
+      const bl = corners.bl;
+      const br = corners.br;
+      
+      const lineHeight = fontSize * 1.2;
+      const text = note.description || 'New Note';
+      const paragraphs = text.split('\n');
+      
+      const lines: { text: string; x: number; y: number }[] = [];
+      
+      const minY = Math.min(tl.y, tr.y);
+      const maxY = Math.max(bl.y, br.y);
+      let currentY = minY + lineHeight / 2;
+      
+      const getBoundsAtY = (y: number) => {
+         const leftX = tl.y === bl.y ? Math.min(tl.x, bl.x) : tl.x + (y - tl.y) * (bl.x - tl.x) / (bl.y - tl.y);
+         const rightX = tr.y === br.y ? Math.max(tr.x, br.x) : tr.x + (y - tr.y) * (br.x - tr.x) / (br.y - tr.y);
+         return { leftX, rightX };
+      };
+
+      paragraphs.forEach(paragraph => {
+        const words = paragraph.split(' ');
+        let currentLine = '';
+        
+        words.forEach(word => {
+          if (currentY > maxY) return;
+          
+          const testLine = currentLine === '' ? word : currentLine + ' ' + word;
+          const metrics = ctx.measureText(testLine);
+          
+          const { leftX, rightX } = getBoundsAtY(currentY);
+          const availableWidth = rightX - leftX;
+          
+          if (metrics.width > availableWidth && currentLine !== '') {
+            const prevBounds = getBoundsAtY(currentY);
+            lines.push({ text: currentLine, x: (prevBounds.leftX + prevBounds.rightX) / 2, y: currentY });
+            currentLine = word;
+            currentY += lineHeight;
+          } else {
+            currentLine = testLine;
+          }
+        });
+        if (currentLine !== '' && currentY <= maxY) {
+          const { leftX, rightX } = getBoundsAtY(currentY);
+          lines.push({ text: currentLine, x: (leftX + rightX) / 2, y: currentY });
+          currentY += lineHeight;
+        }
+      });
+
+      const isSelected = selectedObjectIndex !== null && objects[selectedObjectIndex]?.name === note.name;
+      
+      const drawPolyPath = () => {
+        ctx.beginPath();
+        ctx.moveTo(tl.x, tl.y);
+        ctx.lineTo(tr.x, tr.y);
+        ctx.lineTo(br.x, br.y);
+        ctx.lineTo(bl.x, bl.y);
+        ctx.closePath();
+      };
+
+      if (isSelected) {
+        ctx.save();
+        drawPolyPath();
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      ctx.save();
+      drawPolyPath();
+      ctx.clip();
+
+      lines.forEach((line) => {
+        ctx.fillText(line.text, line.x, line.y);
+      });
+      ctx.restore();
+
+      if (isSelected) {
+         ctx.fillStyle = '#ffffff';
+         ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI * 2); ctx.fill();
+         ctx.beginPath(); ctx.arc(tl.x, tl.y, 5, 0, Math.PI * 2); ctx.fill();
+         ctx.beginPath(); ctx.arc(tr.x, tr.y, 5, 0, Math.PI * 2); ctx.fill();
+         ctx.beginPath(); ctx.arc(bl.x, bl.y, 5, 0, Math.PI * 2); ctx.fill();
+         ctx.beginPath(); ctx.arc(br.x, br.y, 5, 0, Math.PI * 2); ctx.fill();
+         
+         ctx.beginPath(); ctx.arc(tr.x + 20, tr.y - 20, 5, 0, Math.PI * 2); ctx.fill();
+         
+         ctx.save();
+         ctx.beginPath();
+         ctx.moveTo(tr.x, tr.y);
+         ctx.lineTo(tr.x + 20, tr.y - 20);
+         ctx.strokeStyle = '#ffffff';
+         ctx.lineWidth = 1;
+         ctx.setLineDash([2, 2]);
+         ctx.stroke();
+         ctx.restore();
+      }
+
+      ctx.restore();
+    });
+    ctx.restore();
+  }
+
   render(context: MapStyleContext): void {
     this.drawBackground(context);
     this.drawGrid(context);
@@ -241,6 +378,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
 
     this.drawShell(context, shellRadius, shellProj);
     this.drawBodies(context, context.visibleObjects);
+    this.drawNotes(context, context.visibleObjects);
     this.drawScaleBar(context);
     this.drawForeground();
   }

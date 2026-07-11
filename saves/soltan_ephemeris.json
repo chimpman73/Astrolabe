@@ -172,6 +172,23 @@
       "orbitEccentricity": 0.59,
       "orbitRotation": 180,
       "isDMOnly": true
+    },
+    {
+      "name": "Ghule Orbit",
+      "type": "note",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles",
+      "description": "The entire planet of Ghule can leave and enter the Crystal Sphere.  While in the phlogiston, all life on the planet enters into phlogiston hybernation.",
+      "orbitedObjectName": "Soltan",
+      "distanceOrbited": 0,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 365,
+      "affectsShellBoundary": true,
+      "isDMOnly": true,
+      "noteDistanceAU": 110,
+      "noteAngle": 45,
+      "noteRotation": -40
     }
   ],
   "orbitalDrawStrength": 2.9,

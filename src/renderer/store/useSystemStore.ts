@@ -37,6 +37,8 @@ interface SystemState {
   setViewMode: (mode: 'PC' | 'DM') => void;
   generateDecorations: (maxRadius: number) => void;
   clearDecorations: () => void;
+  selectedObjectIndex: number | null;
+  setSelectedObjectIndex: (index: number | null) => void;
 }
 
 export const useSystemStore = create<SystemState>((set, get) => ({
@@ -51,6 +53,9 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   toastMessage: null,
   viewMode: 'PC',
   decorations: [],
+  selectedObjectIndex: null,
+
+  setSelectedObjectIndex: (index) => set({ selectedObjectIndex: index }),
 
   setViewMode: (mode) => set({ viewMode: mode }),
 

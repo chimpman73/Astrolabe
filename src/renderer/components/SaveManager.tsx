@@ -19,6 +19,9 @@ import {
   Satellite,
   Hexagon,
   Folder,
+  ArrowUpFromLine,
+  StickyNote,
+  HelpCircle,
 } from 'lucide-react';
 import { CelestialObject, CelestialObjectType, WorldShape, ElementAffinity, SizeClass } from '../../types/astrolabe';
 import { ScaleManager } from '../utils/ScaleManager';
@@ -54,9 +57,10 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
     addCelestialObject,
     removeCelestialObject,
     setToastMessage,
+    selectedObjectIndex,
+    setSelectedObjectIndex,
   } = useSystemStore();
 
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -132,9 +136,10 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
       distanceOrbited: 1.0,
       initialAngle: 0,
       orbitalPeriodDays: 365,
+      affectsShellBoundary: true,
     };
     addCelestialObject(newObj);
-    setExpandedIndex(activeSphere.objects.length);
+    setSelectedObjectIndex(activeSphere.objects.length);
     setToastMessage({ type: 'success', text: `Added new celestial body "${newObj.name}"` });
   };
 
@@ -147,9 +152,10 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
       distanceOrbited: 0,
       initialAngle: 0,
       orbitalPeriodDays: 0,
+      affectsShellBoundary: false,
     };
     addCelestialObject(newObj);
-    setExpandedIndex(activeSphere.objects.length);
+    setSelectedObjectIndex(activeSphere.objects.length);
     setToastMessage({ type: 'success', text: `Added new group "${newObj.name}"` });
   };
 
@@ -164,7 +170,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
     });
 
     removeCelestialObject(index);
-    setExpandedIndex(null);
+    setSelectedObjectIndex(null);
     setToastMessage({ type: 'success', text: `Deleted "${name}"` });
   };
 
@@ -185,10 +191,9 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
         return <Satellite className="w-3.5 h-3.5 text-slate-400 dark:text-slate-300" />;
       case 'asteroid':
         return <Hexagon className="w-3.5 h-3.5 text-orange-400 dark:text-orange-300" />;
-      case 'group':
-        return <Folder className="w-3.5 h-3.5 text-[var(--color-accent-gold)]" />;
-      default:
-        return <Globe className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />;
+      case 'group': return <Folder className="w-4 h-4 text-[#8b7355]" />;
+      case 'note': return <StickyNote className="w-4 h-4 text-[#e2b34a]" />;
+      default: return <HelpCircle className="w-4 h-4 text-gray-500" />;
     }
   };
 
@@ -371,7 +376,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
 
             return renderOrder.map(({ obj, index, isChild, parentExpanded }) => {
               if (isChild && !parentExpanded) return null;
-              const isExpanded = obj.type === 'group' ? (expandedGroups[obj.name] !== false) : (expandedIndex === index);
+              const isExpanded = obj.type === 'group' ? (expandedGroups[obj.name] !== false) : (selectedObjectIndex === index);
               
               return (
                 <div 
@@ -427,13 +432,13 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                     if (obj.type === 'group') {
                       setExpandedGroups(prev => ({ ...prev, [obj.name]: prev[obj.name] === false ? true : false }));
                     } else {
-                      setExpandedIndex(isExpanded ? null : index);
+                      setSelectedObjectIndex(isExpanded ? null : index);
                     }
                   }}
                   className="editor-card-header"
                   draggable
                   onDragStart={(e) => {
-                    if (obj.type !== 'group') setExpandedIndex(null);
+                    if (obj.type !== 'group') setSelectedObjectIndex(null);
                     setDraggedIndex(index);
                     e.dataTransfer.effectAllowed = 'move';
                   }}
@@ -476,7 +481,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                   <div className="editor-card-body">
                     
                     <div className="flex items-center gap-4 mb-3">
-                      {obj.type !== 'group' && (
+                      {obj.type !== 'group' && obj.type !== 'note' && (
                         <div className="flex items-center gap-2 cursor-pointer">
                           <input 
                             type="checkbox"
@@ -545,66 +550,72 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                         <option value="cloud">☁️ Cloud</option>
                         <option value="living_world">🌳 Living World</option>
                         <option value="constellation">✨ Constellation</option>
+                        <option value="note">📝 Map Note</option>
                       </select>
                     </div>
 
-                    <div className="editor-form-group">
-                      <label>Size Class</label>
-                      <select
-                        className="editor-select"
-                        value={obj.sizeClass || 'D'}
-                        onChange={e => {
-                          const newClass = e.target.value as SizeClass;
-                          const newUnit = newClass === 'J' ? 'AU' : 'miles';
-                          handleUpdateObject(index, { sizeClass: newClass, sizeUnit: newUnit });
-                        }}
-                      >
-                        <option value="A">Size A (&lt; 10 mi)</option>
-                        <option value="B">Size B (10 - 100 mi)</option>
-                        <option value="C">Size C (100 - 1k mi)</option>
-                        <option value="D">Size D (1k - 4k mi)</option>
-                        <option value="E">Size E (4k - 10k mi)</option>
-                        <option value="F">Size F (10k - 40k mi)</option>
-                        <option value="G">Size G (40k - 100k mi)</option>
-                        <option value="H">Size H (100k - 1M mi)</option>
-                        <option value="I">Size I (1M - 10M mi)</option>
-                        <option value="J">Size J (&ge; 10M mi / AU)</option>
-                      </select>
-                    </div>
+                    {obj.type !== 'note' && (
+                      <>
+                        <div className="editor-form-group">
+                          <label>Size Class</label>
+                          <select
+                            className="editor-select"
+                            value={obj.sizeClass || 'D'}
+                            onChange={e => {
+                              const newClass = e.target.value as SizeClass;
+                              const newUnit = newClass === 'J' ? 'AU' : 'miles';
+                              handleUpdateObject(index, { sizeClass: newClass, sizeUnit: newUnit });
+                            }}
+                          >
+                            <option value="A">Size A (&lt; 10 mi)</option>
+                            <option value="B">Size B (10 - 100 mi)</option>
+                            <option value="C">Size C (100 - 1k mi)</option>
+                            <option value="D">Size D (1k - 4k mi)</option>
+                            <option value="E">Size E (4k - 10k mi)</option>
+                            <option value="F">Size F (10k - 40k mi)</option>
+                            <option value="G">Size G (40k - 100k mi)</option>
+                            <option value="H">Size H (100k - 1M mi)</option>
+                            <option value="I">Size I (1M - 10M mi)</option>
+                            <option value="J">Size J (&ge; 10M mi / AU)</option>
+                          </select>
+                        </div>
 
-                    <div className="editor-form-group">
-                      <label>Physical Size ({obj.sizeUnit || 'miles'})</label>
-                      <input 
-                        type="number" 
-                        step="any"
-                        className={`editor-input ${!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') ? 'border-[var(--color-accent-red)] text-[var(--color-accent-red)]' : ''}`}
-                        value={obj.physicalSize ?? 1000}
-                        onChange={e => handleUpdateObject(index, { physicalSize: parseFloat(e.target.value) || 0 })}
-                        title={!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') ? 'Physical size is out of bounds for the selected Size Class.' : ''}
-                      />
-                    </div>
-                    {!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') && (
-                      <div className="text-[var(--color-accent-red)] text-[10px] mt-1 mb-2 px-1 font-bold">
-                        Warning: Size is out of bounds for Class {obj.sizeClass || 'D'}
-                      </div>
+                        <div className="editor-form-group">
+                          <label>Physical Size ({obj.sizeUnit || 'miles'})</label>
+                          <input 
+                            type="number" 
+                            step="any"
+                            className={`editor-input ${!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') ? 'border-[var(--color-accent-red)] text-[var(--color-accent-red)]' : ''}`}
+                            value={obj.physicalSize ?? 1000}
+                            onChange={e => handleUpdateObject(index, { physicalSize: parseFloat(e.target.value) || 0 })}
+                            title={!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') ? 'Physical size is out of bounds for the selected Size Class.' : ''}
+                          />
+                        </div>
+                        {!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') && (
+                          <div className="text-[var(--color-accent-red)] text-[10px] mt-1 mb-2 px-1 font-bold">
+                            Warning: Size is out of bounds for Class {obj.sizeClass || 'D'}
+                          </div>
+                        )}
+
+                        {(obj.type === 'cloud' || obj.type === 'constellation') && (
+                          <div className="editor-form-group">
+                            <label>Arc Width (Degrees)</label>
+                            <input
+                              type="number"
+                              step="1"
+                              min="1"
+                              max="359"
+                              className="editor-input"
+                              value={obj.arcDegrees ?? 30}
+                              onChange={e => handleUpdateObject(index, { arcDegrees: parseFloat(e.target.value) || 30 })}
+                            />
+                          </div>
+                        )}
+                      </>
                     )}
 
-                    {(obj.type === 'cloud' || obj.type === 'constellation') && (
-                      <div className="editor-form-group">
-                        <label>Arc Width (Degrees)</label>
-                        <input
-                          type="number"
-                          step="1"
-                          min="1"
-                          max="359"
-                          className="editor-input"
-                          value={obj.arcDegrees ?? 30}
-                          onChange={e => handleUpdateObject(index, { arcDegrees: parseFloat(e.target.value) || 30 })}
-                        />
-                      </div>
-                    )}
-
-
+                    {obj.type !== 'note' && (
+                      <>
                         <div className="editor-form-group">
                           <label>Orbiting Parent</label>
                           <select 
@@ -731,9 +742,11 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                             )}
                           </div>
                         </div>
+                      </>
+                    )}
 
-                        {/* World Shape (not shown for cloud-type objects) */}
-                        {obj.type !== 'cloud' && obj.type !== 'living_world' && obj.type !== 'constellation' && (
+                    {/* World Shape (not shown for cloud-type objects) */}
+                        {obj.type !== 'cloud' && obj.type !== 'living_world' && obj.type !== 'constellation' && obj.type !== 'note' && (
                           <div className="editor-form-group">
                             <label>World Shape</label>
                             {obj.type === 'station' ? (
@@ -786,41 +799,43 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                         )}
 
                         {/* Element Affinity */}
-                        <div className="editor-form-group">
-                          <label>
-                            Element Affinity
-                            {obj.elementAffinity && (
-                              <span
-                                style={{
-                                  display: 'inline-block',
-                                  marginLeft: '8px',
-                                  width: '16px',
-                                  height: '16px',
-                                  backgroundColor: getElementColor(obj.elementAffinity) || '#fff',
-                                  WebkitMaskImage: `url(${elementSvgUrls[obj.elementAffinity] || ''})`,
-                                  WebkitMaskSize: 'contain',
-                                  WebkitMaskRepeat: 'no-repeat',
-                                  WebkitMaskPosition: 'center',
-                                  verticalAlign: 'middle',
-                                }}
-                                title={`${obj.elementAffinity} icon`}
-                              />
-                            )}
-                          </label>
-                          <select
-                            className="editor-select"
-                            value={obj.elementAffinity ?? ''}
-                            onChange={e => handleUpdateObject(index, { elementAffinity: (e.target.value || null) as ElementAffinity | null })}
-                          >
-                            <option value="">None</option>
-                            <option value="fire">🔥 Fire</option>
-                            <option value="water">💧 Water</option>
-                            <option value="earth">🪨 Earth</option>
-                            <option value="air">💨 Air</option>
-                            <option value="mixed">🌿 Mixed</option>
-                            <option value="none">⋄ No Affinity</option>
-                          </select>
-                        </div>
+                        {obj.type !== 'note' && (
+                          <div className="editor-form-group">
+                            <label>
+                              Element Affinity
+                              {obj.elementAffinity && (
+                                <span
+                                  style={{
+                                    display: 'inline-block',
+                                    marginLeft: '8px',
+                                    width: '16px',
+                                    height: '16px',
+                                    backgroundColor: getElementColor(obj.elementAffinity) || '#fff',
+                                    WebkitMaskImage: `url(${elementSvgUrls[obj.elementAffinity] || ''})`,
+                                    WebkitMaskSize: 'contain',
+                                    WebkitMaskRepeat: 'no-repeat',
+                                    WebkitMaskPosition: 'center',
+                                    verticalAlign: 'middle',
+                                  }}
+                                  title={`${obj.elementAffinity} icon`}
+                                />
+                              )}
+                            </label>
+                            <select
+                              className="editor-select"
+                              value={obj.elementAffinity ?? ''}
+                              onChange={e => handleUpdateObject(index, { elementAffinity: (e.target.value || null) as ElementAffinity | null })}
+                            >
+                              <option value="">None</option>
+                              <option value="fire">🔥 Fire</option>
+                              <option value="water">💧 Water</option>
+                              <option value="earth">🪨 Earth</option>
+                              <option value="air">💨 Air</option>
+                              <option value="mixed">🌿 Mixed</option>
+                              <option value="none">⋄ No Affinity</option>
+                            </select>
+                          </div>
+                        )}
 
                         {/* Star only properties */}
                         {(obj.type === 'star') && (
@@ -1085,12 +1100,104 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                             </div>
                           </>
                         )}
+
+                        {/* Note Config */}
+                        {obj.type === 'note' && (
+                          <>
+                            <div className="editor-form-group">
+                              <label>Distance from Center (AU)</label>
+                              <input
+                                type="number"
+                                step="0.1"
+                                min="0"
+                                className="editor-input"
+                                value={obj.noteDistanceAU ?? 0}
+                                onChange={e => handleUpdateObject(index, { noteDistanceAU: parseFloat(e.target.value) || 0 })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Angle (Degrees)</label>
+                              <input
+                                type="number"
+                                step="1"
+                                min="0"
+                                max="360"
+                                className="editor-input"
+                                value={obj.noteAngle ?? 0}
+                                onChange={e => handleUpdateObject(index, { noteAngle: parseFloat(e.target.value) || 0 })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Rotation (Degrees)</label>
+                              <input
+                                type="number"
+                                step="1"
+                                min="-360"
+                                max="360"
+                                className="editor-input"
+                                value={obj.noteRotation ?? 0}
+                                onChange={e => handleUpdateObject(index, { noteRotation: parseFloat(e.target.value) || 0 })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Font Family</label>
+                              <select
+                                className="editor-select"
+                                value={obj.noteFontFamily || 'Elan'}
+                                onChange={e => handleUpdateObject(index, { noteFontFamily: e.target.value })}
+                              >
+                                <option value="Elan">Elan</option>
+                                <option value="Mephisto">Mephisto</option>
+                                <option value="Cinzel">Cinzel</option>
+                                <option value="Arial">Arial</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Courier New">Courier New</option>
+                              </select>
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Font Size (px)</label>
+                              <input
+                                type="number"
+                                step="1"
+                                min="8"
+                                max="144"
+                                className="editor-input"
+                                value={obj.noteFontSize ?? 16}
+                                onChange={e => handleUpdateObject(index, { noteFontSize: parseInt(e.target.value, 10) || 16 })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Max Width (px)</label>
+                              <input
+                                type="number"
+                                step="10"
+                                min="50"
+                                max="2000"
+                                className="editor-input"
+                                value={obj.noteMaxWidth ?? 250}
+                                onChange={e => handleUpdateObject(index, { noteMaxWidth: parseInt(e.target.value, 10) || 250 })}
+                              />
+                            </div>
+                            <div className="editor-form-group">
+                              <label>Max Height (px)</label>
+                              <input
+                                type="number"
+                                step="10"
+                                min="50"
+                                max="2000"
+                                className="editor-input"
+                                value={obj.noteMaxHeight ?? 250}
+                                onChange={e => handleUpdateObject(index, { noteMaxHeight: parseInt(e.target.value, 10) || 250 })}
+                              />
+                            </div>
+                          </>
+                        )}
                       </>
                     )}
 
                     {obj.type !== 'group' && (
                       <div className="editor-form-group">
-                        <label>Description</label>
+                        <label>{obj.type === 'note' ? 'Note Text' : 'Description'}</label>
                         <textarea 
                           className="editor-textarea"
                           value={obj.description || ''}

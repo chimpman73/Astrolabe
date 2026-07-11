@@ -39,6 +39,12 @@ This file tracks the design, development, and integration tasks for the Astrolab
 | **AST-031** | Disc Shape 3D Lip | Low | `Done` | Render disc shapes with a 3D lip to visually distinguish them from elliptical shapes. |
 | **AST-032** | Dynamic Vellum Desk Layout | Medium | `Done` | Implement contiguous scroll background, alpha-composited burn holes showing wood desk beneath, and absolute toolbar overlay layout. |
 | **AST-033** | Refactor Living World Scaling | Medium | `Planned` | Remove `branchExtent`, use `sizeClass` for branch length, and remove central planet sphere. |
+| **AST-034** | Vellum Directory Symbology | Low | `Done` | Add SVG icons to vellum directory to replace text prefixes. |
+| **AST-035** | System Editor Enhancements | Medium | `Done` | Expandable Accordion cards, `planetBaseSizeOffset` and `orbitalDrawStrength`. |
+| **AST-036** | System Editor Object Groups | High | `Done` | Structural grouping and cascading visiblity (isHidden, isDMOnly). |
+| **AST-037** | Directory Filtering Fixes | Low | `Done` | Exclude background constellations from the directory. |
+| **AST-038** | Map Notes | High | `Done` | Basic visual text labels with wrapping, rotation, fonts. |
+| **AST-039** | Map Note Interactive Polygons | High | `Done` | Interactive map-canvas dragging for note position, rotation, and custom 4-node clipping polygon boxes. |
 
 ---
 
@@ -216,3 +222,17 @@ This file tracks the design, development, and integration tasks for the Astrolab
   
 - [x] **AST-037: Directory Filtering Fixes**
   * Filtered out `constellation` object types from the Vellum Directory left-hand list, as they belong strictly in the background space.
+
+- [x] **AST-038: Map Notes**
+  * Added `note` celestial object type for purely visual text labels.
+  * Added configuration UI for absolute positioning (AU & Angle), text rotation, font styling, and bounding box limits (`noteMaxWidth`).
+  * Implemented a custom word-wrapping rendering pass supporting both explicit line breaks (`\n`) and automatic max-width boundaries.
+  * Explicitly excluded from directory lists and auto-fit zoom calculations.
+
+- [x] **AST-039: Map Note Interactive Polygons**
+  * Added `noteCorners` to schema for custom 4-node polygons (trapezoids, parallelograms, irregular quadrilaterals).
+  * Promoted `expandedIndex` to `useSystemStore` as `selectedObjectIndex` to bind React UI layer to the Canvas rendering engine.
+  * Added bounding box outlines and 6 interactive nodes to selected Map Notes on the Canvas.
+  * Implemented mathematical pointer drag handlers on the Canvas to translate, rotate, and skew the note independently.
+  * Rewrote canvas text-rendering engine to dynamically calculate available horizontal width line-by-line using linear interpolation between left/right boundaries.
+  * Added `ctx.clip()` paths to strict crop overflowing text inside the custom polygon.
