@@ -12,8 +12,8 @@ export interface NoteNodes {
 }
 
 export function getNoteCorners(note: CelestialObject) {
-  const maxWidth = note.noteMaxWidth || 250;
-  const maxHeight = note.noteMaxHeight || 250;
+  const maxWidth = note.noteMaxWidth || 120;
+  const maxHeight = note.noteMaxHeight || 60;
   const halfW = maxWidth / 2;
   const halfH = maxHeight / 2;
 
@@ -50,7 +50,7 @@ export function getNoteNodes(
   const rotatePoint = (offsetX: number, offsetY: number) => {
     const rx = offsetX * Math.cos(rotRad) - offsetY * Math.sin(rotRad);
     const ry = offsetX * Math.sin(rotRad) + offsetY * Math.cos(rotRad);
-    return { x: cx + rx, y: cy + ry };
+    return { x: cx + rx * zoom, y: cy + ry * zoom };
   };
 
   return {

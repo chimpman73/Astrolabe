@@ -44,7 +44,7 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
   };
 
   const isValidBookmarkObject = (obj: any) => 
-    obj.distanceOrbited >= 0 && isPrimary(obj) && obj.type !== 'constellation' && obj.type !== 'group';
+    obj.distanceOrbited >= 0 && isPrimary(obj) && obj.type !== 'constellation' && obj.type !== 'group' && obj.type !== 'note';
 
   // Filter objects to only those that orbit the central point (0,0) or orbit a body at (0,0)
   const planetaryObjects = activeSphere

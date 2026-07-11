@@ -354,8 +354,8 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
          const screenDy = mouseY - centerScreenY;
          
          const rotRad = (initialNote.noteRotation || 0) * Math.PI / 180;
-         const localDx = screenDx * Math.cos(-rotRad) - screenDy * Math.sin(-rotRad);
-         const localDy = screenDx * Math.sin(-rotRad) + screenDy * Math.cos(-rotRad);
+         const localDx = (screenDx * Math.cos(-rotRad) - screenDy * Math.sin(-rotRad)) / zoom;
+         const localDy = (screenDx * Math.sin(-rotRad) + screenDy * Math.cos(-rotRad)) / zoom;
          
          const corners = getNoteCorners(initialNote);
          const newCorners = {
@@ -382,6 +382,47 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   };
 
   const handleMouseUpOrLeave = () => {
+    if (activeNodeDrag && selectedObjectIndex !== null) {
+      if (['tl', 'tr', 'bl', 'br'].includes(activeNodeDrag.id)) {
+        const note = activeSphere?.objects[selectedObjectIndex];
+        if (note && note.type === 'note') {
+          const corners = getNoteCorners(note);
+          const cx = (corners.tl.x + corners.tr.x + corners.bl.x + corners.br.x) / 4;
+          const cy = (corners.tl.y + corners.tr.y + corners.bl.y + corners.br.y) / 4;
+          
+          if (Math.abs(cx) > 0.1 || Math.abs(cy) > 0.1) {
+            const rotRad = (note.noteRotation || 0) * Math.PI / 180;
+            const globalDx = cx * Math.cos(rotRad) - cy * Math.sin(rotRad);
+            const globalDy = cx * Math.sin(rotRad) + cy * Math.cos(rotRad);
+            
+            const currentRad = (note.noteAngle || 0) * Math.PI / 180;
+            const currentX = (note.noteDistanceAU || 0) * Math.cos(currentRad);
+            const currentY = (note.noteDistanceAU || 0) * Math.sin(currentRad);
+            
+            const newX = currentX + globalDx;
+            const newY = currentY + globalDy;
+            
+            const newDist = Math.sqrt(newX * newX + newY * newY);
+            let newAngle = Math.atan2(newY, newX) * 180 / Math.PI;
+            if (newAngle < 0) newAngle += 360;
+            
+            const newCorners = {
+              tl: { x: corners.tl.x - cx, y: corners.tl.y - cy },
+              tr: { x: corners.tr.x - cx, y: corners.tr.y - cy },
+              bl: { x: corners.bl.x - cx, y: corners.bl.y - cy },
+              br: { x: corners.br.x - cx, y: corners.br.y - cy }
+            };
+            
+            updateCelestialObject(selectedObjectIndex, {
+              noteDistanceAU: newDist,
+              noteAngle: newAngle,
+              noteCorners: newCorners
+            });
+          }
+        }
+      }
+    }
+    
     setIsDragging(false);
     setActiveNodeDrag(null);
   };

@@ -27,6 +27,7 @@ import { CelestialObject, CelestialObjectType, WorldShape, ElementAffinity, Size
 import { ScaleManager } from '../utils/ScaleManager';
 import { shapeManager } from '../utils/ShapeManager';
 import { getElementColor } from '../utils/canvasRenderer';
+import { ObjectIcon } from './ObjectIcon';
 
 import fireSvgUrl from '../../../assets/elements/fire.svg';
 import waterSvgUrl from '../../../assets/elements/water.svg';
@@ -176,25 +177,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
 
   // Helper to render type icons
   const renderTypeIcon = (type: string) => {
-    switch (type) {
-      case 'star':
-        return <Sun className="w-3.5 h-3.5 text-yellow-600 dark:text-yellow-400" />;
-      case 'moon':
-        return <Moon className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />;
-      case 'cloud':
-        return <Cloud className="w-3.5 h-3.5 text-blue-400" />;
-      case 'living_world':
-        return <TreeDeciduous className="w-3.5 h-3.5 text-green-600 dark:text-green-500" />;
-      case 'constellation':
-        return <Sparkles className="w-3.5 h-3.5 text-purple-400" />;
-      case 'station':
-        return <Satellite className="w-3.5 h-3.5 text-slate-400 dark:text-slate-300" />;
-      case 'asteroid':
-        return <Hexagon className="w-3.5 h-3.5 text-orange-400 dark:text-orange-300" />;
-      case 'group': return <Folder className="w-4 h-4 text-[#8b7355]" />;
-      case 'note': return <StickyNote className="w-4 h-4 text-[#e2b34a]" />;
-      default: return <HelpCircle className="w-4 h-4 text-gray-500" />;
-    }
+    return <ObjectIcon type={type} />;
   };
 
   return (
@@ -333,6 +316,20 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                       updateActiveSphereMeta({ navChartPlanetSizeOffset: isNaN(val) ? 0 : val });
                     }}
                   />
+                </div>
+              </div>
+              <div className="editor-form-group">
+                <label>Title Strike Outline</label>
+                <div className="flex items-center gap-2 mt-1">
+                  <input
+                    type="checkbox"
+                    checked={activeSphere.navTitleStrike ?? false}
+                    onChange={e => updateActiveSphereMeta({ navTitleStrike: e.target.checked })}
+                    className="w-4 h-4 text-amber-900 bg-amber-50 border-amber-900 rounded focus:ring-amber-900 focus:ring-2"
+                  />
+                  <span className="text-xs text-[var(--color-text-muted)]">
+                    Add outline to planet names for better legibility on the map.
+                  </span>
                 </div>
               </div>
             </div>
@@ -1149,9 +1146,21 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 <option value="Elan">Elan</option>
                                 <option value="Mephisto">Mephisto</option>
                                 <option value="Cinzel">Cinzel</option>
-                                <option value="Arial">Arial</option>
-                                <option value="Times New Roman">Times New Roman</option>
-                                <option value="Courier New">Courier New</option>
+                                <option value="Architects Daughter">Architects Daughter</option>
+                                <option value="Caveat">Caveat</option>
+                                <option value="Kalam">Kalam</option>
+                                <option value="Homemade Apple">Homemade Apple</option>
+                                <option value="Reenie Beanie">Reenie Beanie</option>
+                                <option value="Shadows Into Light">Shadows Into Light</option>
+                                <option value="Sacramento">Sacramento</option>
+                                <option value="Marck Script">Marck Script</option>
+                                <option value="Mr Dafoe">Mr Dafoe</option>
+                                <option value="Herr Von Muellerhoff">Herr Von Muellerhoff</option>
+                                <option value="IM Fell English">IM Fell English</option>
+                                <option value="UnifrakturMaguntia">UnifrakturMaguntia</option>
+                                <option value="MedievalSharp">MedievalSharp</option>
+                                <option value="Pirata One">Pirata One</option>
+                                <option value="Grenze Gotisch">Grenze Gotisch</option>
                               </select>
                             </div>
                             <div className="editor-form-group">
@@ -1174,8 +1183,8 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 min="50"
                                 max="2000"
                                 className="editor-input"
-                                value={obj.noteMaxWidth ?? 250}
-                                onChange={e => handleUpdateObject(index, { noteMaxWidth: parseInt(e.target.value, 10) || 250 })}
+                                value={obj.noteMaxWidth ?? 120}
+                                onChange={e => handleUpdateObject(index, { noteMaxWidth: parseInt(e.target.value, 10) || 120 })}
                               />
                             </div>
                             <div className="editor-form-group">
@@ -1186,8 +1195,8 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 min="50"
                                 max="2000"
                                 className="editor-input"
-                                value={obj.noteMaxHeight ?? 250}
-                                onChange={e => handleUpdateObject(index, { noteMaxHeight: parseInt(e.target.value, 10) || 250 })}
+                                value={obj.noteMaxHeight ?? 60}
+                                onChange={e => handleUpdateObject(index, { noteMaxHeight: parseInt(e.target.value, 10) || 60 })}
                               />
                             </div>
                           </>

@@ -4,6 +4,202 @@
   "currentSystemDate": 0,
   "objects": [
     {
+      "name": "Signature",
+      "type": "note",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles",
+      "description": "Pango Sirage Astral Cartographer of Singe-Saari",
+      "orbitedObjectName": null,
+      "distanceOrbited": 1,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 365,
+      "affectsShellBoundary": true,
+      "noteFontFamily": "Sacramento",
+      "noteDistanceAU": 178.26611193100567,
+      "noteAngle": 146.28746321237847,
+      "noteCorners": {
+        "tl": {
+          "x": -53.03157150419429,
+          "y": -12.048166329739615
+        },
+        "tr": {
+          "x": 51.86914739338681,
+          "y": -12.256681184051558
+        },
+        "bl": {
+          "x": -53.17913271905854,
+          "y": 12.10634443280287
+        },
+        "br": {
+          "x": 54.34155682986602,
+          "y": 12.198503080988303
+        }
+      },
+      "groupName": "All Notes",
+      "noteFontSize": 10
+    },
+    {
+      "name": "Asteroid Settlements",
+      "type": "note",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles",
+      "description": "Felis Minor and Canis Major orbit on opposite sides of the Fringe.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 1,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 365,
+      "affectsShellBoundary": true,
+      "groupName": "All Notes",
+      "noteFontFamily": "Caveat",
+      "noteFontSize": 6,
+      "noteDistanceAU": 63.23117677806387,
+      "noteAngle": 237.75421137637392,
+      "noteCorners": {
+        "tl": {
+          "x": -36.1631383895874,
+          "y": -7.242677688598633
+        },
+        "tr": {
+          "x": 36.401543617248535,
+          "y": -6.653535842895508
+        },
+        "bl": {
+          "x": -35.59361934661865,
+          "y": 7.027463912963867
+        },
+        "br": {
+          "x": 35.35521411895752,
+          "y": 6.868749618530273
+        }
+      },
+      "noteRotation": 329.5215000722926,
+      "isDMOnly": true
+    },
+    {
+      "name": "Fringe",
+      "type": "note",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles",
+      "description": "There are many small worldlets and settlements in the fringe.  ",
+      "orbitedObjectName": null,
+      "distanceOrbited": 1,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 365,
+      "affectsShellBoundary": true,
+      "noteFontSize": 6,
+      "noteFontFamily": "Caveat",
+      "noteCorners": {
+        "tl": {
+          "x": -42.0546875,
+          "y": -7.9140625
+        },
+        "tr": {
+          "x": 45.8203125,
+          "y": -8.2890625
+        },
+        "bl": {
+          "x": -40.5546875,
+          "y": 8.5859375
+        },
+        "br": {
+          "x": 36.7890625,
+          "y": 7.6171875
+        }
+      },
+      "noteDistanceAU": 61.25003077586327,
+      "noteAngle": 107.73747484705831,
+      "noteRotation": 12.852549156734767,
+      "groupName": "All Notes"
+    },
+    {
+      "name": "Empires",
+      "type": "note",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles",
+      "description": "Three empires controlling the system are on the moons of Calidar, Alorea (elves), Kragdur (dwarves) and Munaan (humans).",
+      "orbitedObjectName": null,
+      "distanceOrbited": 1,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 365,
+      "affectsShellBoundary": true,
+      "noteFontFamily": "Caveat",
+      "noteFontSize": 6,
+      "noteCorners": {
+        "tl": {
+          "x": -21.14721469581127,
+          "y": -24.1181108802557
+        },
+        "tr": {
+          "x": 45.887098506093025,
+          "y": -23.515087351202965
+        },
+        "bl": {
+          "x": -21.793145522475243,
+          "y": 22.13159842789173
+        },
+        "br": {
+          "x": -2.946738287806511,
+          "y": 25.501599803566933
+        }
+      },
+      "noteDistanceAU": 111.60989586595282,
+      "noteAngle": 213.58394713534233,
+      "groupName": "All Notes"
+    },
+    {
+      "name": "Date",
+      "type": "note",
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles",
+      "description": "1530 Epoch",
+      "orbitedObjectName": null,
+      "distanceOrbited": 1,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 365,
+      "affectsShellBoundary": true,
+      "noteFontFamily": "Caveat",
+      "noteFontSize": 7,
+      "noteCorners": {
+        "tl": {
+          "x": -16.02734375,
+          "y": -4.69921875
+        },
+        "tr": {
+          "x": 16.72265625,
+          "y": -4.94921875
+        },
+        "bl": {
+          "x": -17.60546875,
+          "y": 4.66015625
+        },
+        "br": {
+          "x": 16.91015625,
+          "y": 4.98828125
+        }
+      },
+      "noteDistanceAU": 133.33396924505297,
+      "noteAngle": 127.68189735599552,
+      "groupName": "All Notes"
+    },
+    {
+      "name": "All Notes",
+      "type": "group",
+      "description": "A structural group for celestial bodies.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 0,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 0,
+      "affectsShellBoundary": false,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
+    },
+    {
       "name": "Soltan",
       "type": "star",
       "sizeClass": "H",
@@ -15,7 +211,8 @@
       "initialAngle": 0,
       "orbitalPeriodDays": 0,
       "isStationary": true,
-      "elementAffinity": "fire"
+      "elementAffinity": "fire",
+      "groupName": "Planets"
     },
     {
       "name": "Draconia",
@@ -29,7 +226,8 @@
       "initialAngle": 300,
       "orbitalPeriodDays": 220,
       "elementAffinity": "earth",
-      "worldShape": "hollow_world"
+      "worldShape": "hollow_world",
+      "groupName": "Planets"
     },
     {
       "name": "Calidar",
@@ -42,7 +240,8 @@
       "distanceOrbited": 26,
       "initialAngle": 270,
       "orbitalPeriodDays": 360,
-      "elementAffinity": "mixed"
+      "elementAffinity": "mixed",
+      "groupName": "Planets"
     },
     {
       "name": "Alorea",
@@ -55,7 +254,8 @@
       "distanceOrbited": 0.2,
       "initialAngle": 0,
       "orbitalPeriodDays": 28,
-      "elementAffinity": "mixed"
+      "elementAffinity": "mixed",
+      "groupName": "Planets"
     },
     {
       "name": "Kragdur",
@@ -69,7 +269,8 @@
       "initialAngle": 180,
       "orbitalPeriodDays": 28,
       "orbitRotation": 0,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "groupName": "Planets"
     },
     {
       "name": "Munaan",
@@ -81,7 +282,8 @@
       "orbitedObjectName": "Calidar",
       "distanceOrbited": 0.4,
       "initialAngle": 322,
-      "orbitalPeriodDays": 42
+      "orbitalPeriodDays": 42,
+      "groupName": "Planets"
     },
     {
       "name": "Lao-Kwei",
@@ -96,7 +298,8 @@
       "orbitalPeriodDays": 500,
       "elementAffinity": "earth",
       "orbitEccentricity": 0.08,
-      "orbitRotation": 180
+      "orbitRotation": 180,
+      "groupName": "Planets"
     },
     {
       "name": "Kumoshima",
@@ -108,7 +311,8 @@
       "orbitedObjectName": "Lao-Kwei",
       "distanceOrbited": 0.2,
       "initialAngle": 0,
-      "orbitalPeriodDays": 28
+      "orbitalPeriodDays": 28,
+      "groupName": "Planets"
     },
     {
       "name": "The Fringe",
@@ -125,7 +329,8 @@
       "cloudTransparency": 0.15,
       "cloudiness": 0,
       "elementAffinity": "earth",
-      "cloudObjectDensity": 800
+      "cloudObjectDensity": 800,
+      "groupName": "Planets"
     },
     {
       "name": "Canis Major",
@@ -140,7 +345,8 @@
       "orbitalPeriodDays": 645,
       "elementAffinity": "earth",
       "isDMOnly": true,
-      "affectsShellBoundary": false
+      "affectsShellBoundary": false,
+      "groupName": "Planets"
     },
     {
       "name": "Felis Minor",
@@ -155,7 +361,8 @@
       "orbitalPeriodDays": 645,
       "elementAffinity": "earth",
       "affectsShellBoundary": false,
-      "isDMOnly": true
+      "isDMOnly": true,
+      "groupName": "Planets"
     },
     {
       "name": "Ghule",
@@ -171,7 +378,21 @@
       "affectsShellBoundary": false,
       "orbitEccentricity": 0.59,
       "orbitRotation": 180,
-      "isDMOnly": true
+      "isDMOnly": true,
+      "groupName": "Planets"
+    },
+    {
+      "name": "Planets",
+      "type": "group",
+      "description": "A structural group for celestial bodies.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 0,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 0,
+      "affectsShellBoundary": false,
+      "sizeClass": "D",
+      "physicalSize": 1000,
+      "sizeUnit": "miles"
     },
     {
       "name": "Ghule Orbit",
@@ -186,11 +407,33 @@
       "orbitalPeriodDays": 365,
       "affectsShellBoundary": true,
       "isDMOnly": true,
-      "noteDistanceAU": 110,
-      "noteAngle": 45,
-      "noteRotation": -40
+      "noteDistanceAU": 135.74469925308756,
+      "noteAngle": 45.68829564785875,
+      "noteRotation": 321.7237720332585,
+      "noteCorners": {
+        "tl": {
+          "x": -54,
+          "y": -41
+        },
+        "tr": {
+          "x": 52,
+          "y": -40
+        },
+        "bl": {
+          "x": -12,
+          "y": 6
+        },
+        "br": {
+          "x": 16,
+          "y": 6
+        }
+      },
+      "noteFontSize": 6,
+      "noteFontFamily": "Caveat",
+      "groupName": "All Notes"
     }
   ],
   "orbitalDrawStrength": 2.9,
-  "navChartPlanetSizeOffset": 0
+  "navChartPlanetSizeOffset": 3,
+  "navTitleStrike": true
 }

@@ -45,6 +45,8 @@ This file tracks the design, development, and integration tasks for the Astrolab
 | **AST-037** | Directory Filtering Fixes | Low | `Done` | Exclude background constellations from the directory. |
 | **AST-038** | Map Notes | High | `Done` | Basic visual text labels with wrapping, rotation, fonts. |
 | **AST-039** | Map Note Interactive Polygons | High | `Done` | Interactive map-canvas dragging for note position, rotation, and custom 4-node clipping polygon boxes. |
+| **AST-040** | Title Strike Outline | Medium | `Done` | Add navTitleStrike system setting and render proportionally scaled outlines around map titles. |
+| **AST-041** | Decorative Google Fonts | Low | `Done` | Imported 15 script/fantasy Google Fonts for Map Notes usage. |
 
 ---
 
@@ -236,3 +238,12 @@ This file tracks the design, development, and integration tasks for the Astrolab
   * Implemented mathematical pointer drag handlers on the Canvas to translate, rotate, and skew the note independently.
   * Rewrote canvas text-rendering engine to dynamically calculate available horizontal width line-by-line using linear interpolation between left/right boundaries.
   * Added `ctx.clip()` paths to strict crop overflowing text inside the custom polygon.
+
+- [x] **AST-040: Title Strike Outline**
+  * Added `Title Strike Outline` system variable to the Celestial Bodies configuration sidebar.
+  * Implemented rendering logic in both `VellumNavigationChartRenderer.ts` and `SpaceNavigationChartRenderer.ts` to draw a scaled `strokeText` outline underneath celestial object names.
+  * Styled with the exact mathematical average color of the parchment background (`#e0caa6`) for Vellum mode and the pitch-black void color (`#0a0b10`) for Space mode.
+
+- [x] **AST-041: Decorative Google Fonts**
+  * Loaded 15 new highly-decorative cursive and fantasy fonts from Google Fonts into `index.html`.
+  * Updated `SaveManager.tsx` font dropdowns to remove standard web safe fonts (Arial, Times New Roman, Courier New) and provide the expanded list for Map Notes.

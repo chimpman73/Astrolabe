@@ -23,6 +23,7 @@ import customObjSvgUrl from '../../../assets/objects/custom.svg';
 
 export class VellumNavigationChartRenderer implements INavigationChartRenderer {
   private readonly colorBg = '#f9f5e8';
+  private readonly colorVellumAverage = '#e0caa6'; // Accurately sampled average color of parchment.jpg
   private readonly colorGrid = 'rgba(94, 79, 60, 0.05)';
   private readonly colorStroke = '#2b2316';
   private readonly colorMuted = '#7c694e';
@@ -416,12 +417,34 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
           ctx.fillStyle = '#ffffff';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
+          
+          if (activeSphere?.navTitleStrike) {
+            ctx.save();
+            ctx.strokeStyle = this.colorVellumAverage;
+            ctx.lineWidth = 12 * 0.15;
+            ctx.lineJoin = 'round';
+            ctx.strokeText(obj.name, proj.x, proj.y);
+            ctx.restore();
+          }
+          
           ctx.fillText(obj.name, proj.x, proj.y);
         } else {
-          ctx.fillStyle = this.colorStroke;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'top';
-          ctx.fillText(obj.name, proj.x, proj.y + renderSize + 5);
+          const titleY = renderSize < 10 ? proj.y : proj.y + renderSize + 5;
+          const fontSize = obj.type === 'star' ? 12 : 10;
+          
+          if (activeSphere?.navTitleStrike) {
+            ctx.save();
+            ctx.strokeStyle = this.colorVellumAverage;
+            ctx.lineWidth = fontSize * 0.15 + 1; // slightly thicker than standard to ensure legibility
+            ctx.lineJoin = 'round';
+            ctx.strokeText(obj.name, proj.x, titleY);
+            ctx.restore();
+          }
+          
+          ctx.fillStyle = this.colorStroke;
+          ctx.fillText(obj.name, proj.x, titleY);
         }
       }
     });
@@ -526,8 +549,8 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       ctx.save();
       ctx.translate(proj.x, proj.y);
       ctx.rotate((rot * Math.PI) / 180);
+      ctx.scale(activeZoom, activeZoom);
 
-      // Notes are always drawn at their absolute fixed font size, completely ignoring activeZoom.
       ctx.font = `${fontSize}px '${fontFamily}', sans-serif`;
       ctx.fillStyle = this.colorStroke;
       ctx.textAlign = 'center';
@@ -598,9 +621,9 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       if (isSelected) {
         ctx.save();
         drawPolyPath();
-        ctx.setLineDash([5, 5]);
+        ctx.setLineDash([5 / activeZoom, 5 / activeZoom]);
         ctx.strokeStyle = this.colorStroke;
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1 / activeZoom;
         ctx.stroke();
         ctx.restore();
       }
@@ -616,21 +639,22 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
 
       if (isSelected) {
          ctx.fillStyle = this.colorStroke;
-         ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI * 2); ctx.fill();
-         ctx.beginPath(); ctx.arc(tl.x, tl.y, 5, 0, Math.PI * 2); ctx.fill();
-         ctx.beginPath(); ctx.arc(tr.x, tr.y, 5, 0, Math.PI * 2); ctx.fill();
-         ctx.beginPath(); ctx.arc(bl.x, bl.y, 5, 0, Math.PI * 2); ctx.fill();
-         ctx.beginPath(); ctx.arc(br.x, br.y, 5, 0, Math.PI * 2); ctx.fill();
+         const r = 5 / activeZoom;
+         ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+         ctx.beginPath(); ctx.arc(tl.x, tl.y, r, 0, Math.PI * 2); ctx.fill();
+         ctx.beginPath(); ctx.arc(tr.x, tr.y, r, 0, Math.PI * 2); ctx.fill();
+         ctx.beginPath(); ctx.arc(bl.x, bl.y, r, 0, Math.PI * 2); ctx.fill();
+         ctx.beginPath(); ctx.arc(br.x, br.y, r, 0, Math.PI * 2); ctx.fill();
          
-         ctx.beginPath(); ctx.arc(tr.x + 20, tr.y - 20, 5, 0, Math.PI * 2); ctx.fill();
+         ctx.beginPath(); ctx.arc(tr.x + 20, tr.y - 20, r, 0, Math.PI * 2); ctx.fill();
          
          ctx.save();
          ctx.beginPath();
          ctx.moveTo(tr.x, tr.y);
          ctx.lineTo(tr.x + 20, tr.y - 20);
          ctx.strokeStyle = this.colorStroke;
-         ctx.lineWidth = 1;
-         ctx.setLineDash([2, 2]);
+         ctx.lineWidth = 1 / activeZoom;
+         ctx.setLineDash([2 / activeZoom, 2 / activeZoom]);
          ctx.stroke();
          ctx.restore();
       }

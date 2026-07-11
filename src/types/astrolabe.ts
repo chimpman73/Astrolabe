@@ -125,6 +125,7 @@ export interface CrystalSphere {
   shellCustomScale?: number;
   orbitalDrawStrength?: number;
   navChartPlanetSizeOffset?: number;
+  navTitleStrike?: boolean;
   objects: CelestialObject[];
 }
 
