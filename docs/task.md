@@ -48,6 +48,7 @@ This file tracks the design, development, and integration tasks for the Astrolab
 | **AST-040** | Title Strike Outline | Medium | `Done` | Add navTitleStrike system setting and render proportionally scaled outlines around map titles. |
 | **AST-041** | Decorative Google Fonts | Low | `Done` | Imported 15 script/fantasy Google Fonts for Map Notes usage. |
 | **AST-042** | Export & Rendering Bug Fixes | Low | `Done` | Fixed high-res export element scaling, title alignment overlaps, and group expansion state. |
+| **AST-043** | Coding Standards Compliance | High | `Done` | Refactored frontend classes to use `#` for encapsulation and strictly enforce one class per file. |
 
 ---
 
@@ -255,3 +256,10 @@ This file tracks the design, development, and integration tasks for the Astrolab
   * Increased application-wide base celestial label fonts (`10/12px` to `14/16px`).
   * Repaired legacy title positioning algorithm that overlapped names with planet centers when sizes were `< 10px`.
   * Patched UI logic to force Celestial Object Group Cards into a closed accordion state by default.
+
+### Phase 11: Codebase Maintenance
+- [x] **AST-043: Coding Standards Compliance**
+  * Refactored frontend renderer and utility classes to use native JavaScript `#` private fields instead of TypeScript `private` keyword.
+  * Split `VisualScaleStrategy.ts` into multiple distinct strategy files to enforce One Class Per File.
+  * Extracted inline `PRNG` and `UnionFind` helper classes into centralized utility files.
+  * Verified 100% compliance with `coding_standards.md` across both frontend and backend (`src/renderer` and `src/main`).
