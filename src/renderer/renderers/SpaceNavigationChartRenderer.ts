@@ -559,10 +559,17 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
               if (img && img.complete && img.naturalWidth > 0) {
                   // White tint for space mode svg icons
                   ctx.save();
-                  // Simple approach: we don't have a reliable SVG tint without masking, but we can draw them normally.
-                  // For space mode, the colors from the SVGs are usually okay, but ideally we'd want them white.
-                  // Astrolabe's standard icons are white with transparency anyway, so it should be fine.
-                  ctx.drawImage(img, startX, startY - iconSize/2, iconSize, iconSize);
+                  const offscreen = document.createElement('canvas');
+                  offscreen.width = iconSize;
+                  offscreen.height = iconSize;
+                  const offCtx = offscreen.getContext('2d');
+                  if (offCtx) {
+                      offCtx.drawImage(img, 0, 0, iconSize, iconSize);
+                      offCtx.globalCompositeOperation = 'source-in';
+                      offCtx.fillStyle = '#ffffff';
+                      offCtx.fillRect(0, 0, iconSize, iconSize);
+                      ctx.drawImage(offscreen, startX, startY - iconSize/2, iconSize, iconSize);
+                  }
                   ctx.restore();
               }
           } else if (item.type === 'draw') {
