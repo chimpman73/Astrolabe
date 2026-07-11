@@ -1,27 +1,16 @@
 import React, { useState } from 'react';
 import { useSystemStore } from '../store/useSystemStore';
 import { 
-  Sun, 
-  Globe, 
-  Moon, 
-  Plus, 
   Trash2, 
+  Plus, 
   ChevronDown, 
   ChevronUp, 
   ChevronLeft,
   Settings,
   Compass,
-  Cloud,
-  TreeDeciduous,
   Eye,
   EyeOff,
-  Sparkles,
-  Satellite,
-  Hexagon,
   Folder,
-  ArrowUpFromLine,
-  StickyNote,
-  HelpCircle,
 } from 'lucide-react';
 import { CelestialObject, CelestialObjectType, WorldShape, ElementAffinity, SizeClass } from '../../types/astrolabe';
 import { ScaleManager } from '../utils/ScaleManager';
@@ -361,7 +350,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
               if (!obj.groupName) {
                 renderOrder.push({obj, index, isChild: false, parentExpanded: true});
                 if (obj.type === 'group') {
-                  const isGroupExpanded = expandedGroups[obj.name] !== false;
+                  const isGroupExpanded = expandedGroups[obj.name] === true;
                   activeSphere.objects.forEach((child, childIndex) => {
                     if (child.groupName === obj.name) {
                       renderOrder.push({obj: child, index: childIndex, isChild: true, parentExpanded: isGroupExpanded});
@@ -373,7 +362,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
 
             return renderOrder.map(({ obj, index, isChild, parentExpanded }) => {
               if (isChild && !parentExpanded) return null;
-              const isExpanded = obj.type === 'group' ? (expandedGroups[obj.name] !== false) : (selectedObjectIndex === index);
+              const isExpanded = obj.type === 'group' ? (expandedGroups[obj.name] === true) : (selectedObjectIndex === index);
               
               return (
                 <div 
@@ -427,7 +416,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                 <div 
                   onClick={() => {
                     if (obj.type === 'group') {
-                      setExpandedGroups(prev => ({ ...prev, [obj.name]: prev[obj.name] === false ? true : false }));
+                      setExpandedGroups(prev => ({ ...prev, [obj.name]: prev[obj.name] === true ? false : true }));
                     } else {
                       setSelectedObjectIndex(isExpanded ? null : index);
                     }

@@ -1,5 +1,5 @@
 import { ParchmentDecoration, MapStyleContext, INavigationChartRenderer } from '../../types/renderer';
-import { AstrolabeSystem, CelestialObject, PlanetTheme, RingData } from '../../types/astrolabe';
+import { CelestialObject } from '../../types/astrolabe';
 import { getNoteCorners } from '../utils/noteInteractions';
 import { drawSolidBody, drawStationaryIndicator, getBodyColors, getElementColor } from '../utils/canvasRenderer';
 import { ScaleManager } from '../utils/ScaleManager';
@@ -284,7 +284,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     ctx.restore();
   }
 
-  drawOrbits({ ctx, activeZoom, positions, project, isPrimary, activeSphere }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
+  drawOrbits({ ctx, activeZoom, positions, project, isPrimary, activeSphere, isExport }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
     activeVisibleObjects.forEach((obj) => {
       if (obj.type === 'constellation' || obj.type === 'note') return;
 
@@ -316,12 +316,13 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
           ctx.ellipse(cx, cy, orbitRadius, b, rotRad, 0, 2 * Math.PI);
         }
         
+        const exportScale = isExport ? 2.5 : 1.0;
         const isPrimaryOrbit = isPrimary(obj);
-        ctx.lineWidth = isPrimaryOrbit ? 1.5 : 1.0;
+        ctx.lineWidth = (isPrimaryOrbit ? 1.5 : 1.0) * exportScale;
         
         const strength = activeSphere?.orbitalDrawStrength ?? 1.0;
-        const dashLength = isPrimaryOrbit ? 3 : 2;
-        const gapLength = isPrimaryOrbit ? 4 : 5;
+        const dashLength = (isPrimaryOrbit ? 3 : 2) * exportScale;
+        const gapLength = (isPrimaryOrbit ? 4 : 5) * exportScale;
         
         const baseAlpha = isPrimaryOrbit ? 0.18 : 0.25;
         const finalAlpha = Math.min(1.0, baseAlpha * strength);
@@ -370,7 +371,9 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     );
   }
 
-  drawBodies({ ctx, activeZoom, positions, project, activeSphere }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
+  drawBodies({ ctx, activeZoom, positions, project, activeSphere, isExport }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
+    const exportScale = isExport ? 2.5 : 1.0;
+    
     activeVisibleObjects.forEach((obj) => {
       if (obj.type === 'note') return;
       const pos = positions[obj.name];
@@ -385,7 +388,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       const proj = project(pos.x, pos.y);
       const baseRenderSize = ScaleManager.getNavChartVisualRadius(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles', activeZoom);
       const isScalableType = ['planet', 'moon', 'asteroid', 'star'].includes(obj.type);
-      const renderSize = Math.max(1, baseRenderSize + (isScalableType ? (activeSphere?.navChartPlanetSizeOffset ?? 0) : 0));
+      const renderSize = Math.max(1, baseRenderSize + (isScalableType ? ((activeSphere?.navChartPlanetSizeOffset ?? 0) * exportScale) : 0));
 
       if (obj.type === 'cloud') {
         if (obj.distanceOrbited <= 0) return;
@@ -409,9 +412,12 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
 
       const shouldLabel = obj.type !== 'moon' || activeZoom > 150;
       if (shouldLabel) {
+        const starFontSize = Math.round(16 * exportScale);
+        const defaultFontSize = Math.round(14 * exportScale);
+        
         ctx.font = obj.type === 'star'
-          ? `bold 12px 'Elan', 'Cinzel', serif`
-          : `500 10px 'Elan', 'Outfit', sans-serif`;
+          ? `bold ${starFontSize}px 'Elan', 'Cinzel', serif`
+          : `500 ${defaultFontSize}px 'Elan', 'Outfit', sans-serif`;
         
         if (obj.type === 'constellation') {
           ctx.fillStyle = '#ffffff';
@@ -421,7 +427,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
           if (activeSphere?.navTitleStrike) {
             ctx.save();
             ctx.strokeStyle = this.colorVellumAverage;
-            ctx.lineWidth = 12 * 0.15;
+            ctx.lineWidth = starFontSize * 0.15;
             ctx.lineJoin = 'round';
             ctx.strokeText(obj.name, proj.x, proj.y);
             ctx.restore();
@@ -431,8 +437,8 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
         } else {
           ctx.textAlign = 'center';
           ctx.textBaseline = 'top';
-          const titleY = renderSize < 10 ? proj.y : proj.y + renderSize + 5;
-          const fontSize = obj.type === 'star' ? 12 : 10;
+          const titleY = proj.y + renderSize + (5 * exportScale);
+          const fontSize = obj.type === 'star' ? starFontSize : defaultFontSize;
           
           if (activeSphere?.navTitleStrike) {
             ctx.save();

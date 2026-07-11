@@ -156,7 +156,7 @@
       "sizeClass": "D",
       "physicalSize": 1000,
       "sizeUnit": "miles",
-      "description": "1530 Epoch",
+      "description": "1512 CE, third day of Loriath",
       "orbitedObjectName": null,
       "distanceOrbited": 1,
       "initialAngle": 0,
@@ -166,24 +166,24 @@
       "noteFontSize": 7,
       "noteCorners": {
         "tl": {
-          "x": -16.02734375,
-          "y": -4.69921875
+          "x": -36.6661491394043,
+          "y": -4.396968841552734
         },
         "tr": {
-          "x": 16.72265625,
-          "y": -4.94921875
+          "x": 36.06906509399414,
+          "y": -3.929637908935547
         },
         "bl": {
-          "x": -17.60546875,
-          "y": 4.66015625
+          "x": -38.2442741394043,
+          "y": 4.962406158447266
         },
         "br": {
-          "x": 16.91015625,
-          "y": 4.98828125
+          "x": 38.84135818481445,
+          "y": 3.3642005920410156
         }
       },
-      "noteDistanceAU": 133.33396924505297,
-      "noteAngle": 127.68189735599552,
+      "noteDistanceAU": 121.55624410866967,
+      "noteAngle": 120.04739779721082,
       "groupName": "All Notes"
     },
     {
@@ -197,7 +197,8 @@
       "affectsShellBoundary": false,
       "sizeClass": "D",
       "physicalSize": 1000,
-      "sizeUnit": "miles"
+      "sizeUnit": "miles",
+      "isHidden": false
     },
     {
       "name": "Soltan",
@@ -283,7 +284,8 @@
       "distanceOrbited": 0.4,
       "initialAngle": 322,
       "orbitalPeriodDays": 42,
-      "groupName": "Planets"
+      "groupName": "Planets",
+      "elementAffinity": "earth"
     },
     {
       "name": "Lao-Kwei",
@@ -433,7 +435,7 @@
       "groupName": "All Notes"
     }
   ],
-  "orbitalDrawStrength": 2.9,
+  "orbitalDrawStrength": 3,
   "navChartPlanetSizeOffset": 3,
   "navTitleStrike": true
 }

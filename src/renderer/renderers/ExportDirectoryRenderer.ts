@@ -74,6 +74,24 @@ export async function exportNavigationChart({
     };
   };
 
+  const culledObjects = new Set<string>();
+  visibleObjects.forEach((obj: any) => {
+    if (obj.orbitedObjectName && obj.orbitedObjectName !== obj.name && !isPrimary(obj)) {
+      const orbitRadiusPx = obj.distanceOrbited * exportZoom;
+      const parent = objects.find((o: any) => o.name === obj.orbitedObjectName);
+      let cullThreshold = 10;
+      if (parent) {
+        const parentSize = ScaleManager.getNavChartVisualRadius(parent.sizeClass || 'D', parent.physicalSize || 1000, parent.sizeUnit || 'miles', exportZoom);
+        cullThreshold = parentSize + 5;
+      }
+      if (orbitRadiusPx < cullThreshold) {
+        culledObjects.add(obj.name);
+      }
+    }
+  });
+
+  const activeVisibleObjects = visibleObjects.filter((obj: any) => !culledObjects.has(obj.name));
+
   const context: MapStyleContext = {
     ctx,
     width: exportWidth,
@@ -81,7 +99,7 @@ export async function exportNavigationChart({
     activeZoom: exportZoom,
     activePan: exportPan,
     objects,
-    visibleObjects,
+    visibleObjects: activeVisibleObjects,
     positions,
     activeSphere,
     currentSystemDate,

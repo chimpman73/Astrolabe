@@ -337,8 +337,6 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
          
          const mouseAngle = Math.atan2(mouseY - centerScreenY, mouseX - centerScreenX);
          
-         const halfW = (initialNote.noteMaxWidth || 250) / 2;
-         const halfH = (initialNote.noteMaxHeight || 250) / 2;
          const corners = getNoteCorners(initialNote);
          const localAngle = Math.atan2(corners.tr.y - 20, corners.tr.x + 20);
          

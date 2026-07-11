@@ -1,5 +1,5 @@
 import { MapStyleContext, INavigationChartRenderer } from '../../types/renderer';
-import { AstrolabeSystem, CelestialObject, PlanetTheme, RingData } from '../../types/astrolabe';
+import { CelestialObject } from '../../types/astrolabe';
 import { getNoteCorners } from '../utils/noteInteractions';
 import { drawSolidBody, drawStationaryIndicator, getBodyColors, getElementColor } from '../utils/canvasRenderer';
 import { ScaleManager } from '../utils/ScaleManager';
@@ -54,7 +54,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
     // No decorations in space mode
   }
 
-  drawOrbits({ ctx, activeZoom, positions, project, isPrimary, activeSphere }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
+  drawOrbits({ ctx, activeZoom, positions, project, isPrimary, activeSphere, isExport }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
     activeVisibleObjects.forEach((obj) => {
       if (obj.type === 'constellation' || obj.type === 'note') return;
       
@@ -86,12 +86,13 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
           ctx.ellipse(cx, cy, orbitRadius, b, rotRad, 0, 2 * Math.PI);
         }
         
+        const exportScale = isExport ? 2.5 : 1.0;
         const isPrimaryOrbit = isPrimary(obj);
-        ctx.lineWidth = isPrimaryOrbit ? 1.5 : 1.0;
+        ctx.lineWidth = (isPrimaryOrbit ? 1.5 : 1.0) * exportScale;
         
         const strength = activeSphere?.orbitalDrawStrength ?? 1.0;
-        const dashLength = isPrimaryOrbit ? 3 : 2;
-        const gapLength = isPrimaryOrbit ? 4 : 5;
+        const dashLength = (isPrimaryOrbit ? 3 : 2) * exportScale;
+        const gapLength = (isPrimaryOrbit ? 4 : 5) * exportScale;
         
         const baseAlpha = isPrimaryOrbit ? 0.15 : 0.3;
         const finalAlpha = Math.min(1.0, baseAlpha * strength);
@@ -128,7 +129,9 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
     );
   }
 
-  drawBodies({ ctx, activeZoom, positions, project, activeSphere }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
+  drawBodies({ ctx, activeZoom, positions, project, activeSphere, isExport }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
+    const exportScale = isExport ? 2.5 : 1.0;
+    
     activeVisibleObjects.forEach((obj) => {
       if (obj.type === 'note') return;
       const pos = positions[obj.name];
@@ -143,33 +146,36 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
       const proj = project(pos.x, pos.y);
       const baseRenderSize = ScaleManager.getNavChartVisualRadius(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles', activeZoom);
       const isScalableType = ['planet', 'moon', 'asteroid', 'star'].includes(obj.type);
-      const renderSize = Math.max(1, baseRenderSize + (isScalableType ? (activeSphere?.navChartPlanetSizeOffset ?? 0) : 0));
+      const renderSize = Math.max(1, baseRenderSize + (isScalableType ? ((activeSphere?.navChartPlanetSizeOffset ?? 0) * exportScale) : 0));
 
       if (obj.type === 'cloud') {
         if (obj.distanceOrbited <= 0) return;
         const orbitR = obj.distanceOrbited * activeZoom;
-        const cloudFill = getElementColor(obj.elementAffinity || null) || '#a0a0a0';
+        const cloudFill = getElementColor(obj.elementAffinity || null) || '#808080';
         
         drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, cloudFill, '#505050', false, activeZoom,
-          false, parentProj.x, parentProj.y, orbitR, pos.angle
+          true, parentProj.x, parentProj.y, orbitR, pos.angle
         );
       } else {
         const { bodyFill, bodyStroke } = getBodyColors(obj, false, this.colorBg, this.colorStroke, this.colorGold);
         const orbitR = obj.distanceOrbited * activeZoom;
         drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, bodyFill, bodyStroke, false, activeZoom,
-          false, parentProj.x, parentProj.y, orbitR, pos.angle
+          true, parentProj.x, parentProj.y, orbitR, pos.angle
         );
 
-        if (obj.isStationary && obj.type !== 'star' && obj.type !== 'constellation') {
+        if (obj.isStationary && obj.type !== 'star' && obj.type !== 'constellation' && obj.type !== 'living_world') {
           drawStationaryIndicator(ctx, proj.x, proj.y, renderSize, this.colorMuted);
         }
       }
 
       const shouldLabel = obj.type !== 'moon' || activeZoom > 150;
       if (shouldLabel) {
+        const starFontSize = Math.round(16 * exportScale);
+        const defaultFontSize = Math.round(14 * exportScale);
+        
         ctx.font = obj.type === 'star'
-          ? `bold 12px 'Elan', 'Cinzel', serif`
-          : `500 10px 'Elan', 'Outfit', sans-serif`;
+          ? `bold ${starFontSize}px 'Elan', 'Cinzel', serif`
+          : `500 ${defaultFontSize}px 'Elan', 'Outfit', sans-serif`;
         
         if (obj.type === 'constellation') {
           ctx.fillStyle = '#ffffff';
@@ -179,7 +185,7 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
           if (activeSphere?.navTitleStrike) {
             ctx.save();
             ctx.strokeStyle = this.colorBg;
-            ctx.lineWidth = 12 * 0.15;
+            ctx.lineWidth = starFontSize * 0.15;
             ctx.lineJoin = 'round';
             ctx.strokeText(obj.name, proj.x, proj.y);
             ctx.restore();
@@ -189,8 +195,8 @@ export class SpaceNavigationChartRenderer implements INavigationChartRenderer {
         } else {
           ctx.textAlign = 'center';
           ctx.textBaseline = 'top';
-          const titleY = renderSize < 10 ? proj.y : proj.y + renderSize + 5;
-          const fontSize = obj.type === 'star' ? 12 : 10;
+          const titleY = proj.y + renderSize + (5 * exportScale);
+          const fontSize = obj.type === 'star' ? starFontSize : defaultFontSize;
           
           if (activeSphere?.navTitleStrike) {
             ctx.save();

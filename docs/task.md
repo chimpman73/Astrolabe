@@ -47,6 +47,7 @@ This file tracks the design, development, and integration tasks for the Astrolab
 | **AST-039** | Map Note Interactive Polygons | High | `Done` | Interactive map-canvas dragging for note position, rotation, and custom 4-node clipping polygon boxes. |
 | **AST-040** | Title Strike Outline | Medium | `Done` | Add navTitleStrike system setting and render proportionally scaled outlines around map titles. |
 | **AST-041** | Decorative Google Fonts | Low | `Done` | Imported 15 script/fantasy Google Fonts for Map Notes usage. |
+| **AST-042** | Export & Rendering Bug Fixes | Low | `Done` | Fixed high-res export element scaling, title alignment overlaps, and group expansion state. |
 
 ---
 
@@ -247,3 +248,10 @@ This file tracks the design, development, and integration tasks for the Astrolab
 - [x] **AST-041: Decorative Google Fonts**
   * Loaded 15 new highly-decorative cursive and fantasy fonts from Google Fonts into `index.html`.
   * Updated `SaveManager.tsx` font dropdowns to remove standard web safe fonts (Arial, Times New Roman, Courier New) and provide the expanded list for Map Notes.
+
+- [x] **AST-042: Export & Rendering Bug Fixes**
+  * Added dynamic `exportScale` multiplier (2.5x) to `ExportDirectoryRenderer` to ensure orbital rings, dashes, and text strokes scale proportionately in high-res exports.
+  * Extracted orbital cull logic out of `NavChartCanvas` and applied it to `ExportDirectoryRenderer` to properly cull invisible moons on zoom out.
+  * Increased application-wide base celestial label fonts (`10/12px` to `14/16px`).
+  * Repaired legacy title positioning algorithm that overlapped names with planet centers when sizes were `< 10px`.
+  * Patched UI logic to force Celestial Object Group Cards into a closed accordion state by default.
