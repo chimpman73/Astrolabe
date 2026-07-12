@@ -103,7 +103,7 @@ export interface NavigationChartStyleConfig {
   directoryDividerColor: string;
   directoryTitleColor: string;
   directorySubTitleColor: string;
-  directoryIconTint: 'none' | 'invert';
+  directoryIconColor: string | null;
   directoryTextColor: string;
   
   // Notes / Legends

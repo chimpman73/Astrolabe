@@ -69,7 +69,7 @@ export const vellumStyleConfig: NavigationChartStyleConfig = {
   directoryDividerColor: '#c8b185',
   directoryTitleColor: '#2b2316',
   directorySubTitleColor: '#5e4f3c',
-  directoryIconTint: 'none',
+  directoryIconColor: null,
   directoryTextColor: '#2b2316',
   
   noteTextColor: '#2b2316',
@@ -121,7 +121,7 @@ export const spaceStyleConfig: NavigationChartStyleConfig = {
   directoryDividerColor: 'rgba(255, 255, 255, 0.3)',
   directoryTitleColor: '#ffffff',
   directorySubTitleColor: 'rgba(255, 255, 255, 0.7)',
-  directoryIconTint: 'invert',
+  directoryIconColor: '#ffffff',
   directoryTextColor: '#ffffff',
   
   noteTextColor: '#ffffff',

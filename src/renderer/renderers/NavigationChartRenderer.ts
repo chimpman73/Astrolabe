@@ -18,6 +18,7 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
   
   // Icons
   #svgIcons: Record<string, HTMLImageElement> = {};
+  #tintedSvgIcons: Record<string, HTMLCanvasElement> = {};
 
   #imagesLoaded = false;
   #loadCount = 0;
@@ -32,6 +33,7 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
       this.#loadCount++;
       if (this.#loadCount >= this.#totalImages) {
         this.#imagesLoaded = true;
+        this.#prepareTintedIcons();
         this.#forceRedraw?.();
       }
     };
@@ -72,6 +74,34 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
         img.src = src;
       });
     }
+  }
+
+  #prepareTintedIcons() {
+    if (!this.#config.directoryIconColor) return;
+    
+    for (const [key, img] of Object.entries(this.#svgIcons)) {
+      if (!img.complete || img.naturalWidth === 0) continue;
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) continue;
+      
+      ctx.drawImage(img, 0, 0);
+      ctx.globalCompositeOperation = 'source-in';
+      ctx.fillStyle = this.#config.directoryIconColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      this.#tintedSvgIcons[key] = canvas;
+    }
+  }
+
+  #getIcon(key: string): HTMLImageElement | HTMLCanvasElement | undefined {
+    if (this.#config.directoryIconColor && this.#tintedSvgIcons[key]) {
+      return this.#tintedSvgIcons[key];
+    }
+    return this.#svgIcons[key];
   }
 
   #getScrollBounds(context: MapStyleContext) {
@@ -763,8 +793,8 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
 
       items.forEach(item => {
           if (item.type === 'svg') {
-              const img = this.#svgIcons[item.key];
-              if (img && img.complete && img.naturalWidth > 0) {
+              const img = this.#getIcon(item.key);
+              if (img && (img instanceof HTMLCanvasElement || (img.complete && img.naturalWidth > 0))) {
                   ctx.drawImage(img, startX, startY - iconSize/2, iconSize, iconSize);
               }
           } else if (item.type === 'draw') {
@@ -920,22 +950,20 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
 
       // Draw Element Icon
       const elemIconName = obj.elementAffinity || 'none';
-      const elemIcon = this.#svgIcons[elemIconName];
-      if (elemIcon && elemIcon.complete && elemIcon.naturalWidth > 0) {
+      const elemIcon = this.#getIcon(elemIconName);
+      if (elemIcon && (elemIcon instanceof HTMLCanvasElement || (elemIcon.complete && elemIcon.naturalWidth > 0))) {
         ctx.save();
         ctx.translate(startX + 55 * z, curY + 15 * z);
-        if (this.#config.directoryIconTint === 'invert') ctx.filter = 'brightness(0) invert(1)';
         ctx.drawImage(elemIcon, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
         ctx.restore();
       }
 
       // Draw Object Type Icon
       const typeIconName = obj.type || 'custom';
-      const typeIcon = this.#svgIcons[typeIconName];
-      if (typeIcon && typeIcon.complete && typeIcon.naturalWidth > 0) {
+      const typeIcon = this.#getIcon(typeIconName);
+      if (typeIcon && (typeIcon instanceof HTMLCanvasElement || (typeIcon.complete && typeIcon.naturalWidth > 0))) {
         ctx.save();
         ctx.translate(startX + 95 * z, curY + 15 * z);
-        if (this.#config.directoryIconTint === 'invert') ctx.filter = 'brightness(0) invert(1)';
         ctx.drawImage(typeIcon, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
         ctx.restore();
       }
