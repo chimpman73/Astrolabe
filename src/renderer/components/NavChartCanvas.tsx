@@ -77,64 +77,13 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
     const shellRadiusModel = maxDist * shellScale;
     
-    const getMaxAbsoluteReach = (obj: any, allObjs: any[]): number => {
-      let reach = ScaleManager.getPhysicalReachAU(obj);
-      let curr = obj;
-      while (curr.orbitedObjectName) {
-        const parent = allObjs.find((p: any) => p.name === curr.orbitedObjectName);
-        if (parent) {
-          reach += (parent.distanceOrbited || 0);
-          curr = parent;
-        } else {
-          break;
-        }
-      }
-      return reach;
-    };
-
-    let maxOrbitX_AU = shellRadiusModel;
-    let maxOrbitY_AU = shellRadiusModel;
-
-    const visibleObjects = objects;
-    visibleObjects.forEach((o: any) => {
-      if (o.type === 'note' || o.type === 'legend' || o.type === 'constellation') return;
-      const objMaxReach = getMaxAbsoluteReach(o, objects);
-      if (objMaxReach > maxOrbitX_AU) maxOrbitX_AU = objMaxReach;
-      if (objMaxReach > maxOrbitY_AU) maxOrbitY_AU = objMaxReach;
-    });
-
-    let maxNoteX_AU = maxOrbitX_AU;
-    let maxNoteY_AU = maxOrbitY_AU;
-
-    visibleObjects.filter((o:any) => o.type === 'note').forEach((note: any) => {
-      const distAU = note.noteDistanceAU || 0;
-      const rad = ((note.noteAngle || 0) * Math.PI) / 180;
-      const noteX_AU = Math.cos(rad) * distAU;
-      const noteY_AU = Math.sin(rad) * distAU;
-      const textBufferAU = 0; 
-      if (noteX_AU + textBufferAU > maxNoteX_AU) maxNoteX_AU = noteX_AU + textBufferAU;
-      if (noteY_AU + textBufferAU > maxNoteY_AU) maxNoteY_AU = noteY_AU + textBufferAU;
-    });
-
-    let minLegendX_AU = -shellRadiusModel - shellRadiusModel;
-    const legends = visibleObjects.filter((o:any) => o.type === 'legend');
-    if (legends.length > 0) {
-      minLegendX_AU = 0;
-      legends.forEach((legend: any) => {
-        const distAU = legend.legendDistanceAU || 0;
-        const rad = ((legend.legendAngle || 0) * Math.PI) / 180;
-        const legX_AU = Math.cos(rad) * distAU;
-        const textBufferAU = 0;
-        if (legX_AU - textBufferAU < minLegendX_AU) minLegendX_AU = legX_AU - textBufferAU;
-      });
-    }
-
-    const directoryStartX_AU = minLegendX_AU;
+    // Hardcoded Layout constraints based strictly on Soltan Ephemeris standard proportions
+    const directoryStartX_AU = -900.686 * shellRadiusModel;
     const directoryWidthModel = shellRadiusModel;
     
     const mapTopY_AU = -shellRadiusModel;
-    const mapBottomY_AU = Math.max(maxOrbitY_AU, maxNoteY_AU);
-    const mapRightX_AU = Math.max(maxOrbitX_AU, maxNoteX_AU);
+    const mapBottomY_AU = 526.102 * shellRadiusModel;
+    const mapRightX_AU = 474.130 * shellRadiusModel;
     
     const paddingModel = shellRadiusModel * 0.25;
 

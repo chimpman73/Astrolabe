@@ -119,63 +119,13 @@ context.activeSphere?.shellBoundaryType === 'relativeMargin')
     
     const centerProj = context.project(0, 0);
 
-    const getMaxAbsoluteReach = (obj: any, allObjs: any[]): number => {
-      let reach = ScaleManager.getPhysicalReachAU(obj);
-      let curr = obj;
-      while (curr.orbitedObjectName) {
-        const parent = allObjs.find((p: any) => p.name === curr.orbitedObjectName);
-        if (parent) {
-          reach += (parent.distanceOrbited || 0);
-          curr = parent;
-        } else {
-          break;
-        }
-      }
-      return reach;
-    };
-
-    let maxOrbitX = shellRadiusPx;
-    let maxOrbitY = shellRadiusPx;
-
-    context.objects.forEach((o: any) => {
-      if (o.type === 'note' || o.type === 'legend' || o.type === 'constellation') return;
-      const reachPx = getMaxAbsoluteReach(o, context.objects) * context.activeZoom;
-      if (reachPx > maxOrbitX) maxOrbitX = reachPx;
-      if (reachPx > maxOrbitY) maxOrbitY = reachPx;
-    });
-
-    let maxNoteX = maxOrbitX;
-    let maxNoteY = maxOrbitY;
-
-    context.objects.filter((o:any) => o.type === 'note').forEach((note: any) => {
-      const distPx = (note.noteDistanceAU || 0) * context.activeZoom;
-      const rad = ((note.noteAngle || 0) * Math.PI) / 180;
-      const noteX = Math.cos(rad) * distPx;
-      const noteY = Math.sin(rad) * distPx;
-      const textBufferPx = 0; 
-      if (noteX + textBufferPx > maxNoteX) maxNoteX = noteX + textBufferPx;
-      if (noteY + textBufferPx > maxNoteY) maxNoteY = noteY + textBufferPx;
-    });
-
-    let minLegendX = -shellRadiusPx - shellRadiusPx;
-    const legends = context.objects.filter((o:any) => o.type === 'legend');
-    if (legends.length > 0) {
-      minLegendX = 0;
-      legends.forEach((legend: any) => {
-        const distPx = (legend.legendDistanceAU || 0) * context.activeZoom;
-        const rad = ((legend.legendAngle || 0) * Math.PI) / 180;
-        const legX = Math.cos(rad) * distPx;
-        const textBufferPx = 0;
-        if (legX - textBufferPx < minLegendX) minLegendX = legX - textBufferPx;
-      });
-    }
-
-    const directoryStartX = centerProj.x + minLegendX;
+    // Hardcoded Layout constraints based strictly on Soltan Ephemeris standard proportions
+    const directoryStartX = centerProj.x - 900.686 * shellRadiusPx;
     const directoryWidthPx = shellRadiusPx;
     
     const mapTopY = centerProj.y - shellRadiusPx;
-    const mapBottomY = centerProj.y + Math.max(maxOrbitY, maxNoteY);
-    const mapRightX = centerProj.x + Math.max(maxOrbitX, maxNoteX);
+    const mapBottomY = centerProj.y + 526.102 * shellRadiusPx;
+    const mapRightX = centerProj.x + 474.130 * shellRadiusPx;
     
     const paddingPx = shellRadiusPx * 0.25;
 
