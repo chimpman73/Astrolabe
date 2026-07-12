@@ -50,7 +50,7 @@ This file tracks the design, development, and integration tasks for the Astrolab
 | **AST-042** | Export & Rendering Bug Fixes | Low | `Done` | Fixed high-res export element scaling, title alignment overlaps, and group expansion state. |
 | **AST-043** | Coding Standards Compliance | High | `Done` | Refactored frontend classes to use `#` for encapsulation and strictly enforce one class per file. |
 | **AST-044** | Legend Object | High | `Done` | Implement dynamic on-canvas map legends for Planets, Orbits, and Elements. |
-
+| **AST-045** | Fixed Layout Template | High | `Done` | Refactored Nav Chart to use static multipliers for margins, locking parchment proportions independent of orbital objects. |
 ---
 
 ## Detailed Task Breakdown
@@ -272,3 +272,10 @@ This file tracks the design, development, and integration tasks for the Astrolab
   * Supported 'full' vs 'partial' modes across 3 legend types: Planets, Orbits, Elements.
   * Excluded legends from planetary/orbit drawing logic and directory lists.
   * Passed export scale offsets deeply into CloudRenderer to maintain accurate nested asteroid sizing on image export.
+
+- [x] **AST-045: Fixed Layout Template**
+  * Removed dynamic bounding calculations that expanded the parchment when objects moved near edges.
+  * Replaced with hardcoded margin multipliers (`2.184x` left, `1.375x` right, `1.15x + 20px` top/bottom) based on `shellRadius`.
+  * Scaled the Sphere title text dynamically with `shellRadius` to maintain exact proportions with the sphere edge across all zoom levels.
+  * Aligned the top of the System Directory exactly with the top of the dynamic Sphere title.
+  * Corrected `AutoFitCalculator` algebra and `constrainPan` boundaries to guarantee the drawn parchment perfectly maximizes the viewport area without clipping.

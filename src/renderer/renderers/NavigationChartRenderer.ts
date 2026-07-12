@@ -119,26 +119,23 @@ context.activeSphere?.shellBoundaryType === 'relativeMargin')
     
     const centerProj = context.project(0, 0);
 
-    // Hardcoded Layout constraints based strictly on Soltan Ephemeris standard proportions
-    const directoryStartX = centerProj.x - 900.686 * shellRadiusPx;
-    const directoryWidthPx = shellRadiusPx;
-    
-    const mapTopY = centerProj.y - shellRadiusPx;
-    const mapBottomY = centerProj.y + 526.102 * shellRadiusPx;
-    const mapRightX = centerProj.x + 474.130 * shellRadiusPx;
-    
-    const paddingPx = shellRadiusPx * 0.25;
+    const topMargin = (shellRadiusPx * 1.15) + 20;
+    const rightMargin = (shellRadiusPx * 1.375) - 10;
+    const leftMargin = shellRadiusPx * 2.184;
+
+    const directoryStartX = centerProj.x - leftMargin + 20;
+    const directoryWidthPx = leftMargin - shellRadiusPx - 20;
 
     return {
-      x: directoryStartX - paddingPx,
-      y: mapTopY - paddingPx,
-      width: (mapRightX - directoryStartX) + paddingPx * 2,
-      height: (mapBottomY - mapTopY) + paddingPx * 2,
+      x: centerProj.x - leftMargin,
+      y: centerProj.y - topMargin,
+      width: leftMargin + rightMargin,
+      height: topMargin * 2,
       directoryStartX,
       directoryWidthPx,
       shellRadiusPx,
       parchmentRadiusPx: shellRadiusPx,
-      paddingPx
+      paddingPx: 0
     };
   }
 
@@ -374,14 +371,17 @@ context.activeSphere?.shellBoundaryType === 'relativeMargin')
 
     ctx.restore();
 
-    ctx.font = `bold 24px ${this.#config.titleFontFamily}`;
+    const fontSize = shellRadius * 0.058;
+    const offset = shellRadius * 0.04;
+    
+    ctx.font = `bold ${fontSize}px ${this.#config.titleFontFamily}`;
     ctx.fillStyle = this.#config.strokeColor;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
     ctx.fillText(
       (activeSphere?.sphereName || 'CRYSTAL SHELL').toUpperCase() + ' SHELL',
       shellProj.x,
-      shellProj.y - shellRadius - 15
+      shellProj.y - shellRadius - offset
     );
   }
 
@@ -862,8 +862,10 @@ context.activeSphere?.shellBoundaryType === 'relativeMargin')
     const startX = bounds.directoryStartX;
     
     const shellProj = project(0, 0);
-    // Start at the exact same height as the crystal shell
-    let curY = shellProj.y - bounds.shellRadiusPx;
+    // Align with the top edge of the sphere title (which sits above the shell)
+    const titleOffset = bounds.shellRadiusPx * 0.04;
+    const titleFontSize = bounds.shellRadiusPx * 0.058;
+    let curY = shellProj.y - bounds.shellRadiusPx - titleOffset - titleFontSize;
 
     ctx.fillStyle = this.#config.directoryTitleColor;
     ctx.font = `bold ${48 * z}px ${this.#config.titleFontFamily}`;

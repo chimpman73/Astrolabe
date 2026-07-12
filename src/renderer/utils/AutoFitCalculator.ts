@@ -58,35 +58,41 @@ export class AutoFitCalculator {
     
                         const shellRadius = maxDist * shellScale;
     
-    // Hardcoded Layout constraints based strictly on Soltan Ephemeris standard proportions
-    const directoryStartX_AU = -900.686 * shellRadius;
+    const topMarginAU = shellRadius * 1.15;
+    const rightMarginAU = shellRadius * 1.375;
+    const leftMarginAU = shellRadius * 2.184;
+
+    const directoryStartX_AU = -leftMarginAU;
     const directoryWidthModel = shellRadius;
     
-    const mapTopY_AU = -shellRadius;
-    const mapBottomY_AU = 526.102 * shellRadius;
-    const mapRightX_AU = 474.130 * shellRadius;
+    const mapTopY_AU = -topMarginAU;
+    const mapBottomY_AU = topMarginAU;
+    const mapRightX_AU = rightMarginAU;
     
-    const paddingAU = shellRadius * 0.25;
+    const paddingAU = 0;
 
-    const paperWidthAU = (mapRightX_AU - directoryStartX_AU) + paddingAU * 2;
-    const paperHeightAU = (mapBottomY_AU - mapTopY_AU) + paddingAU * 2;
+    const paperWidthAU = leftMarginAU + rightMarginAU;
+    const paperHeightAU = topMarginAU * 2;
 
-    const margin = 0.90;
-    const targetZoomX = (dimensions.width * margin) / paperWidthAU;
-    const topOffsetPx = 0;
-    const availableHeight = dimensions.height - topOffsetPx;
-    const targetZoomY = (availableHeight * margin) / paperHeightAU;
+    const margin = 1.0;
+    
+    // To match NavigationChartRenderer's exact pixel adjustments:
+    // Drawn Width = (paperWidthAU * zoom) - 10
+    // Drawn Height = (paperHeightAU * zoom) + 40
+    const targetZoomX = (dimensions.width * margin + 10) / paperWidthAU;
+    const targetZoomY = (dimensions.height * margin - 40) / paperHeightAU;
     const targetZoom = Math.min(targetZoomX, targetZoomY);
     
-    // Geometric center of the fixed layout bounds
-    const centerXAU = (directoryStartX_AU - paddingAU + mapRightX_AU + paddingAU) / 2;
-    const centerYAU = (mapTopY_AU - paddingAU + mapBottomY_AU + paddingAU) / 2;
+    // Geometric center of the custom bounds
+    const centerXAU = (directoryStartX_AU + mapRightX_AU) / 2;
+    const centerYAU = 0;
     
     return {
       zoom: targetZoom,
       pan: { 
-         x: dimensions.width / 2 - (centerXAU * targetZoom), 
-         y: dimensions.height / 2 - (centerYAU * targetZoom) + (topOffsetPx / 2)
+         // Shift x by +5 pixels because the right margin is 10px smaller (shifts center 5px left)
+         x: dimensions.width / 2 - (centerXAU * targetZoom) + 5, 
+         y: dimensions.height / 2 - (centerYAU * targetZoom)
       }
     };
   }

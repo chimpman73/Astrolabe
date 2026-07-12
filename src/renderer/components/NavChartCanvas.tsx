@@ -77,18 +77,15 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
     const shellRadiusModel = maxDist * shellScale;
     
-    // Hardcoded Layout constraints based strictly on Soltan Ephemeris standard proportions
-    const directoryStartX_AU = -900.686 * shellRadiusModel;
-    const directoryWidthModel = shellRadiusModel;
-    
-    const mapTopY_AU = -shellRadiusModel;
-    const mapBottomY_AU = 526.102 * shellRadiusModel;
-    const mapRightX_AU = 474.130 * shellRadiusModel;
-    
-    const paddingModel = shellRadiusModel * 0.25;
+    const topMarginAU = shellRadiusModel * 1.15;
+    const rightMarginAU = shellRadiusModel * 1.375;
+    const leftMarginAU = shellRadiusModel * 2.184;
 
-    const paperWidthModel = (mapRightX_AU - directoryStartX_AU) + paddingModel * 2;
-    const paperHeightModel = (mapBottomY_AU - mapTopY_AU) + paddingModel * 2;
+    const directoryStartX_AU = -leftMarginAU;
+    const directoryWidthModel = shellRadiusModel;
+
+    const paperWidthModel = leftMarginAU + rightMarginAU;
+    const paperHeightModel = topMarginAU * 2;
     
     const totalWidthModel = paperWidthModel * 1.06;
     const totalHeightModel = paperHeightModel * 1.06;
@@ -113,22 +110,25 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     let minX, maxX, minY, maxY;
     
     // Adjust the center offset because the parchment is asymmetrical
-    const dirOffset = (panLimits.directoryWidthModel * z) / 2;
+    const leftMarginAU = panLimits.directoryWidthModel * 2.184;
+    const rightMarginAU = panLimits.directoryWidthModel * 1.375;
+    const centerX_px = ((-leftMarginAU + rightMarginAU) / 2) * z;
+    const xOffset = -centerX_px + 5;
     
     if (paperW <= dimensions.width) {
-      minX = dimensions.width / 2 + dirOffset;
-      maxX = dimensions.width / 2 + dirOffset;
+      minX = dimensions.width / 2 + xOffset;
+      maxX = dimensions.width / 2 + xOffset;
     } else {
-      minX = dimensions.width - deskMargin - paperW / 2 + dirOffset;
-      maxX = paperW / 2 + deskMargin + dirOffset;
+      minX = dimensions.width - deskMargin - paperW / 2 + xOffset;
+      maxX = paperW / 2 + deskMargin + xOffset;
     }
     
     if (paperH <= dimensions.height) {
-      minY = dimensions.height / 2 + 25; // Shift center down to account for toolbar
-      maxY = dimensions.height / 2 + 25;
+      minY = dimensions.height / 2;
+      maxY = dimensions.height / 2;
     } else {
       minY = dimensions.height - deskMargin - paperH / 2;
-      maxY = paperH / 2 + deskMargin + 25; // allow panning down slightly more to see top
+      maxY = paperH / 2 + deskMargin;
     }
     
     return {
