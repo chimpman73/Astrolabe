@@ -1,4 +1,5 @@
 import { CrystalSphere, CelestialObject } from '../../types/astrolabe';
+import { BookmarkStyleConfig } from '../../types/renderer';
 import { drawSolidBody, getBodyColors } from '../utils/canvasRenderer';
 import { ScaleManager } from '../utils/ScaleManager';
 
@@ -6,7 +7,7 @@ export function drawBookmark(
   ctx: CanvasRenderingContext2D,
   width: number,
   height: number,
-  theme: 'light' | 'dark',
+  config: BookmarkStyleConfig,
   showShell: boolean,
   showDistance: boolean,
   activeSphere: CrystalSphere | null,
@@ -15,12 +16,12 @@ export function drawBookmark(
   absoluteMaxDistance: number,
   visibleMaxDistance: number
 ) {
-  const isDark = theme === 'dark';
+  const isDark = config.isDarkTheme;
   
   // Theme Colors
-  const colorBg = isDark ? '#000000' : '#ffffff';
-  const colorStroke = isDark ? '#ffffff' : '#000000';
-  const colorMuted = isDark ? '#888888' : '#777777';
+  const colorBg = config.backgroundColor;
+  const colorStroke = config.strokeColor;
+  const colorMuted = config.mutedColor;
 
   // Clear background
   ctx.fillStyle = colorBg;

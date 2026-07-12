@@ -56,6 +56,13 @@ export interface INavigationChartRenderer {
   render(context: MapStyleContext): void;
 }
 
+export interface BookmarkStyleConfig {
+  isDarkTheme: boolean;
+  backgroundColor: string;
+  strokeColor: string;
+  mutedColor: string;
+}
+
 export interface NavigationChartStyleConfig {
   isDarkTheme: boolean;
   // Base Colors

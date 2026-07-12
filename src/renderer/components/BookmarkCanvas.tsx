@@ -2,6 +2,7 @@ import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 're
 import { useSystemStore } from '../store/useSystemStore';
 import { saveCanvasExport } from '../utils/exportHelper';
 import { drawBookmark } from '../renderers/SimpleVertBookmarkRenderer';
+import { vellumBookmarkStyleConfig, spaceBookmarkStyleConfig } from '../renderers/BookmarkStyleConfigs';
 import { ScaleManager } from '../utils/ScaleManager';
 
 export interface BookmarkCanvasHandle {
@@ -86,9 +87,11 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const config = bookmarkBackgroundMode === 'dark' ? spaceBookmarkStyleConfig : vellumBookmarkStyleConfig;
+
     // Redraw using canvas layout coordinates
     drawBookmark(
-      ctx, canvas.width, canvas.height, bookmarkBackgroundMode, 
+      ctx, canvas.width, canvas.height, config, 
       bookmarkShowShell, bookmarkShowDistance, 
       activeSphere, planetaryObjects, shellBasisDistance, absoluteMaxDistance, visibleMaxDistance
     );
@@ -107,9 +110,11 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
     const ctx = exportCanvas.getContext('2d');
     if (!ctx) return;
 
+    const config = bookmarkBackgroundMode === 'dark' ? spaceBookmarkStyleConfig : vellumBookmarkStyleConfig;
+
     // Draw high quality
     drawBookmark(
-      ctx, exportWidth, exportHeight, bookmarkBackgroundMode, 
+      ctx, exportWidth, exportHeight, config, 
       bookmarkShowShell, bookmarkShowDistance,
       activeSphere, planetaryObjects, shellBasisDistance, absoluteMaxDistance, visibleMaxDistance
     );
