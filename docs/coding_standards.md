@@ -32,7 +32,7 @@ This document provides explicit, high-signal instructions for AI models working 
     *   `SCREAMING_SNAKE_CASE` for global constants.
     *   `PascalCase` for React component filenames.
 *   **State Management:** Keep local state in components where possible; use a lightweight global store (`zustand` via `useSystemStore.ts`) for global app state (active sphere, view modes, toast messages).
-*   **Graphics/Canvas:** Encapsulate all Canvas rendering logic into dedicated stateless rendering components (e.g. `BaseRenderer`, `SimpleVertBookmarkRenderer`, `VellumNavigationChartRenderer`) to separate them from standard UI layout controls. React canvas components should act as "View Areas" that instantiate a "Renderer Style" and call `.render()`.
+*   **Graphics/Canvas:** Encapsulate all Canvas rendering logic into dedicated stateless rendering components (e.g. `BaseRenderer`, `SimpleVertBookmarkRenderer`, `NavigationChartRenderer`) to separate them from standard UI layout controls. React canvas components should act as "View Areas" that instantiate a "Renderer Style" and call `.render()`.
 
 ## 5. File Export & Serialization
 *   **Data Serialization:** When passing system data to the main process for saving, ensure it matches the `CrystalSphere` JSON schema.

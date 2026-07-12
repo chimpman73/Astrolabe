@@ -244,7 +244,7 @@ This file tracks the design, development, and integration tasks for the Astrolab
 
 - [x] **AST-040: Title Strike Outline**
   * Added `Title Strike Outline` system variable to the Celestial Bodies configuration sidebar.
-  * Implemented rendering logic in both `VellumNavigationChartRenderer.ts` and `SpaceNavigationChartRenderer.ts` to draw a scaled `strokeText` outline underneath celestial object names.
+  * Implemented rendering logic in `NavigationChartRenderer.ts` to draw a scaled `strokeText` outline underneath celestial object names.
   * Styled with the exact mathematical average color of the parchment background (`#e0caa6`) for Vellum mode and the pitch-black void color (`#0a0b10`) for Space mode.
 
 - [x] **AST-041: Decorative Google Fonts**
