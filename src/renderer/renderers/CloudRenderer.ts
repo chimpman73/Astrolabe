@@ -7,7 +7,7 @@ import { PRNG } from '../utils/PRNG';
 export class CloudRenderer extends BaseRenderer {
   public draw(context: RenderContext): void {
     const { 
-      ctx, obj, size, bodyFill, 
+      ctx, obj, size, bodyFill, bodyStroke,
       isBookmarkView, 
       parentX, parentY, orbitRadius, orbitAngle,
       bookmarkWidth, bookmarkCenterY, bookmarkR
@@ -125,7 +125,7 @@ export class CloudRenderer extends BaseRenderer {
 
       ctx.save();
       ctx.fillStyle = bodyFill;
-      ctx.strokeStyle = '#222222';
+      ctx.strokeStyle = bodyStroke;
       ctx.lineWidth = 1;
 
       for (let i = 0; i < density; i++) {

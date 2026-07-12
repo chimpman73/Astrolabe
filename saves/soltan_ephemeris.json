@@ -332,7 +332,8 @@
       "cloudiness": 0,
       "elementAffinity": "earth",
       "cloudObjectDensity": 800,
-      "groupName": "Planets"
+      "groupName": "Planets",
+      "cloudObjectShape": "irregular"
     },
     {
       "name": "Canis Major",

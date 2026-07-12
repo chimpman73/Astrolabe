@@ -55,3 +55,81 @@ export interface ParchmentDecoration {
 export interface INavigationChartRenderer {
   render(context: MapStyleContext): void;
 }
+
+export interface NavigationChartStyleConfig {
+  isDarkTheme: boolean;
+  // Base Colors
+  backgroundColor: string;
+  gridColor: string;
+  strokeColor: string;
+  mutedColor: string;
+  goldColor: string;
+  
+  // Background Textures/Images
+  backgroundImageUrl?: string;
+  foregroundImageUrl?: string;
+  
+  // Fonts
+  titleFontFamily: string;
+  starFontFamily: string;
+  defaultFontFamily: string;
+  
+  // Title / Strike color
+  titleStrikeColor?: string;
+  titleStrikeThicknessMultiplier: number;
+  
+  // Orbits
+  primaryOrbitAlpha: number;
+  secondaryOrbitAlpha: number;
+  primaryOrbitRgb: string;
+  secondaryOrbitRgb: string; 
+
+  // Shell colors
+  shellStrokeColor: string;
+  shellInnerStrokeColor: string;
+  shellShadowColor?: string;
+  
+  // Features
+  hasDecorations: boolean;
+  
+  // Directory specific
+  directoryDividerColor: string;
+  directoryTitleColor: string;
+  directorySubTitleColor: string;
+  directoryIconTint: 'none' | 'invert';
+  directoryTextColor: string;
+  
+  // Notes / Legends
+  noteTextColor: string;
+  noteSelectionColor: string;
+  legendBorderColor: string;
+  legendTextColor: string;
+  legendTitleColor: string;
+  
+  // Asset Paths (Symbols/Icons)
+  assets: {
+    elements: {
+      fire: string;
+      water: string;
+      earth: string;
+      air: string;
+      mixed: string;
+      none: string;
+    };
+    objects: {
+      star: string;
+      planet: string;
+      moon: string;
+      asteroid: string;
+      station: string;
+      cloud: string;
+      living_world: string;
+      custom: string;
+    };
+    decorations?: {
+      ink: string;
+      coffee: string;
+      burn: string;
+    };
+  };
+}

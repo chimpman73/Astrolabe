@@ -1,33 +1,12 @@
-import { ParchmentDecoration, MapStyleContext, INavigationChartRenderer } from '../../types/renderer';
+import { ParchmentDecoration, MapStyleContext, INavigationChartRenderer, NavigationChartStyleConfig } from '../../types/renderer';
 import { CelestialObject } from '../../types/astrolabe';
 import { getNoteCorners } from '../utils/noteInteractions';
-import { drawSolidBody, drawStationaryIndicator, getBodyColors, getElementColor } from '../utils/canvasRenderer';
+import { drawSolidBody, drawStationaryIndicator, getBodyColors } from '../utils/canvasRenderer';
 import { ScaleManager } from '../utils/ScaleManager';
 import { calculateSystemPositions } from '../utils/orbitMath';
 
-import fireSvgUrl from '../../../assets/elements/fire.svg';
-import waterSvgUrl from '../../../assets/elements/water.svg';
-import earthSvgUrl from '../../../assets/elements/earth.svg';
-import airSvgUrl from '../../../assets/elements/air.svg';
-import mixedSvgUrl from '../../../assets/elements/mixed.svg';
-import noneSvgUrl from '../../../assets/elements/none.svg';
-
-import starObjSvgUrl from '../../../assets/objects/star.svg';
-import planetObjSvgUrl from '../../../assets/objects/planet.svg';
-import moonObjSvgUrl from '../../../assets/objects/moon.svg';
-import asteroidObjSvgUrl from '../../../assets/objects/asteroid.svg';
-import stationObjSvgUrl from '../../../assets/objects/station.svg';
-import cloudObjSvgUrl from '../../../assets/objects/cloud.svg';
-import livingWorldObjSvgUrl from '../../../assets/objects/living_world.svg';
-import customObjSvgUrl from '../../../assets/objects/custom.svg';
-
-export class VellumNavigationChartRenderer implements INavigationChartRenderer {
-  readonly #colorBg = '#f9f5e8';
-  readonly #colorVellumAverage = '#e0caa6'; // Accurately sampled average color of parchment.jpg
-  readonly #colorGrid = 'rgba(94, 79, 60, 0.05)';
-  readonly #colorStroke = '#2b2316';
-  readonly #colorMuted = '#7c694e';
-  readonly #colorGold = '#b58315';
+export class NavigationChartRenderer implements INavigationChartRenderer {
+  #config: NavigationChartStyleConfig;
 
   #bgPattern: CanvasPattern | null = null;
   #woodPattern: CanvasPattern | null = null;
@@ -42,11 +21,13 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
 
   #imagesLoaded = false;
   #loadCount = 0;
-  readonly #totalImages = 5 + 6 + 8;
+  #totalImages = 0;
   #forceRedraw?: () => void;
 
-  constructor(forceRedraw?: () => void) {
+  constructor(config: NavigationChartStyleConfig, forceRedraw?: () => void) {
+    this.#config = config;
     this.#forceRedraw = forceRedraw;
+    
     const onLoad = () => {
       this.#loadCount++;
       if (this.#loadCount >= this.#totalImages) {
@@ -55,44 +36,41 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       }
     };
 
-    this.#bgImage.src = '/images/vellum_bg.png';
-    this.#bgImage.onload = onLoad;
+    const imagesToLoad: { img: HTMLImageElement, src: string }[] = [];
 
-    this.#woodDeskImage.src = '/images/wood_desk.png';
-    this.#woodDeskImage.onload = onLoad;
-
-    this.#stainInk.src = '/images/stain_ink.png';
-    this.#stainInk.onload = onLoad;
-
-    this.#stainCoffee.src = '/images/stain_coffee.png';
-    this.#stainCoffee.onload = onLoad;
-
-    this.#stainBurn.src = '/images/stain_burn.png';
-    this.#stainBurn.onload = onLoad;
+    if (this.#config.backgroundImageUrl) {
+      imagesToLoad.push({ img: this.#bgImage, src: this.#config.backgroundImageUrl });
+    }
+    if (this.#config.foregroundImageUrl) {
+      imagesToLoad.push({ img: this.#woodDeskImage, src: this.#config.foregroundImageUrl });
+    }
+    if (this.#config.assets.decorations) {
+      imagesToLoad.push({ img: this.#stainInk, src: this.#config.assets.decorations.ink });
+      imagesToLoad.push({ img: this.#stainCoffee, src: this.#config.assets.decorations.coffee });
+      imagesToLoad.push({ img: this.#stainBurn, src: this.#config.assets.decorations.burn });
+    }
 
     const svgSources: Record<string, string> = {
-      fire: fireSvgUrl,
-      water: waterSvgUrl,
-      earth: earthSvgUrl,
-      air: airSvgUrl,
-      mixed: mixedSvgUrl,
-      none: noneSvgUrl,
-      star: starObjSvgUrl,
-      planet: planetObjSvgUrl,
-      moon: moonObjSvgUrl,
-      asteroid: asteroidObjSvgUrl,
-      station: stationObjSvgUrl,
-      cloud: cloudObjSvgUrl,
-      living_world: livingWorldObjSvgUrl,
-      custom: customObjSvgUrl
+      ...this.#config.assets.elements,
+      ...this.#config.assets.objects
     };
 
     for (const [key, src] of Object.entries(svgSources)) {
       const img = new Image();
-      img.src = src;
-      img.onload = onLoad;
-      img.onerror = onLoad; 
       this.#svgIcons[key] = img;
+      imagesToLoad.push({ img, src });
+    }
+
+    this.#totalImages = imagesToLoad.length;
+    
+    if (this.#totalImages === 0) {
+      this.#imagesLoaded = true;
+    } else {
+      imagesToLoad.forEach(({ img, src }) => {
+        img.onload = onLoad;
+        img.onerror = onLoad;
+        img.src = src;
+      });
     }
   }
 
@@ -142,10 +120,10 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       return;
     }
 
-    if (!this.#bgPattern) {
+    if (!this.#bgPattern && this.#config.backgroundImageUrl) {
       this.#bgPattern = ctx.createPattern(this.#bgImage, 'repeat');
     }
-    if (!this.#woodPattern) {
+    if (!this.#woodPattern && this.#config.foregroundImageUrl) {
       this.#woodPattern = ctx.createPattern(this.#woodDeskImage, 'repeat');
     }
 
@@ -172,7 +150,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     if (this.#bgPattern) {
       ctx.fillStyle = this.#bgPattern;
     } else {
-      ctx.fillStyle = this.#colorBg;
+      ctx.fillStyle = this.#config.backgroundColor;
     }
     
     ctx.fill();
@@ -211,7 +189,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
   }
 
   drawGrid({ ctx, width, height, activePan }: MapStyleContext): void {
-    ctx.strokeStyle = this.#colorGrid;
+    ctx.strokeStyle = this.#config.gridColor;
     ctx.lineWidth = 1;
     const gridSize = 80;
     
@@ -234,7 +212,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
   }
 
   drawDecorations({ ctx, activeZoom, project, decorations }: MapStyleContext): void {
-    if (!this.#imagesLoaded || !decorations) return;
+    if (!this.#imagesLoaded || !decorations || !this.#config.hasDecorations) return;
 
     ctx.save();
     // Multiply blend mode simulates ink/coffee soaking into parchment
@@ -324,9 +302,9 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
         const dashLength = (isPrimaryOrbit ? 3 : 2) * exportScale;
         const gapLength = (isPrimaryOrbit ? 4 : 5) * exportScale;
         
-        const baseAlpha = isPrimaryOrbit ? 0.18 : 0.25;
+        const baseAlpha = isPrimaryOrbit ? this.#config.primaryOrbitAlpha : this.#config.secondaryOrbitAlpha;
         const finalAlpha = Math.min(1.0, baseAlpha * strength);
-        const rgb = isPrimaryOrbit ? '94, 79, 60' : '143, 50, 36';
+        const rgb = isPrimaryOrbit ? this.#config.primaryOrbitRgb : this.#config.secondaryOrbitRgb;
         
         ctx.setLineDash([dashLength, gapLength]);
         ctx.strokeStyle = `rgba(${rgb}, ${finalAlpha})`;
@@ -340,14 +318,19 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     ctx.save();
     
     // "Burned" effect for the shell boundary
-    ctx.shadowColor = 'rgba(43, 20, 10, 0.8)';
-    ctx.shadowBlur = 10;
+    if (this.#config.shellShadowColor) {
+      ctx.shadowColor = this.#config.shellShadowColor;
+      ctx.shadowBlur = 10;
+    } else {
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+    }
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
 
     ctx.beginPath();
     ctx.arc(shellProj.x, shellProj.y, Math.max(0, shellRadius), 0, 2 * Math.PI);
-    ctx.strokeStyle = '#382013'; // Very dark brown char color
+    ctx.strokeStyle = this.#config.shellStrokeColor;
     ctx.lineWidth = 4;
     ctx.stroke();
     
@@ -355,13 +338,13 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     ctx.beginPath();
     ctx.arc(shellProj.x, shellProj.y, Math.max(0, shellRadius - 5), 0, 2 * Math.PI);
     ctx.lineWidth = 1;
-    ctx.strokeStyle = '#5c3a21'; // Lighter singe
+    ctx.strokeStyle = this.#config.shellInnerStrokeColor;
     ctx.stroke();
 
     ctx.restore();
 
-    ctx.font = `bold 24px 'Elan', 'Cinzel', serif`;
-    ctx.fillStyle = this.#colorStroke;
+    ctx.font = `bold 24px ${this.#config.titleFontFamily}`;
+    ctx.fillStyle = this.#config.strokeColor;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
     ctx.fillText(
@@ -392,21 +375,21 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
 
       if (obj.type === 'cloud') {
         if (obj.distanceOrbited <= 0) return;
+        const { bodyFill, bodyStroke } = getBodyColors(obj, !this.#config.isDarkTheme, this.#config.backgroundColor, this.#config.strokeColor, this.#config.goldColor);
         const orbitR = obj.distanceOrbited * activeZoom;
-        const cloudFill = getElementColor(obj.elementAffinity || null) || '#808080';
         
-        drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, cloudFill, '#505050', false, activeZoom,
+        drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, bodyFill, bodyStroke, false, activeZoom,
           false, parentProj.x, parentProj.y, orbitR, pos.angle, undefined, undefined, undefined, isExport, exportScale
         );
       } else {
-        const { bodyFill, bodyStroke } = getBodyColors(obj, true, this.#colorBg, this.#colorStroke, this.#colorGold);
+        const { bodyFill, bodyStroke } = getBodyColors(obj, !this.#config.isDarkTheme, this.#config.backgroundColor, this.#config.strokeColor, this.#config.goldColor);
         const orbitR = obj.distanceOrbited * activeZoom;
         drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, bodyFill, bodyStroke, false, activeZoom,
           false, parentProj.x, parentProj.y, orbitR, pos.angle, undefined, undefined, undefined, isExport, exportScale
         );
 
         if (obj.isStationary && obj.type !== 'star' && obj.type !== 'constellation' && obj.type !== 'living_world') {
-          drawStationaryIndicator(ctx, proj.x, proj.y, renderSize, this.#colorMuted);
+          drawStationaryIndicator(ctx, proj.x, proj.y, renderSize, this.#config.mutedColor);
         }
       }
 
@@ -416,8 +399,8 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
         const defaultFontSize = Math.round(14 * exportScale);
         
         ctx.font = obj.type === 'star'
-          ? `bold ${starFontSize}px 'Elan', 'Cinzel', serif`
-          : `500 ${defaultFontSize}px 'Elan', 'Outfit', sans-serif`;
+          ? `bold ${starFontSize}px ${this.#config.starFontFamily}`
+          : `500 ${defaultFontSize}px ${this.#config.defaultFontFamily}`;
         
         if (obj.type === 'constellation') {
           ctx.fillStyle = '#ffffff';
@@ -426,7 +409,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
           
           if (activeSphere?.navTitleStrike) {
             ctx.save();
-            ctx.strokeStyle = this.#colorVellumAverage;
+            ctx.strokeStyle = (this.#config.titleStrikeColor || '#e0caa6');
             ctx.lineWidth = starFontSize * 0.15;
             ctx.lineJoin = 'round';
             ctx.strokeText(obj.name, proj.x, proj.y);
@@ -442,14 +425,14 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
           
           if (activeSphere?.navTitleStrike) {
             ctx.save();
-            ctx.strokeStyle = this.#colorVellumAverage;
+            ctx.strokeStyle = (this.#config.titleStrikeColor || '#e0caa6');
             ctx.lineWidth = fontSize * 0.15 + 1; // slightly thicker than standard to ensure legibility
             ctx.lineJoin = 'round';
             ctx.strokeText(obj.name, proj.x, titleY);
             ctx.restore();
           }
           
-          ctx.fillStyle = this.#colorStroke;
+          ctx.fillStyle = this.#config.strokeColor;
           ctx.fillText(obj.name, proj.x, titleY);
         }
       }
@@ -470,7 +453,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     ctx.lineTo(barX + scaleBarWidth, barY);
     ctx.lineTo(barX + scaleBarWidth, barY - 5);
     
-    ctx.strokeStyle = this.#colorStroke;
+    ctx.strokeStyle = this.#config.strokeColor;
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -482,8 +465,8 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       scaleLabel = `${miles.toLocaleString()} mi`;
     }
 
-    ctx.font = `500 10px 'Elan', 'Outfit', sans-serif`;
-    ctx.fillStyle = this.#colorStroke;
+    ctx.font = `500 10px ${this.#config.defaultFontFamily}`;
+    ctx.fillStyle = this.#config.strokeColor;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
     ctx.fillText(scaleLabel, barX + (scaleBarWidth / 2), barY - 8);
@@ -559,7 +542,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       ctx.scale(activeZoom, activeZoom);
 
       ctx.font = `${fontSize}px '${fontFamily}', sans-serif`;
-      ctx.fillStyle = this.#colorStroke;
+      ctx.fillStyle = this.#config.strokeColor;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
@@ -629,7 +612,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
         ctx.save();
         drawPolyPath();
         ctx.setLineDash([5 / activeZoom, 5 / activeZoom]);
-        ctx.strokeStyle = this.#colorStroke;
+        ctx.strokeStyle = this.#config.strokeColor;
         ctx.lineWidth = 1 / activeZoom;
         ctx.stroke();
         ctx.restore();
@@ -645,7 +628,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       ctx.restore();
 
       if (isSelected) {
-         ctx.fillStyle = this.#colorStroke;
+         ctx.fillStyle = this.#config.strokeColor;
          const r = 5 / activeZoom;
          ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
          ctx.beginPath(); ctx.arc(tl.x, tl.y, r, 0, Math.PI * 2); ctx.fill();
@@ -659,7 +642,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
          ctx.beginPath();
          ctx.moveTo(tr.x, tr.y);
          ctx.lineTo(tr.x + 20, tr.y - 20);
-         ctx.strokeStyle = this.#colorStroke;
+         ctx.strokeStyle = this.#config.strokeColor;
          ctx.lineWidth = 1 / activeZoom;
          ctx.setLineDash([2 / activeZoom, 2 / activeZoom]);
          ctx.stroke();
@@ -757,14 +740,14 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       const boxHeight = padding * 2 + fontSize + (items.length > 0 ? fontSize * 0.5 + items.length * lineSpacing : 0);
 
       // Draw Border Box (no fill)
-      ctx.strokeStyle = this.#colorStroke;
+      ctx.strokeStyle = this.#config.strokeColor;
       ctx.lineWidth = 1 / activeZoom;
       ctx.beginPath();
       ctx.roundRect(-boxWidth/2, -boxHeight/2, boxWidth, boxHeight, 5 / activeZoom);
       ctx.stroke();
 
       // Draw Title
-      ctx.fillStyle = this.#colorStroke;
+      ctx.fillStyle = this.#config.strokeColor;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       ctx.font = `bold ${fontSize}px '${fontFamily}', sans-serif`;
@@ -788,8 +771,8 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
               ctx.save();
               ctx.translate(startX + iconSize/2, startY);
               const R = iconSize * 0.4;
-              ctx.strokeStyle = this.#colorStroke;
-              ctx.fillStyle = this.#colorStroke;
+              ctx.strokeStyle = this.#config.legendTextColor;
+              ctx.fillStyle = this.#config.legendTextColor;
               ctx.lineWidth = 1.5 / activeZoom;
               
               ctx.beginPath();
@@ -820,7 +803,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       // Draw selection indicator
       const isSelected = selectedObjectIndex !== null && objects[selectedObjectIndex]?.name === legend.name;
       if (isSelected) {
-          ctx.fillStyle = this.#colorStroke;
+          ctx.fillStyle = this.#config.strokeColor;
           ctx.beginPath();
           const r = 5 / (activeZoom * lScale);
           ctx.arc(0, 0, r, 0, Math.PI * 2);
@@ -833,7 +816,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
   }
 
   #drawSystemDirectory(context: MapStyleContext, bounds: any): void {
-    const { ctx, activeSphere, visibleObjects, currentSystemDate, project } = context;
+    const { ctx, activeSphere, visibleObjects, project, activeZoom } = context;
     if (!this.#imagesLoaded) return;
 
     ctx.save();
@@ -848,7 +831,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     ctx.beginPath();
     ctx.moveTo(dividerX, bounds.y + bounds.paddingPx);
     ctx.lineTo(dividerX, bounds.y + bounds.height - bounds.paddingPx);
-    ctx.strokeStyle = '#c8b185';
+    ctx.strokeStyle = this.#config.directoryDividerColor;
     ctx.lineWidth = 4 * z;
     ctx.stroke();
 
@@ -859,16 +842,16 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
     // Start at the exact same height as the crystal shell
     let curY = shellProj.y - bounds.shellRadiusPx;
 
-    ctx.fillStyle = this.#colorStroke;
-    ctx.font = `bold ${48 * z}px 'Elan', 'Cinzel', serif`;
+    ctx.fillStyle = this.#config.directoryTitleColor;
+    ctx.font = `bold ${48 * z}px ${this.#config.titleFontFamily}`;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top'; // use top so it precisely aligns with the shell's top edge
     ctx.fillText((activeSphere?.sphereName || 'CRYSTAL SPHERE').toUpperCase(), startX, curY);
 
     curY += 50 * z;
-    ctx.font = `normal ${24 * z}px 'Elan', 'Outfit', sans-serif`;
-    ctx.fillStyle = '#5e4f3c';
-    const shellRadiusAU = bounds.shellRadiusPx / context.activeZoom;
+    ctx.font = `normal ${24 * z}px ${this.#config.defaultFontFamily}`;
+    ctx.fillStyle = this.#config.directorySubTitleColor;
+    const shellRadiusAU = bounds.shellRadiusPx / activeZoom;
     ctx.fillText(`Radius: ${shellRadiusAU.toFixed(2)} AU`, startX, curY);
 
     curY += 80 * z;
@@ -897,8 +880,8 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       ctx.translate(startX + 15 * z, curY + 15 * z);
       
       const R = iconSize / 2 - 2 * z;
-      ctx.strokeStyle = this.#colorStroke;
-      ctx.fillStyle = this.#colorStroke;
+      ctx.strokeStyle = this.#config.strokeColor;
+      ctx.fillStyle = this.#config.strokeColor;
       ctx.lineWidth = 1.5 * z;
 
       ctx.beginPath();
@@ -941,6 +924,7 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       if (elemIcon && elemIcon.complete && elemIcon.naturalWidth > 0) {
         ctx.save();
         ctx.translate(startX + 55 * z, curY + 15 * z);
+        if (this.#config.directoryIconTint === 'invert') ctx.filter = 'brightness(0) invert(1)';
         ctx.drawImage(elemIcon, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
         ctx.restore();
       }
@@ -951,18 +935,19 @@ export class VellumNavigationChartRenderer implements INavigationChartRenderer {
       if (typeIcon && typeIcon.complete && typeIcon.naturalWidth > 0) {
         ctx.save();
         ctx.translate(startX + 95 * z, curY + 15 * z);
+        if (this.#config.directoryIconTint === 'invert') ctx.filter = 'brightness(0) invert(1)';
         ctx.drawImage(typeIcon, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
         ctx.restore();
       }
 
       // Draw details
-      ctx.fillStyle = this.#colorStroke;
-      ctx.font = `bold ${32 * z}px 'Elan', 'Cinzel', serif`;
+      ctx.fillStyle = this.#config.directoryTextColor;
+      ctx.font = `bold ${32 * z}px ${this.#config.titleFontFamily}`;
       ctx.fillText(obj.name, startX + textOffsetX, curY);
 
       curY += 35 * z;
-      ctx.font = `italic ${20 * z}px 'Elan', 'Outfit', sans-serif`;
-      ctx.fillStyle = '#5e4f3c';
+      ctx.font = `italic ${20 * z}px ${this.#config.defaultFontFamily}`;
+      ctx.fillStyle = this.#config.directorySubTitleColor;
       
       const period = calculateSystemPositions([obj], 0)[obj.name]?.period || 0;
       ctx.fillText(

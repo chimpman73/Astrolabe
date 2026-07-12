@@ -3,8 +3,8 @@ import { useSystemStore } from '../store/useSystemStore';
 import { calculateSystemPositions } from '../utils/orbitMath';
 import { ScaleManager } from '../utils/ScaleManager';
 import { AutoFitCalculator } from '../utils/AutoFitCalculator';
-import { VellumNavigationChartRenderer } from '../renderers/VellumNavigationChartRenderer';
-import { SpaceNavigationChartRenderer } from '../renderers/SpaceNavigationChartRenderer';
+import { NavigationChartRenderer } from '../renderers/NavigationChartRenderer';
+import { vellumStyleConfig, spaceStyleConfig } from '../renderers/ChartStyleConfigs';
 import { getNoteNodes, hitTestNoteNodes, NoteNodeId, getNoteCorners } from '../utils/noteInteractions';
 import { CelestialObject } from '../../types/astrolabe';
 import { exportNavigationChart } from '../renderers/ExportDirectoryRenderer';
@@ -16,7 +16,7 @@ export interface NavChartCanvasHandle {
   handleExport: () => Promise<void>;
 }
 
-const MIN_ZOOM = 5;
+
 const MAX_ZOOM = 1000;
 
 export interface NavChartCanvasProps {
@@ -40,8 +40,8 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   const forceRedraw = () => setForceRenderState(s => s + 1);
 
   const renderersRef = useRef({
-    vellum: new VellumNavigationChartRenderer(forceRedraw),
-    space: new SpaceNavigationChartRenderer()
+    vellum: new NavigationChartRenderer(vellumStyleConfig, forceRedraw),
+    space: new NavigationChartRenderer(spaceStyleConfig, forceRedraw)
   });
 
   const objects = activeSphere?.objects || [];
@@ -65,7 +65,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   };
 
   const panLimits = useMemo(() => {
-    if (mapTheme !== 'parchment') return null;
+    
     let maxDist = 0.1;
     objects.forEach((o: any) => {
       if (!isPrimary(o) || o.affectsShellBoundary === false) return;
@@ -98,7 +98,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   }, [panLimits, dimensions]);
 
   const constrainPan = (p: { x: number; y: number }, z: number) => {
-    if (!panLimits || mapTheme !== 'parchment') return p;
+    if (!panLimits) return p;
     const paperW = panLimits.width * z;
     const paperH = panLimits.height * z;
     const deskMargin = 40;
@@ -131,7 +131,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   };
 
   useEffect(() => {
-    if (mapTheme === 'parchment' && zoom < minZoomLimit) {
+    if (zoom < minZoomLimit) {
       setZoom(() => minZoomLimit);
       setPan(p => constrainPan(p, minZoomLimit));
     }
@@ -191,7 +191,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   useImperativeHandle(ref, () => ({
     handleZoom: (factor: number) => {
         setZoom((z) => {
-            const newZoom = Math.max(Math.min(z * factor, MAX_ZOOM), mapTheme === 'parchment' ? minZoomLimit : MIN_ZOOM);
+            const newZoom = Math.max(Math.min(z * factor, MAX_ZOOM), minZoomLimit);
             setPan(p => constrainPan(p, newZoom));
             return newZoom;
         });
@@ -441,7 +441,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     const mouseY = e.clientY - rect.top;
 
     setZoom((z) => {
-      const newZoom = Math.min(Math.max(z * zoomFactor, mapTheme === 'parchment' ? minZoomLimit : MIN_ZOOM), MAX_ZOOM);
+      const newZoom = Math.min(Math.max(z * zoomFactor, minZoomLimit), MAX_ZOOM);
       
       // Calculate new pan to zoom toward mouse
       const scale = newZoom / z;

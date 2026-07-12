@@ -15,17 +15,8 @@ export interface ExportNavigationChartParams {
   renderer: INavigationChartRenderer;
 }
 
-export async function exportNavigationChart({
-  mapTheme,
-  activeSphere,
-  currentSystemDate,
-  objects,
-  visibleObjects,
-  isPrimary,
-  setToastMessage,
-  renderer
-}: ExportNavigationChartParams): Promise<void> {
-  const isParchment = mapTheme === 'parchment';
+export async function exportNavigationChart(params: ExportNavigationChartParams): Promise<void> {
+  const { activeSphere, currentSystemDate, objects, visibleObjects, isPrimary, renderer, setToastMessage } = params;
   
   const primaryObjects = objects.filter((o) => 
     o.distanceOrbited >= 0 && isPrimary(o)
