@@ -4,7 +4,7 @@ import { CelestialObject, OrbitDirection } from '../../types/astrolabe';
  * Calculates the orbital period (P) in days using Keplerian scaling: P = k * d^1.5.
  * Defaults to k = 365, so a distance of 1.0 (Earth-like) equals 365 days.
  */
-export function calculateOrbitalPeriod(distance: number, override?: number): number {
+function calculateOrbitalPeriod(distance: number, override?: number): number {
   if (override !== undefined && override > 0) return override;
   if (distance <= 0) return 1;
   // Kepler's Third Law approximation: P = 365 * d^1.5
@@ -17,7 +17,7 @@ export function calculateOrbitalPeriod(distance: number, override?: number): num
  * @param isStationary - If true, always returns initialAngle (object is fixed in space).
  * @param direction - 'retrograde' reverses angular velocity, producing clockwise motion.
  */
-export function calculateAngle(
+function calculateAngle(
   initialAngle: number,
   periodDays: number,
   currentDays: number,
@@ -37,7 +37,7 @@ export function calculateAngle(
  * Converts polar distance (semi-major axis) and angle to 2D Cartesian offset coordinates,
  * supporting Keplerian elliptical orbits.
  */
-export function calculateCoordinates(
+function calculateCoordinates(
   distance: number, 
   angleDegrees: number,
   eccentricity: number = 0,
@@ -66,7 +66,7 @@ export function calculateCoordinates(
   };
 }
 
-export interface PositionDetails {
+interface PositionDetails {
   x: number;      // global X position in system scale
   y: number;      // global Y position in system scale
   angle: number;  // current active angle in degrees

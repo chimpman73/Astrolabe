@@ -1,6 +1,5 @@
 import { BaseRenderer } from './BaseRenderer';
 import { RenderContext } from '../../types/renderer';
-import { shapeManager } from '../utils/ShapeManager';
 
 export class StarRenderer extends BaseRenderer {
   public draw(context: RenderContext): void {
@@ -14,20 +13,8 @@ export class StarRenderer extends BaseRenderer {
     ctx.fillStyle = bodyFill;
     ctx.globalAlpha = cAlpha;
     
-    if (customPath instanceof Path2D) {
-      ctx.translate(x, y);
-      
-      const bounds = (shapeManager as any).getCachedBounds?.(obj.customShapeName);
-      let cx = 50, cy = 50, maxDim = 100;
-      if (bounds && bounds.w > 0 && bounds.h > 0) {
-        cx = bounds.x + bounds.w / 2;
-        cy = bounds.y + bounds.h / 2;
-        maxDim = Math.max(bounds.w, bounds.h);
-      }
-      
-      const scale = (2 * size) / maxDim;
-      ctx.scale(scale, scale);
-      ctx.translate(-cx, -cy);
+      if (customPath instanceof Path2D) {
+        const maxDim = this.applyCustomShapeTransform(ctx, obj.customShapeName, x, y, size * cSize);
       
       const expansion = (cSize - 1) * maxDim / 2;
       ctx.lineWidth = expansion * 2;

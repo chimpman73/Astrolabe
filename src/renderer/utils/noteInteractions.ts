@@ -2,7 +2,7 @@ import { CelestialObject } from '../../types/astrolabe';
 
 export type NoteNodeId = 'center' | 'rotate' | 'tl' | 'tr' | 'bl' | 'br';
 
-export interface NoteNodes {
+interface NoteNodes {
   center: { x: number; y: number };
   rotate: { x: number; y: number };
   tl: { x: number; y: number };

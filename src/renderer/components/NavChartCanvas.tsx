@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState, forwardRef, useImperativeHandle, useMemo } from 'react';
+import { useFontsLoaded } from '../hooks/useFontsLoaded';
 import { useSystemStore } from '../store/useSystemStore';
 import { calculateSystemPositions } from '../utils/orbitMath';
 import { ScaleManager } from '../utils/ScaleManager';
@@ -19,7 +20,7 @@ export interface NavChartCanvasHandle {
 
 const MAX_ZOOM = 1000;
 
-export interface NavChartCanvasProps {
+interface NavChartCanvasProps {
   mapTheme: 'parchment' | 'space';
 }
 
@@ -34,7 +35,6 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     updateCelestialObject,
   } = useSystemStore();
 
-  const [fontsLoaded, setFontsLoaded] = useState(false);
   const [forceRenderState, setForceRenderState] = useState(0);
 
   const forceRedraw = () => setForceRenderState(s => s + 1);
@@ -137,13 +137,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     }
   }, [minZoomLimit, zoom, mapTheme]);
 
-  useEffect(() => {
-    if (document.fonts) {
-      document.fonts.ready.then(() => {
-        setFontsLoaded(true);
-      });
-    }
-  }, []);
+  const fontsLoaded = useFontsLoaded();
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);

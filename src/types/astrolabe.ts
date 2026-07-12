@@ -145,7 +145,7 @@ export interface CrystalSphere {
   objects: CelestialObject[];
 }
 
-export interface IpcResponse<T> {
+interface IpcResponse<T> {
   success: boolean;
   data?: T;
   error?: string;
@@ -161,7 +161,7 @@ export interface SaveFileInfo {
 }
 
 // Window API augmentation for Electron
-export interface IAstrolabeAPI {
+interface IAstrolabeAPI {
   selectSaveDirectory: () => Promise<IpcResponse<string>>;
   listSavesDirectory: (dirPath: string) => Promise<IpcResponse<SaveFileInfo[]>>;
   loadJsonFile: (filePath: string) => Promise<IpcResponse<CrystalSphere>>;

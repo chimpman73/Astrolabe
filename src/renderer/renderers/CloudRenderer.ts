@@ -5,6 +5,31 @@ import { ScaleManager } from '../utils/ScaleManager';
 import { PRNG } from '../utils/PRNG';
 
 export class CloudRenderer extends BaseRenderer {
+  private drawCloudArc(
+    ctx: CanvasRenderingContext2D,
+    numSegments: number,
+    isFullRing: boolean,
+    amp: number,
+    numBumps: number,
+    isReverse: boolean,
+    calculatePoint: (nx: number, envelope: number, bump: number) => { x: number, y: number }
+  ) {
+    const start = isReverse ? numSegments : 0;
+    const end = isReverse ? -1 : numSegments + 1;
+    const step = isReverse ? -1 : 1;
+
+    for (let i = start; i !== end; i += step) {
+      const t = i / numSegments;
+      const nx = -1 + 2 * t;
+      const envelope = isFullRing ? 1 : (1 - nx * nx);
+      const bump = (1 - amp) + amp * Math.cos(nx * Math.PI * numBumps);
+      
+      const pt = calculatePoint(nx, envelope, bump);
+      if (i === start && !isReverse) ctx.moveTo(pt.x, pt.y);
+      else ctx.lineTo(pt.x, pt.y);
+    }
+  }
+
   public draw(context: RenderContext): void {
     const { 
       ctx, obj, size, bodyFill, bodyStroke,
@@ -32,34 +57,23 @@ export class CloudRenderer extends BaseRenderer {
       const cloudW = bookmarkR * halfAngle * 2;
       const numSegments = Math.max(100, Math.floor(cloudW));
 
-      for (let i = 0; i <= numSegments; i++) {
-        const t = i / numSegments;
-        const nx = -1 + 2 * t;
-        const envelope = isFullRing ? 1 : (1 - nx * nx);
-        const bump = (1 - amp) + amp * Math.cos(nx * Math.PI * numBumps);
-        
+      this.drawCloudArc(ctx, numSegments, isFullRing, amp, numBumps, false, (nx, envelope, bump) => {
         const alpha = 1.5 * Math.PI + nx * halfAngle;
         const currentR = bookmarkR + halfH * envelope * bump;
-        const cx = parentX + currentR * Math.cos(alpha);
-        const cy = bookmarkCenterY + currentR * Math.sin(alpha);
-        
-        if (i === 0) ctx.moveTo(cx, cy);
-        else ctx.lineTo(cx, cy);
-      }
+        return {
+          x: parentX + currentR * Math.cos(alpha),
+          y: bookmarkCenterY + currentR * Math.sin(alpha)
+        };
+      });
       
-      for (let i = numSegments; i >= 0; i--) {
-        const t = i / numSegments;
-        const nx = -1 + 2 * t;
-        const envelope = isFullRing ? 1 : (1 - nx * nx);
-        const bump = (1 - amp) + amp * Math.cos(nx * Math.PI * numBumps);
-        
+      this.drawCloudArc(ctx, numSegments, isFullRing, amp, numBumps, true, (nx, envelope, bump) => {
         const alpha = 1.5 * Math.PI + nx * halfAngle;
         const currentR = Math.max(0, bookmarkR - halfH * envelope * bump);
-        const cx = parentX + currentR * Math.cos(alpha);
-        const cy = bookmarkCenterY + currentR * Math.sin(alpha);
-        
-        ctx.lineTo(cx, cy);
-      }
+        return {
+          x: parentX + currentR * Math.cos(alpha),
+          y: bookmarkCenterY + currentR * Math.sin(alpha)
+        };
+      });
     } else {
       if (parentX === undefined || parentY === undefined || orbitRadius === undefined || orbitAngle === undefined) return;
       if (obj.distanceOrbited <= 0) return;
@@ -69,34 +83,23 @@ export class CloudRenderer extends BaseRenderer {
       const halfH = Math.max(8, size * 1.5);
       const numSegments = Math.max(40, Math.floor(arcDegrees * 1.5));
 
-      for (let i = 0; i <= numSegments; i++) {
-        const t = i / numSegments;
-        const nx = -1 + 2 * t;
-        const envelope = isFullRing ? 1 : (1 - nx * nx);
-        const bump = (1 - amp) + amp * Math.cos(nx * Math.PI * numBumps);
-        
+      this.drawCloudArc(ctx, numSegments, isFullRing, amp, numBumps, false, (nx, envelope, bump) => {
         const angle = centerAngle + nx * arcHalf;
         const rOuter = orbitRadius + halfH * envelope * bump;
-        
-        const cx = parentX + rOuter * Math.cos(angle);
-        const cy = parentY + rOuter * Math.sin(angle);
-        if (i === 0) ctx.moveTo(cx, cy);
-        else ctx.lineTo(cx, cy);
-      }
+        return {
+          x: parentX + rOuter * Math.cos(angle),
+          y: parentY + rOuter * Math.sin(angle)
+        };
+      });
       
-      for (let i = numSegments; i >= 0; i--) {
-        const t = i / numSegments;
-        const nx = -1 + 2 * t;
-        const envelope = isFullRing ? 1 : (1 - nx * nx);
-        const bump = (1 - amp) + amp * Math.cos(nx * Math.PI * numBumps);
-        
+      this.drawCloudArc(ctx, numSegments, isFullRing, amp, numBumps, true, (nx, envelope, bump) => {
         const angle = centerAngle + nx * arcHalf;
         const rInner = orbitRadius - halfH * envelope * bump;
-        
-        const cx = parentX + rInner * Math.cos(angle);
-        const cy = parentY + rInner * Math.sin(angle);
-        ctx.lineTo(cx, cy);
-      }
+        return {
+          x: parentX + rInner * Math.cos(angle),
+          y: parentY + rInner * Math.sin(angle)
+        };
+      });
     }
     
     ctx.closePath();

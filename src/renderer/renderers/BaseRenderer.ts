@@ -152,6 +152,22 @@ export abstract class BaseRenderer {
     }
   }
 
+  protected applyCustomShapeTransform(ctx: CanvasRenderingContext2D, customShapeName: string | undefined, x: number, y: number, size: number): number {
+    ctx.translate(x, y);
+    const bounds = (shapeManager as any).getCachedBounds?.(customShapeName ?? '');
+    let cx = 50, cy = 50, maxDim = 100;
+    if (bounds && bounds.w > 0 && bounds.h > 0) {
+      cx = bounds.x + bounds.w / 2;
+      cy = bounds.y + bounds.h / 2;
+      maxDim = Math.max(bounds.w, bounds.h);
+    }
+    
+    const scale = (2 * size) / maxDim;
+    ctx.scale(scale, scale);
+    ctx.translate(-cx, -cy);
+    return maxDim;
+  }
+
   protected drawBaseSolid(context: RenderContext): void {
     const { ctx, x, y, obj, size, bodyFill, bodyStroke } = context;
     const shape = obj.worldShape ?? 'sphere';
@@ -170,19 +186,7 @@ export abstract class BaseRenderer {
       const path = shapeManager.getCachedPath(obj.customShapeName);
       if (path) {
         ctx.save();
-        ctx.translate(x, y);
-        
-        const bounds = (shapeManager as any).getCachedBounds?.(obj.customShapeName);
-        let cx = 50, cy = 50, maxDim = 100;
-        if (bounds && bounds.w > 0 && bounds.h > 0) {
-          cx = bounds.x + bounds.w / 2;
-          cy = bounds.y + bounds.h / 2;
-          maxDim = Math.max(bounds.w, bounds.h);
-        }
-        
-        const scale = (2 * size) / maxDim;
-        ctx.scale(scale, scale);
-        ctx.translate(-cx, -cy);
+        this.applyCustomShapeTransform(ctx, obj.customShapeName, x, y, size);
         
         ctx.fill(path);
         ctx.stroke(path);

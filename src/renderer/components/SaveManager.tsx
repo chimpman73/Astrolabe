@@ -1056,15 +1056,9 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 value={obj.constellationStarMinSizeClass || 'A'}
                                 onChange={e => handleUpdateObject(index, { constellationStarMinSizeClass: e.target.value as SizeClass })}
                               >
-                                <option value="A">Size A</option>
-                                <option value="B">Size B</option>
-                                <option value="C">Size C</option>
-                                <option value="D">Size D</option>
-                                <option value="E">Size E</option>
-                                <option value="F">Size F</option>
-                                <option value="G">Size G</option>
-                                <option value="H">Size H</option>
-                                <option value="I">Size I</option>
+                                {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].map(size => (
+                                  <option key={size} value={size}>Size {size}</option>
+                                ))}
                               </select>
                             </div>
                             <div className="editor-form-group">
@@ -1074,15 +1068,9 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 value={obj.constellationStarMaxSizeClass || 'C'}
                                 onChange={e => handleUpdateObject(index, { constellationStarMaxSizeClass: e.target.value as SizeClass })}
                               >
-                                <option value="A">Size A</option>
-                                <option value="B">Size B</option>
-                                <option value="C">Size C</option>
-                                <option value="D">Size D</option>
-                                <option value="E">Size E</option>
-                                <option value="F">Size F</option>
-                                <option value="G">Size G</option>
-                                <option value="H">Size H</option>
-                                <option value="I">Size I</option>
+                                {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].map(size => (
+                                  <option key={size} value={size}>Size {size}</option>
+                                ))}
                               </select>
                             </div>
                           </>
@@ -1133,24 +1121,15 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 value={obj.noteFontFamily || 'Elan'}
                                 onChange={e => handleUpdateObject(index, { noteFontFamily: e.target.value })}
                               >
-                                <option value="Elan">Elan</option>
-                                <option value="Mephisto">Mephisto</option>
-                                <option value="Cinzel">Cinzel</option>
-                                <option value="Architects Daughter">Architects Daughter</option>
-                                <option value="Caveat">Caveat</option>
-                                <option value="Kalam">Kalam</option>
-                                <option value="Homemade Apple">Homemade Apple</option>
-                                <option value="Reenie Beanie">Reenie Beanie</option>
-                                <option value="Shadows Into Light">Shadows Into Light</option>
-                                <option value="Sacramento">Sacramento</option>
-                                <option value="Marck Script">Marck Script</option>
-                                <option value="Mr Dafoe">Mr Dafoe</option>
-                                <option value="Herr Von Muellerhoff">Herr Von Muellerhoff</option>
-                                <option value="IM Fell English">IM Fell English</option>
-                                <option value="UnifrakturMaguntia">UnifrakturMaguntia</option>
-                                <option value="MedievalSharp">MedievalSharp</option>
-                                <option value="Pirata One">Pirata One</option>
-                                <option value="Grenze Gotisch">Grenze Gotisch</option>
+                                {[
+                                  'Elan', 'Mephisto', 'Cinzel', 'Architects Daughter', 'Caveat',
+                                  'Kalam', 'Homemade Apple', 'Reenie Beanie', 'Shadows Into Light',
+                                  'Sacramento', 'Marck Script', 'Mr Dafoe', 'Herr Von Muellerhoff',
+                                  'IM Fell English', 'UnifrakturMaguntia', 'MedievalSharp', 'Pirata One',
+                                  'Grenze Gotisch'
+                                ].map(font => (
+                                  <option key={font} value={font}>{font}</option>
+                                ))}
                               </select>
                             </div>
                             <div className="editor-form-group">
@@ -1248,14 +1227,12 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 value={obj.legendFontFamily || 'Elan'}
                                 onChange={e => handleUpdateObject(index, { legendFontFamily: e.target.value })}
                               >
-                                <option value="Elan">Elan</option>
-                                <option value="Mephisto">Mephisto</option>
-                                <option value="Cinzel">Cinzel</option>
-                                <option value="Architects Daughter">Architects Daughter</option>
-                                <option value="Caveat">Caveat</option>
-                                <option value="Kalam">Kalam</option>
-                                <option value="MedievalSharp">MedievalSharp</option>
-                                <option value="Grenze Gotisch">Grenze Gotisch</option>
+                                {[
+                                  'Elan', 'Mephisto', 'Cinzel', 'Architects Daughter', 'Caveat',
+                                  'Kalam', 'MedievalSharp', 'Grenze Gotisch'
+                                ].map(font => (
+                                  <option key={font} value={font}>{font}</option>
+                                ))}
                               </select>
                             </div>
                             <div className="editor-form-group">

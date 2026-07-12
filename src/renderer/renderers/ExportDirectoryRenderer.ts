@@ -4,7 +4,7 @@ import { ScaleManager } from '../utils/ScaleManager';
 import { calculateSystemPositions } from '../utils/orbitMath';
 import { saveCanvasExport } from '../utils/exportHelper';
 
-export interface ExportNavigationChartParams {
+interface ExportNavigationChartParams {
   mapTheme: 'parchment' | 'space';
   activeSphere: CrystalSphere | null;
   currentSystemDate: number;

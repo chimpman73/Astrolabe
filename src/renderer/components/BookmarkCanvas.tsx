@@ -1,4 +1,5 @@
-import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
+import { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useFontsLoaded } from '../hooks/useFontsLoaded';
 import { useSystemStore } from '../store/useSystemStore';
 import { saveCanvasExport } from '../utils/exportHelper';
 import { drawBookmark } from '../renderers/SimpleVertBookmarkRenderer';
@@ -19,15 +20,7 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
     viewMode,
   } = useSystemStore();
 
-  const [fontsLoaded, setFontsLoaded] = useState(false);
-
-  useEffect(() => {
-    if (document.fonts) {
-      document.fonts.ready.then(() => {
-        setFontsLoaded(true);
-      });
-    }
-  }, []);
+  const fontsLoaded = useFontsLoaded();
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 

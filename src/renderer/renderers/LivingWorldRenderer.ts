@@ -1,23 +1,7 @@
 import { BaseRenderer } from './BaseRenderer';
 import { RenderContext } from '../../types/renderer';
 
-function mulberry32(a: number) {
-  return function() {
-    let t = a += 0x6D2B79F5;
-    t = Math.imul(t ^ t >>> 15, t | 1);
-    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  }
-}
-
-function hashString(str: string) {
-  let h = 0x811c9dc5;
-  for(let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i);
-    h = Math.imul(h, 0x01000193);
-  }
-  return h;
-}
+import { PRNG } from '../utils/PRNG';
 
 export class LivingWorldRenderer extends BaseRenderer {
   static #geometryCache = new Map<string, { 
@@ -66,7 +50,8 @@ export class LivingWorldRenderer extends BaseRenderer {
       ) => {
         if (currentLevel > levels) return;
         
-        const rand = mulberry32(hashString(pathSeed));
+        const rng = new PRNG(pathSeed);
+        const rand = () => rng.next();
         const baseBranches = Math.max(1, Math.floor(density / 2));
         const branchSpread = currentLevel === 1 ? Math.PI * 2 : (Math.PI / 1.5);
         
@@ -76,7 +61,8 @@ export class LivingWorldRenderer extends BaseRenderer {
           
         for (let i = 0; i < numBranches; i++) {
           const branchSeed = pathSeed + '_' + i;
-          const bRand = mulberry32(hashString(branchSeed));
+          const bRng = new PRNG(branchSeed);
+          const bRand = () => bRng.next();
           
           let branchAngle = baseAngle;
           const noiseFactor = Math.max(0.1, bendFactor * 2);
