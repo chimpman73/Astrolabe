@@ -442,7 +442,8 @@
       "legendDistanceAU": 175.20663681121266,
       "legendAngle": 164.68552204798874,
       "legendFontSize": 8,
-      "legendScale": 0.5
+      "legendScale": 0.5,
+      "groupId": "krye0y6"
     },
     {
       "id": "b5heyl3",
@@ -456,7 +457,8 @@
       "legendDistanceAU": 145.72817405057287,
       "legendAngle": 160.1952274051393,
       "legendFontSize": 8,
-      "legendScale": 0.5
+      "legendScale": 0.5,
+      "groupId": "krye0y6"
     },
     {
       "id": "tycip9b",
@@ -471,7 +473,8 @@
       "legendDistanceAU": 116.5262691220274,
       "legendAngle": 155.01072706870772,
       "legendFontSize": 8,
-      "legendScale": 0.5
+      "legendScale": 0.5,
+      "groupId": "krye0y6"
     }
   ]
 }

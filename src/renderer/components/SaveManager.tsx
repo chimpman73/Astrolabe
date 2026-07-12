@@ -13,27 +13,13 @@ import {
   EyeOff,
   Folder,
 } from 'lucide-react';
-import { CelestialObject, CelestialObjectType, WorldShape, ElementAffinity, SizeClass } from '../../types/astrolabe';
-import { ScaleManager } from '../utils/ScaleManager';
-import { shapeManager } from '../utils/ShapeManager';
-import { getElementColor } from '../utils/canvasRenderer';
+import { CelestialObject, CelestialObjectType } from '../../types/astrolabe';
 import { ObjectIcon } from './ObjectIcon';
-
-import fireSvgUrl from '../../../assets/elements/fire.svg';
-import waterSvgUrl from '../../../assets/elements/water.svg';
-import earthSvgUrl from '../../../assets/elements/earth.svg';
-import airSvgUrl from '../../../assets/elements/air.svg';
-import mixedSvgUrl from '../../../assets/elements/mixed.svg';
-import noneSvgUrl from '../../../assets/elements/none.svg';
-
-const elementSvgUrls: Record<string, string> = {
-  fire: fireSvgUrl,
-  water: waterSvgUrl,
-  earth: earthSvgUrl,
-  air: airSvgUrl,
-  mixed: mixedSvgUrl,
-  none: noneSvgUrl,
-};
+import { PhysicalBodyEditor } from './editors/PhysicalBodyEditor';
+import { PhenomenonEditor } from './editors/PhenomenonEditor';
+import { ConstellationEditor } from './editors/ConstellationEditor';
+import { MapOverlayEditor } from './editors/MapOverlayEditor';
+import { GroupEditor } from './editors/GroupEditor';
 
 interface SaveManagerProps {
   onCollapse?: () => void;
@@ -52,6 +38,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
   } = useSystemStore();
 
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+  const [showAddMenu, setShowAddMenu] = useState<boolean>(false);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [isSystemConfigExpanded, setIsSystemConfigExpanded] = useState<boolean>(true);
@@ -116,23 +103,27 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
     updateCelestialObject(id, updated);
   };
 
-  const handleAddObject = () => {
-    const newObj: any = { id: Date.now().toString(),
-      name: `New Body ${allObjects.length + 1}`,
-      type: 'planet',
-      sizeClass: 'D',
-      physicalSize: 1000,
-      sizeUnit: 'miles',
-      description: 'A newly added planetary body.',
-      orbitedObjectName: null,
-      distanceOrbited: 1.0,
-      initialAngle: 0,
-      orbitalPeriodDays: 365,
-      affectsShellBoundary: true,
+  const handleAddObject = (type: CelestialObjectType) => {
+    let newObj: any = { 
+      id: Date.now().toString(),
+      name: `New ${type.charAt(0).toUpperCase() + type.slice(1)} ${allObjects.length + 1}`,
+      type: type,
     };
+    
+    if (['star', 'planet', 'moon', 'asteroid', 'station', 'living_world', 'custom'].includes(type)) {
+      newObj = { ...newObj, sizeClass: 'D', physicalSize: 1000, sizeUnit: 'miles', orbitedObjectName: null, distanceOrbited: 1.0, initialAngle: 0, orbitalPeriodDays: 365, affectsShellBoundary: true };
+    } else if (type === 'cloud') {
+      newObj = { ...newObj, arcDegrees: 30, cloudTransparency: 0.45, cloudiness: 0.5, cloudObjectShape: 'sphere', cloudObjectSizeClass: 'A', cloudObjectPhysicalSize: 5, orbitedObjectName: null, distanceOrbited: 1.0, initialAngle: 0 };
+    } else if (type === 'constellation') {
+      newObj = { ...newObj, arcDegrees: 30, constellationFillAlpha: 0.2, constellationStyle: 'internal', constellationDetail: 1, constellationStarCount: 5, constellationStarMinSizeClass: 'A', constellationStarMaxSizeClass: 'C' };
+    } else if (type === 'note' || type === 'legend') {
+      newObj = { ...newObj, noteDistanceAU: 0, noteAngle: 0, noteFontSize: 16 };
+      if (type === 'note') newObj.noteMaxWidth = 120;
+    }
+    
     addCelestialObject(newObj);
     setSelectedObjectId(newObj.id || null);
-    setToastMessage({ type: 'success', text: `Added new celestial body "${newObj.name}"` });
+    setToastMessage({ type: 'success', text: `Added new ${type} "${newObj.name}"` });
   };
 
   const handleAddGroup = () => {
@@ -335,13 +326,34 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
         </div>
 
         {/* Action Button: Add Body & Group */}
-        <div className="flex gap-2">
-          <button onClick={handleAddObject} className="add-body-btn flex-1">
-            <Plus className="w-3.5 h-3.5" /> Add Celestial Body
+        <div className="relative mb-4">
+          <button 
+            onClick={() => setShowAddMenu(!showAddMenu)} 
+            className="add-body-btn w-full flex items-center justify-center gap-1"
+          >
+            <Plus className="w-3.5 h-3.5" /> Add Object <ChevronDown className="w-3.5 h-3.5 ml-1 opacity-70" />
           </button>
-          <button onClick={handleAddGroup} className="add-body-btn flex-1" style={{ backgroundColor: 'var(--color-bg-base)' }}>
-            <Folder className="w-3.5 h-3.5" /> Add Group
-          </button>
+          
+          {showAddMenu && (
+            <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1b23] dark:bg-[#12151c] border border-[var(--color-border-parchment)] rounded shadow-xl z-50 overflow-hidden flex flex-col py-1">
+              <button className="text-left px-3 py-2 text-xs text-[var(--color-text-main)] hover:bg-[var(--color-accent-gold)] hover:text-[#2b2316] transition-colors flex items-center gap-2" onClick={() => { handleAddObject('planet'); setShowAddMenu(false); }}>
+                <ObjectIcon type="planet" /> Physical Body
+              </button>
+              <button className="text-left px-3 py-2 text-xs text-[var(--color-text-main)] hover:bg-[var(--color-accent-gold)] hover:text-[#2b2316] transition-colors flex items-center gap-2" onClick={() => { handleAddObject('cloud'); setShowAddMenu(false); }}>
+                <ObjectIcon type="cloud" /> Phenomenon
+              </button>
+              <button className="text-left px-3 py-2 text-xs text-[var(--color-text-main)] hover:bg-[var(--color-accent-gold)] hover:text-[#2b2316] transition-colors flex items-center gap-2" onClick={() => { handleAddObject('constellation'); setShowAddMenu(false); }}>
+                <ObjectIcon type="constellation" /> Constellation
+              </button>
+              <button className="text-left px-3 py-2 text-xs text-[var(--color-text-main)] hover:bg-[var(--color-accent-gold)] hover:text-[#2b2316] transition-colors flex items-center gap-2" onClick={() => { handleAddObject('note'); setShowAddMenu(false); }}>
+                <ObjectIcon type="note" /> Map Overlay
+              </button>
+              <div className="border-t border-[var(--color-border-parchment)] my-1" />
+              <button className="text-left px-3 py-2 text-xs text-[var(--color-text-main)] hover:bg-[var(--color-bg-light)] transition-colors flex items-center gap-2" onClick={() => { handleAddGroup(); setShowAddMenu(false); }}>
+                <Folder className="w-3 h-3" /> Group
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Dynamic Accordion list of bodies */}
@@ -509,796 +521,21 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                       />
                     </div>
 
-                    {obj.type !== 'group' && (
-                      <>
-                        <div className="editor-form-group">
-                          <label>Type</label>
-                      <select 
-                        className="editor-select"
-                        value={obj.type}
-                        onChange={e => {
-                          const newType = e.target.value as CelestialObjectType;
-                          const updates: Partial<CelestialObject> = { type: newType };
-                          if (newType === 'station') {
-                            if (!['ring', 'cylinder', 'ship', 'castle', 'skull'].includes(obj.worldShape || '')) {
-                              updates.worldShape = 'ring';
-                            }
-                          } else {
-                            if (['ring', 'cylinder', 'ship', 'castle', 'skull'].includes(obj.worldShape || '')) {
-                              updates.worldShape = 'sphere';
-                            }
-                          }
-                          handleUpdateObject(id, updates);
-                        }}
-                      >
-                        <option value="star">⭐ Star</option>
-                        <option value="planet">🌍 Planet</option>
-                        <option value="moon">🌕 Moon</option>
-                        <option value="asteroid">☄️ Asteroid</option>
-                        <option value="station">🏙️ Station</option>
-                        <option value="cloud">☁️ Cloud</option>
-                        <option value="living_world">🌳 Living World</option>
-                        <option value="constellation">✨ Constellation</option>
-                        <option value="note">📝 Map Note</option>
-                        <option value="legend">🗺️ Legend</option>
-                      </select>
-                    </div>
-
-                    {obj.type !== 'note' && obj.type !== 'legend' && (
-                      <>
-                        <div className="editor-form-group">
-                          <label>Size Class</label>
-                          <select
-                            className="editor-select"
-                            value={obj.sizeClass || 'D'}
-                            onChange={e => {
-                              const newClass = e.target.value as SizeClass;
-                              const newUnit = newClass === 'J' ? 'AU' : 'miles';
-                              handleUpdateObject(id, { sizeClass: newClass, sizeUnit: newUnit });
-                            }}
-                          >
-                            <option value="A">Size A (&lt; 10 mi)</option>
-                            <option value="B">Size B (10 - 100 mi)</option>
-                            <option value="C">Size C (100 - 1k mi)</option>
-                            <option value="D">Size D (1k - 4k mi)</option>
-                            <option value="E">Size E (4k - 10k mi)</option>
-                            <option value="F">Size F (10k - 40k mi)</option>
-                            <option value="G">Size G (40k - 100k mi)</option>
-                            <option value="H">Size H (100k - 1M mi)</option>
-                            <option value="I">Size I (1M - 10M mi)</option>
-                            <option value="J">Size J (&ge; 10M mi / AU)</option>
-                          </select>
-                        </div>
-
-                        <div className="editor-form-group">
-                          <label>Physical Size ({obj.sizeUnit || 'miles'})</label>
-                          <input 
-                            type="number" 
-                            step="any"
-                            className={`editor-input ${!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') ? 'border-[var(--color-accent-red)] text-[var(--color-accent-red)]' : ''}`}
-                            value={obj.physicalSize ?? 1000}
-                            onChange={e => handleUpdateObject(id, { physicalSize: parseFloat(e.target.value) || 0 })}
-                            title={!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') ? 'Physical size is out of bounds for the selected Size Class.' : ''}
-                          />
-                        </div>
-                        {!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') && (
-                          <div className="text-[var(--color-accent-red)] text-[10px] mt-1 mb-2 px-1 font-bold">
-                            Warning: Size is out of bounds for Class {obj.sizeClass || 'D'}
-                          </div>
-                        )}
-
-                        {(obj.type === 'cloud' || obj.type === 'constellation') && (
-                          <div className="editor-form-group">
-                            <label>Arc Width (Degrees)</label>
-                            <input
-                              type="number"
-                              step="1"
-                              min="1"
-                              max="359"
-                              className="editor-input"
-                              value={obj.arcDegrees ?? 30}
-                              onChange={e => handleUpdateObject(id, { arcDegrees: parseFloat(e.target.value) || 30 })}
-                            />
-                          </div>
-                        )}
-                      </>
+                    {['star', 'planet', 'moon', 'asteroid', 'station', 'custom', 'living_world'].includes(obj.type) && (
+                      <PhysicalBodyEditor obj={obj} allObjects={allObjects} handleUpdateObject={handleUpdateObject} />
                     )}
-
-                    {obj.type !== 'note' && obj.type !== 'legend' && (
-                      <>
-                        <div className="editor-form-group">
-                          <label>Orbiting Parent</label>
-                          <select 
-                            className="editor-select"
-                            value={obj.orbitedObjectName || ''}
-                            onChange={e => handleUpdateObject(id, { orbitedObjectName: e.target.value === '' ? null : e.target.value })}
-                          >
-                            <option value="">None (System Center)</option>
-                            {allObjects
-                              .filter(o => o.name !== obj.name && o.type !== 'moon')
-                              .map(o => (
-                                <option key={o.name} value={o.name}>{o.name}</option>
-                              ))}
-                          </select>
-                        </div>
-
-                        <div className="editor-form-group">
-                          <label>Orbit Distance (AU)</label>
-                          <input 
-                            type="number" 
-                            step="any"
-                            className="editor-input"
-                            value={(obj.distanceOrbited || 0)}
-                            onChange={e => handleUpdateObject(id, { distanceOrbited: parseFloat(e.target.value) || 0 })}
-                          />
-                        </div>
-
-                        <div className="editor-form-group">
-                          <label>Initial Angle (Deg)</label>
-                          <div className="flex gap-1">
-                            <input 
-                              type="number" 
-                              step="any"
-                              className="editor-input"
-                              style={{ flex: 1 }}
-                              value={obj.initialAngle}
-                              onChange={e => handleUpdateObject(id, { initialAngle: parseFloat(e.target.value) || 0 })}
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleUpdateObject(id, { initialAngle: Math.floor(Math.random() * 360) })}
-                              className="px-2 text-xs bg-transparent border border-[var(--color-border-parchment)] text-[var(--color-text-muted)] hover:bg-[var(--color-accent-gold)] hover:text-[#2b2316] transition-colors"
-                              title="Randomize Angle"
-                            >
-                              🎲
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="editor-form-group">
-                          <label>Orbital Period (Days)</label>
-                          <input 
-                            type="number" 
-                            step="any"
-                            className="editor-input"
-                            value={obj.orbitalPeriodDays}
-                            onChange={e => handleUpdateObject(id, { orbitalPeriodDays: parseFloat(e.target.value) || 0 })}
-                          />
-                        </div>
-
-                        {/* Orbit Motion: Prograde / Stationary / Retrograde */}
-                        <div className="editor-form-group">
-                          <label>Orbit Motion</label>
-                          <div className="flex gap-1">
-                            {(['prograde', 'stationary', 'retrograde'] as const).map((motion) => {
-                              const isActive =
-                                motion === 'stationary' ? !!obj.isStationary
-                                : !obj.isStationary && (obj.orbitDirection ?? 'prograde') === motion;
-                              return (
-                                <button
-                                  key={motion}
-                                  type="button"
-                                  onClick={() => handleUpdateObject(id, {
-                                    isStationary: motion === 'stationary',
-                                    orbitDirection: motion !== 'stationary' ? motion : obj.orbitDirection,
-                                  })}
-                                  className={`flex-1 text-[9px] py-1 font-bold transition-colors ${
-                                    isActive
-                                      ? 'bg-[var(--color-accent-gold)] text-[#2b2316] border border-[var(--color-accent-gold)]'
-                                      : 'bg-transparent text-[var(--color-text-muted)] border border-[var(--color-border-parchment)] hover:bg-[var(--color-bg-base)]'
-                                  }`}
-                                >
-                                  {motion === 'prograde' ? '▶ PRO' : motion === 'stationary' ? '◆ FIXED' : '◄ RETRO'}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        {/* Advanced Orbit */}
-                        <div className="editor-form-group" style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px dashed var(--color-border-parchment)' }}>
-                          <label className="text-[10px] text-[var(--color-accent-gold)]">Advanced Orbit</label>
-                          <div className="flex flex-col gap-2 mt-2">
-                            <div>
-                              <label style={{ fontSize: '9px', opacity: 0.8 }}>Eccentricity (0.0 to 0.99)</label>
-                              <div className="flex gap-2 items-center">
-                                <input 
-                                  type="range"
-                                  min="0"
-                                  max="0.99"
-                                  step="0.01"
-                                  className="flex-1"
-                                  value={obj.orbitEccentricity || 0}
-                                  onChange={e => handleUpdateObject(id, { orbitEccentricity: parseFloat(e.target.value) || 0 })}
-                                />
-                                <span className="text-[9px] w-6">{obj.orbitEccentricity?.toFixed(2) || '0.00'}</span>
-                              </div>
-                            </div>
-                            <div>
-                              <label style={{ fontSize: '9px', opacity: 0.8 }}>Rotation (Degrees)</label>
-                              <input 
-                                type="number"
-                                step="any"
-                                className="editor-input"
-                                value={obj.orbitRotation || 0}
-                                onChange={e => handleUpdateObject(id, { orbitRotation: parseFloat(e.target.value) || 0 })}
-                              />
-                            </div>
-                            {(obj.orbitEccentricity || 0) > 0 && (
-                              <div className="flex justify-between text-[9px] text-[var(--color-text-muted)] mt-1 border-t border-[var(--color-border-parchment)] pt-1">
-                                <span>Periapsis: {((obj.distanceOrbited || 0) * (1 - (obj.orbitEccentricity || 0))).toFixed(2)} AU</span>
-                                <span>Apoapsis: {((obj.distanceOrbited || 0) * (1 + (obj.orbitEccentricity || 0))).toFixed(2)} AU</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </>
+                    {obj.type === 'cloud' && (
+                      <PhenomenonEditor obj={obj} allObjects={allObjects} handleUpdateObject={handleUpdateObject} />
                     )}
-
-                    {/* World Shape (not shown for cloud-type objects) */}
-                        {obj.type !== 'cloud' && obj.type !== 'living_world' && obj.type !== 'constellation' && obj.type !== 'note' && obj.type !== 'legend' && (
-                          <div className="editor-form-group">
-                            <label>World Shape</label>
-                            {obj.type === 'station' ? (
-                              <select
-                                className="editor-select"
-                                value={obj.worldShape ?? 'ring'}
-                                onChange={e => handleUpdateObject(id, { worldShape: e.target.value as WorldShape })}
-                              >
-                                <option value="ring">◎ Ring</option>
-                                <option value="cylinder">▱ Cylinder</option>
-                                <option value="ship">⬖ Ship</option>
-                                <option value="castle">🏰 Castle</option>
-                                <option value="skull">💀 Skull</option>
-                              </select>
-                            ) : (
-                              <select
-                                className="editor-select"
-                                value={obj.worldShape ?? 'sphere'}
-                                onChange={e => handleUpdateObject(id, { worldShape: e.target.value as WorldShape })}
-                              >
-                                <option value="sphere">● Sphere (Default)</option>
-                                <option value="disc">⬡ Disc World</option>
-                                <option value="pyramid">△ Pyramid World</option>
-                                <option value="cluster">⊛ Cluster World</option>
-                                <option value="irregular">✦ Irregular</option>
-                                <option value="elliptical">⬭ Elliptical</option>
-                                <option value="rectangular">▭ Rectangular</option>
-                                <option value="hollow_world">◎ Hollow World</option>
-                                <option value="custom">⚙️ Custom SVG</option>
-                              </select>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Custom Shape Selector */}
-                        {(obj.worldShape === 'custom' || obj.type === 'constellation') && (
-                          <div className="editor-form-group">
-                            <label>Custom Shape</label>
-                            <select
-                              className="editor-select"
-                              value={obj.customShapeName ?? ''}
-                              onChange={e => handleUpdateObject(id, { customShapeName: e.target.value })}
-                            >
-                              <option value="">-- Select Shape --</option>
-                              {shapeManager.getAvailableShapes().map(shape => (
-                                <option key={shape} value={shape}>{shape}</option>
-                              ))}
-                            </select>
-                          </div>
-                        )}
-
-                        {/* Element Affinity */}
-                        {obj.type !== 'note' && obj.type !== 'legend' && (
-                          <div className="editor-form-group">
-                            <label>
-                              Element Affinity
-                              {obj.elementAffinity && (
-                                <span
-                                  style={{
-                                    display: 'inline-block',
-                                    marginLeft: '8px',
-                                    width: '16px',
-                                    height: '16px',
-                                    backgroundColor: getElementColor(obj.elementAffinity) || '#fff',
-                                    WebkitMaskImage: `url(${elementSvgUrls[obj.elementAffinity] || ''})`,
-                                    WebkitMaskSize: 'contain',
-                                    WebkitMaskRepeat: 'no-repeat',
-                                    WebkitMaskPosition: 'center',
-                                    verticalAlign: 'middle',
-                                  }}
-                                  title={`${obj.elementAffinity} icon`}
-                                />
-                              )}
-                            </label>
-                            <select
-                              className="editor-select"
-                              value={obj.elementAffinity ?? ''}
-                              onChange={e => handleUpdateObject(id, { elementAffinity: (e.target.value || null) as ElementAffinity | null })}
-                            >
-                              <option value="">None</option>
-                              <option value="fire">🔥 Fire</option>
-                              <option value="water">💧 Water</option>
-                              <option value="earth">🪨 Earth</option>
-                              <option value="air">💨 Air</option>
-                              <option value="mixed">🌿 Mixed</option>
-                              <option value="none">⋄ No Affinity</option>
-                            </select>
-                          </div>
-                        )}
-
-                        {/* Star only properties */}
-                        {(obj.type === 'star') && (
-                          <>
-                            <div className="editor-form-group">
-                              <label>Corona Size (x)</label>
-                              <input
-                                type="number"
-                                step="0.1"
-                                min="1.0"
-                                className="editor-input"
-                                value={obj.coronaSize ?? 1.5}
-                                onChange={e => handleUpdateObject(id, { coronaSize: parseFloat(e.target.value) || 1.5 })}
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Corona Alpha (0-1)</label>
-                              <input
-                                type="number"
-                                step="0.05"
-                                min="0.0"
-                                max="1.0"
-                                className="editor-input"
-                                value={obj.coronaAlpha ?? 0.3}
-                                onChange={e => handleUpdateObject(id, { coronaAlpha: parseFloat(e.target.value) || 0.3 })}
-                              />
-                            </div>
-                          </>
-                        )}
-
-                        {/* Cloud only properties */}
-                        {(obj.type === 'cloud') && (
-                          <>
-                            <div className="editor-form-group">
-                              <label>Transparency (0-1)</label>
-                              <input
-                                type="number"
-                                step="0.05"
-                                min="0"
-                                max="1"
-                                className="editor-input"
-                                value={obj.cloudTransparency ?? 0.45}
-                                onChange={e => handleUpdateObject(id, { cloudTransparency: parseFloat(e.target.value) || 0 })}
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Cloudiness (0-1)</label>
-                              <input
-                                type="number"
-                                step="0.05"
-                                min="0"
-                                max="1"
-                                className="editor-input"
-                                value={obj.cloudiness ?? 0.5}
-                                onChange={e => handleUpdateObject(id, { cloudiness: parseFloat(e.target.value) || 0 })}
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Internal Shape</label>
-                              <select
-                                className="editor-select"
-                                value={obj.cloudObjectShape ?? 'sphere'}
-                                onChange={e => handleUpdateObject(id, { cloudObjectShape: e.target.value as WorldShape })}
-                              >
-                                <option value="sphere">● Sphere (Default)</option>
-                                <option value="disc">⬡ Disc</option>
-                                <option value="pyramid">△ Pyramid</option>
-                                <option value="cluster">⊛ Cluster</option>
-                                <option value="irregular">✦ Irregular</option>
-                                <option value="elliptical">⬭ Elliptical</option>
-                              </select>
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Internal Size Class</label>
-                              <select
-                                className="editor-select"
-                                value={obj.cloudObjectSizeClass ?? 'A'}
-                                onChange={e => handleUpdateObject(id, { cloudObjectSizeClass: e.target.value as SizeClass })}
-                              >
-                                <option value="A">Size A (&lt; 10 mi)</option>
-                                <option value="B">Size B (10 - 100 mi)</option>
-                                <option value="C">Size C (100 - 1,000 mi)</option>
-                                <option value="D">Size D (1,000 - 4,000 mi)</option>
-                                <option value="E">Size E (4,000 - 10,000 mi)</option>
-                                <option value="F">Size F (10,000 - 40,000 mi)</option>
-                                <option value="G">Size G (40,000 - 100k mi)</option>
-                                <option value="H">Size H (100k - 1m mi)</option>
-                                <option value="I">Size I (1m - 10m mi)</option>
-                              </select>
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Internal Physical Size (miles)</label>
-                              <input
-                                type="number"
-                                step="any"
-                                min="0"
-                                className="editor-input"
-                                value={obj.cloudObjectPhysicalSize ?? 5}
-                                onChange={e => handleUpdateObject(id, { cloudObjectPhysicalSize: parseFloat(e.target.value) || 0 })}
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Internal Density</label>
-                              <input
-                                type="number"
-                                step="1"
-                                min="0"
-                                className="editor-input"
-                                value={obj.cloudObjectDensity ?? 0}
-                                onChange={e => handleUpdateObject(id, { cloudObjectDensity: parseInt(e.target.value, 10) || 0 })}
-                              />
-                            </div>
-                          </>
-                        )}
-
-                        {/* Living World Config */}
-                        {obj.type === 'living_world' && (
-                          <>
-                            <div className="editor-form-group">
-                              <label>Branch Levels</label>
-                              <input
-                                type="number"
-                                step="1"
-                                min="1"
-                                max="6"
-                                className="editor-input"
-                                value={obj.branchLevels ?? 2}
-                                onChange={e => handleUpdateObject(id, { branchLevels: parseInt(e.target.value, 10) || 2 })}
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Branch Density</label>
-                              <input
-                                type="number"
-                                step="1"
-                                min="1"
-                                max="10"
-                                className="editor-input"
-                                value={obj.branchDensity ?? 3}
-                                onChange={e => handleUpdateObject(id, { branchDensity: parseInt(e.target.value, 10) || 3 })}
-                              />
-                            </div>
-                            <div className="editor-form-group flex items-center justify-between mt-2">
-                              <label className="mb-0">Has Leaves</label>
-                              <input
-                                type="checkbox"
-                                checked={obj.hasLeaves ?? true}
-                                onChange={e => handleUpdateObject(id, { hasLeaves: e.target.checked })}
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Branch Bend</label>
-                              <input
-                                type="number"
-                                step="0.1"
-                                min="0.0"
-                                max="2.0"
-                                className="editor-input"
-                                value={obj.branchBend ?? 0.5}
-                                onChange={e => handleUpdateObject(id, { branchBend: parseFloat(e.target.value) || 0.0 })}
-                              />
-                            </div>
-                          </>
-                        )}
-
-                        {/* Constellation Config */}
-                        {obj.type === 'constellation' && (
-                          <>
-                            <div className="editor-form-group">
-                              <label>Inverse (Flip X)</label>
-                              <label className="editor-checkbox">
-                                <input
-                                  type="checkbox"
-                                  checked={obj.constellationFlipX || false}
-                                  onChange={e => handleUpdateObject(id, { constellationFlipX: e.target.checked })}
-                                />
-                                <span>Mirror image horizontally</span>
-                              </label>
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Background Fill Alpha (0-1)</label>
-                              <input
-                                type="number"
-                                step="0.05"
-                                min="0.0"
-                                max="1.0"
-                                className="editor-input"
-                                value={obj.constellationFillAlpha ?? 0.2}
-                                onChange={e => handleUpdateObject(id, { constellationFillAlpha: parseFloat(e.target.value) || 0.0 })}
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Line Drawing Style</label>
-                              <select
-                                className="editor-select"
-                                value={obj.constellationStyle || 'internal'}
-                                onChange={e => handleUpdateObject(id, { constellationStyle: e.target.value as 'outline' | 'internal' })}
-                              >
-                                <option value="internal">Internal Geometric Graph</option>
-                                <option value="outline">Shape Outline</option>
-                              </select>
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Wireframe Detail Level</label>
-                              <input
-                                type="number"
-                                step="1"
-                                min="1"
-                                max="20"
-                                className="editor-input"
-                                value={obj.constellationDetail ?? 1}
-                                onChange={e => handleUpdateObject(id, { constellationDetail: parseInt(e.target.value, 10) || 1 })}
-                                title="Complexity Level (1 to 20)."
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Star Count</label>
-                              <input
-                                type="number"
-                                step="1"
-                                min="0"
-                                className="editor-input"
-                                value={obj.constellationStarCount ?? 5}
-                                onChange={e => handleUpdateObject(id, { constellationStarCount: parseInt(e.target.value, 10) || 0 })}
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Min Internal Star Size Class</label>
-                              <select
-                                className="editor-select"
-                                value={obj.constellationStarMinSizeClass || 'A'}
-                                onChange={e => handleUpdateObject(id, { constellationStarMinSizeClass: e.target.value as SizeClass })}
-                              >
-                                {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].map(size => (
-                                  <option key={size} value={size}>Size {size}</option>
-                                ))}
-                              </select>
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Max Internal Star Size Class</label>
-                              <select
-                                className="editor-select"
-                                value={obj.constellationStarMaxSizeClass || 'C'}
-                                onChange={e => handleUpdateObject(id, { constellationStarMaxSizeClass: e.target.value as SizeClass })}
-                              >
-                                {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].map(size => (
-                                  <option key={size} value={size}>Size {size}</option>
-                                ))}
-                              </select>
-                            </div>
-                          </>
-                        )}
-
-                        {/* Note Config */}
-                        {obj.type === 'note' && (
-                          <>
-                            <div className="editor-form-group">
-                              <label>Distance from Center (AU)</label>
-                              <input
-                                type="number"
-                                step="0.1"
-                                min="0"
-                                className="editor-input"
-                                value={obj.noteDistanceAU ?? 0}
-                                onChange={e => handleUpdateObject(id, { noteDistanceAU: parseFloat(e.target.value) || 0 })}
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Angle (Degrees)</label>
-                              <input
-                                type="number"
-                                step="1"
-                                min="0"
-                                max="360"
-                                className="editor-input"
-                                value={obj.noteAngle ?? 0}
-                                onChange={e => handleUpdateObject(id, { noteAngle: parseFloat(e.target.value) || 0 })}
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Rotation (Degrees)</label>
-                              <input
-                                type="number"
-                                step="1"
-                                min="-360"
-                                max="360"
-                                className="editor-input"
-                                value={obj.noteRotation ?? 0}
-                                onChange={e => handleUpdateObject(id, { noteRotation: parseFloat(e.target.value) || 0 })}
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Font Family</label>
-                              <select
-                                className="editor-select"
-                                value={obj.noteFontFamily || 'Elan'}
-                                onChange={e => handleUpdateObject(id, { noteFontFamily: e.target.value })}
-                              >
-                                {[
-                                  'Elan', 'Mephisto', 'Cinzel', 'Architects Daughter', 'Caveat',
-                                  'Kalam', 'Homemade Apple', 'Reenie Beanie', 'Shadows Into Light',
-                                  'Sacramento', 'Marck Script', 'Mr Dafoe', 'Herr Von Muellerhoff',
-                                  'IM Fell English', 'UnifrakturMaguntia', 'MedievalSharp', 'Pirata One',
-                                  'Grenze Gotisch'
-                                ].map(font => (
-                                  <option key={font} value={font}>{font}</option>
-                                ))}
-                              </select>
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Font Size (px)</label>
-                              <input
-                                type="number"
-                                step="1"
-                                min="8"
-                                max="144"
-                                className="editor-input"
-                                value={obj.noteFontSize ?? 16}
-                                onChange={e => handleUpdateObject(id, { noteFontSize: parseInt(e.target.value, 10) || 16 })}
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Max Width (px)</label>
-                              <input
-                                type="number"
-                                step="10"
-                                min="50"
-                                max="2000"
-                                className="editor-input"
-                                value={obj.noteMaxWidth ?? 120}
-                                onChange={e => handleUpdateObject(id, { noteMaxWidth: parseInt(e.target.value, 10) || 120 })}
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Max Height (px)</label>
-                              <input
-                                type="number"
-                                step="10"
-                                min="50"
-                                max="2000"
-                                className="editor-input"
-                                value={obj.noteMaxHeight ?? 60}
-                                onChange={e => handleUpdateObject(id, { noteMaxHeight: parseInt(e.target.value, 10) || 60 })}
-                              />
-                            </div>
-                          </>
-                        )}
-
-                        {/* Legend Config */}
-                        {obj.type === 'legend' && (
-                          <>
-                            <div className="editor-form-group">
-                              <label>Distance from Center (AU)</label>
-                              <input
-                                type="number"
-                                step="0.1"
-                                min="0"
-                                className="editor-input"
-                                value={obj.legendDistanceAU ?? 0}
-                                onChange={e => handleUpdateObject(id, { legendDistanceAU: parseFloat(e.target.value) || 0 })}
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Angle (Degrees)</label>
-                              <input
-                                type="number"
-                                step="1"
-                                min="0"
-                                max="360"
-                                className="editor-input"
-                                value={obj.legendAngle ?? 0}
-                                onChange={e => handleUpdateObject(id, { legendAngle: parseFloat(e.target.value) || 0 })}
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Legend Type</label>
-                              <select
-                                className="editor-select"
-                                value={obj.legendType || 'PlanetType'}
-                                onChange={e => handleUpdateObject(id, { legendType: e.target.value as any })}
-                              >
-                                <option value="PlanetType">Planet Type</option>
-                                <option value="OrbitType">Orbit Type</option>
-                                <option value="ElementalAffinity">Elemental Affinity</option>
-                              </select>
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Legend Mode</label>
-                              <select
-                                className="editor-select"
-                                value={obj.legendMode || 'partial'}
-                                onChange={e => handleUpdateObject(id, { legendMode: e.target.value as any })}
-                              >
-                                <option value="full">Full (All Icons)</option>
-                                <option value="partial">Partial (Present in System)</option>
-                              </select>
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Font Family</label>
-                              <select
-                                className="editor-select"
-                                value={obj.legendFontFamily || 'Elan'}
-                                onChange={e => handleUpdateObject(id, { legendFontFamily: e.target.value })}
-                              >
-                                {[
-                                  'Elan', 'Mephisto', 'Cinzel', 'Architects Daughter', 'Caveat',
-                                  'Kalam', 'MedievalSharp', 'Grenze Gotisch'
-                                ].map(font => (
-                                  <option key={font} value={font}>{font}</option>
-                                ))}
-                              </select>
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Font Size (px)</label>
-                              <input
-                                type="number"
-                                step="1"
-                                min="8"
-                                max="144"
-                                className="editor-input"
-                                value={obj.legendFontSize ?? 16}
-                                onChange={e => handleUpdateObject(id, { legendFontSize: parseInt(e.target.value, 10) || 16 })}
-                              />
-                            </div>
-                            <div className="editor-form-group">
-                              <label>Scale Multiplier</label>
-                              <input
-                                type="number"
-                                step="0.1"
-                                min="0.1"
-                                max="10.0"
-                                className="editor-input"
-                                value={obj.legendScale ?? 1.0}
-                                onChange={e => handleUpdateObject(id, { legendScale: parseFloat(e.target.value) || 1.0 })}
-                              />
-                            </div>
-                          </>
-                        )}
-                      </>
+                    {obj.type === 'constellation' && (
+                      <ConstellationEditor obj={obj} handleUpdateObject={handleUpdateObject} />
                     )}
-
-                    {obj.type !== 'group' && obj.type !== 'legend' && (
-                      <div className="editor-form-group">
-                        <label>{obj.type === 'note' ? 'Note Text' : 'Description'}</label>
-                        <textarea 
-                          className="editor-textarea"
-                          value={obj.description || ''}
-                          onChange={e => handleUpdateObject(id, { description: e.target.value })}
-                        />
-                      </div>
+                    {['note', 'legend'].includes(obj.type) && (
+                      <MapOverlayEditor obj={obj} handleUpdateObject={handleUpdateObject} />
                     )}
-
-                    {obj.type === 'group' && (() => {
-                      const children = allObjects.filter(o => o.groupName === obj.name);
-                      return (
-                        <div className="editor-form-group mt-2">
-                           <label className="text-[var(--color-text-main)] mb-2 font-bold block">Group Contents</label>
-                           {children.length === 0 ? (
-                              <div className="p-4 border border-dashed border-[var(--color-border-parchment)] rounded text-center text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">
-                                Empty Group
-                              </div>
-                           ) : (
-                              <div className="flex flex-col gap-1.5 p-2.5 bg-[#f5efdf] dark:bg-[#12151c] rounded border border-[var(--color-border-parchment)]">
-                                {children.map(c => (
-                                  <div key={c.name} className="flex items-center gap-2 text-xs text-[var(--color-text-main)]">
-                                    {renderTypeIcon(c.type)} {c.name}
-                                  </div>
-                                ))}
-                              </div>
-                           )}
-                        </div>
-                      );
-                    })()}
+                    {obj.type === 'group' && (
+                      <GroupEditor obj={obj} allObjects={allObjects} handleUpdateObject={handleUpdateObject} />
+                    )}
 
                   </div>
                 )}
