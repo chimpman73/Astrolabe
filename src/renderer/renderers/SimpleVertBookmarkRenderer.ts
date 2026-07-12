@@ -11,7 +11,7 @@ export function drawBookmark(
   showShell: boolean,
   showDistance: boolean,
   activeSphere: CrystalSphere | null,
-  planetaryObjects: CelestialObject[],
+  planetaryObjects: any[],
   shellBasisDistance: number,
   absoluteMaxDistance: number,
   visibleMaxDistance: number
@@ -153,7 +153,7 @@ export function drawBookmark(
 
   // Draw orbits
   ctx.lineWidth = 1 * sizeMultiplier;
-  planetaryObjects.forEach((obj) => {
+  planetaryObjects.forEach((obj: any) => {
     const r = getPixelRadius(obj.distanceOrbited);
     ctx.beginPath();
     // Draw top semicircle arc
@@ -195,7 +195,7 @@ export function drawBookmark(
 
   // Group objects by their orbital distance
   const groupedObjects = new Map<number, typeof planetaryObjects>();
-  planetaryObjects.forEach((obj) => {
+  planetaryObjects.forEach((obj: any) => {
     const d = obj.distanceOrbited;
     if (!groupedObjects.has(d)) groupedObjects.set(d, []);
     groupedObjects.get(d)!.push(obj);

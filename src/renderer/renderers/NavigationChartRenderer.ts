@@ -104,39 +104,90 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
     return this.#svgIcons[key];
   }
 
-  #getScrollBounds(context: MapStyleContext) {
+      #getScrollBounds(context: MapStyleContext) {
     let maxDist = 0.1;
     context.objects.forEach((o: any) => {
+      if (o.type === 'note' || o.type === 'legend' || o.type === 'constellation') return;
       if (!context.isPrimary(o) || o.affectsShellBoundary === false) return;
       const reach = ScaleManager.getPhysicalReachAU(o);
       if (reach > maxDist) maxDist = reach;
     });
-    const shellScale = (context.activeSphere?.shellBoundaryType === 'custom' || context.activeSphere?.shellBoundaryType === 'relativeMargin') 
+    const shellScale = (context.activeSphere?.shellBoundaryType === 'custom' || 
+context.activeSphere?.shellBoundaryType === 'relativeMargin') 
       ? (context.activeSphere?.shellCustomScale ?? 1.2) : 2.0;
     const shellRadiusPx = maxDist * shellScale * context.activeZoom;
     
-    // 25% padding ensures the 24px title has room to breathe horizontally
-    const paddingPx = shellRadiusPx * 0.25;
-    
-    // Extend directory to the left by 1.0 * shellRadiusPx (which is 0.5 * diameter)
+    const centerProj = context.project(0, 0);
+
+    const getMaxAbsoluteReach = (obj: any, allObjs: any[]): number => {
+      let reach = ScaleManager.getPhysicalReachAU(obj);
+      let curr = obj;
+      while (curr.orbitedObjectName) {
+        const parent = allObjs.find((p: any) => p.name === curr.orbitedObjectName);
+        if (parent) {
+          reach += (parent.distanceOrbited || 0);
+          curr = parent;
+        } else {
+          break;
+        }
+      }
+      return reach;
+    };
+
+    let maxOrbitX = shellRadiusPx;
+    let maxOrbitY = shellRadiusPx;
+
+    context.objects.forEach((o: any) => {
+      if (o.type === 'note' || o.type === 'legend' || o.type === 'constellation') return;
+      const reachPx = getMaxAbsoluteReach(o, context.objects) * context.activeZoom;
+      if (reachPx > maxOrbitX) maxOrbitX = reachPx;
+      if (reachPx > maxOrbitY) maxOrbitY = reachPx;
+    });
+
+    let maxNoteX = maxOrbitX;
+    let maxNoteY = maxOrbitY;
+
+    context.objects.filter((o:any) => o.type === 'note').forEach((note: any) => {
+      const distPx = (note.noteDistanceAU || 0) * context.activeZoom;
+      const rad = ((note.noteAngle || 0) * Math.PI) / 180;
+      const noteX = Math.cos(rad) * distPx;
+      const noteY = Math.sin(rad) * distPx;
+      const textBufferPx = 0; 
+      if (noteX + textBufferPx > maxNoteX) maxNoteX = noteX + textBufferPx;
+      if (noteY + textBufferPx > maxNoteY) maxNoteY = noteY + textBufferPx;
+    });
+
+    let minLegendX = -shellRadiusPx - shellRadiusPx;
+    const legends = context.objects.filter((o:any) => o.type === 'legend');
+    if (legends.length > 0) {
+      minLegendX = 0;
+      legends.forEach((legend: any) => {
+        const distPx = (legend.legendDistanceAU || 0) * context.activeZoom;
+        const rad = ((legend.legendAngle || 0) * Math.PI) / 180;
+        const legX = Math.cos(rad) * distPx;
+        const textBufferPx = 0;
+        if (legX - textBufferPx < minLegendX) minLegendX = legX - textBufferPx;
+      });
+    }
+
+    const directoryStartX = centerProj.x + minLegendX;
     const directoryWidthPx = shellRadiusPx;
     
-    const paperWidthPx = shellRadiusPx * 2 + paddingPx * 2 + directoryWidthPx;
-    const paperHeightPx = shellRadiusPx * 2 + paddingPx * 2;
+    const mapTopY = centerProj.y - shellRadiusPx;
+    const mapBottomY = centerProj.y + Math.max(maxOrbitY, maxNoteY);
+    const mapRightX = centerProj.x + Math.max(maxOrbitX, maxNoteX);
     
-    const centerProj = context.project(0, 0);
-    
-    // Center was previously `centerProj.x - (shellRadiusPx * 2 + paddingPx * 2) / 2`. 
-    // Now we shift left by the directory width.
-    const originalLeft = centerProj.x - (shellRadiusPx * 2 + paddingPx * 2) / 2;
-    
+    const paddingPx = shellRadiusPx * 0.25;
+
     return {
-      x: originalLeft - directoryWidthPx,
-      y: centerProj.y - paperHeightPx / 2,
-      width: paperWidthPx,
-      height: paperHeightPx,
+      x: directoryStartX - paddingPx,
+      y: mapTopY - paddingPx,
+      width: (mapRightX - directoryStartX) + paddingPx * 2,
+      height: (mapBottomY - mapTopY) + paddingPx * 2,
+      directoryStartX,
       directoryWidthPx,
       shellRadiusPx,
+      parchmentRadiusPx: shellRadiusPx,
       paddingPx
     };
   }
@@ -293,7 +344,7 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
   }
 
   drawOrbits({ ctx, activeZoom, positions, project, isPrimary, activeSphere, isExport }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
-    activeVisibleObjects.forEach((obj) => {
+    activeVisibleObjects.forEach((obj: any) => {
       if (obj.type === 'constellation' || obj.type === 'note' || obj.type === 'legend') return;
 
       let px = 0;
@@ -307,7 +358,7 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
       }
 
       const parentProj = project(px, py);
-      const orbitRadius = obj.distanceOrbited * activeZoom;
+      const orbitRadius = (obj.distanceOrbited || 0) * activeZoom;
 
       if (orbitRadius > 0) {
         ctx.beginPath();
@@ -387,7 +438,7 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
   drawBodies({ ctx, activeZoom, positions, project, activeSphere, isExport }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
     const exportScale = isExport ? 2.5 : 1.0;
     
-    activeVisibleObjects.forEach((obj) => {
+    activeVisibleObjects.forEach((obj: any) => {
       if (obj.type === 'note' || obj.type === 'legend') return;
       const pos = positions[obj.name];
       if (!pos) return;
@@ -404,16 +455,16 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
       const renderSize = Math.max(1, baseRenderSize + (isScalableType ? ((activeSphere?.navChartPlanetSizeOffset ?? 0) * exportScale) : 0));
 
       if (obj.type === 'cloud') {
-        if (obj.distanceOrbited <= 0) return;
+        if ((obj.distanceOrbited || 0) <= 0) return;
         const { bodyFill, bodyStroke } = getBodyColors(obj, !this.#config.isDarkTheme, this.#config.backgroundColor, this.#config.strokeColor, this.#config.goldColor);
-        const orbitR = obj.distanceOrbited * activeZoom;
+        const orbitR = (obj.distanceOrbited || 0) * activeZoom;
         
         drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, bodyFill, bodyStroke, false, activeZoom,
           false, parentProj.x, parentProj.y, orbitR, pos.angle, undefined, undefined, undefined, isExport, exportScale
         );
       } else {
         const { bodyFill, bodyStroke } = getBodyColors(obj, !this.#config.isDarkTheme, this.#config.backgroundColor, this.#config.strokeColor, this.#config.goldColor);
-        const orbitR = obj.distanceOrbited * activeZoom;
+        const orbitR = (obj.distanceOrbited || 0) * activeZoom;
         drawSolidBody(ctx, proj.x, proj.y, obj, renderSize, bodyFill, bodyStroke, false, activeZoom,
           false, parentProj.x, parentProj.y, orbitR, pos.angle, undefined, undefined, undefined, isExport, exportScale
         );
@@ -526,7 +577,8 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
 
     let maxDist = 0.1;
     context.objects.forEach((o: any) => {
-      if (!context.isPrimary(o) || o.affectsShellBoundary === false) return;
+      if (o.type === 'note' || o.type === 'legend' || o.type === 'constellation') return;
+        if (!context.isPrimary(o) || o.affectsShellBoundary === false) return;
       const reach = ScaleManager.getPhysicalReachAU(o);
       if (reach > maxDist) maxDist = reach;
     });
@@ -548,8 +600,8 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
     this.drawForeground(context);
   }
 
-  #drawNotes({ ctx, activeZoom, project, selectedObjectIndex, objects }: MapStyleContext, visibleObjects: CelestialObject[]): void {
-    const notes = visibleObjects.filter(o => o.type === 'note');
+  #drawNotes({ ctx, activeZoom, project, selectedObjectId, objects }: MapStyleContext, visibleObjects: any[]): void {
+    const notes = visibleObjects.filter(o => o.type === 'note') as any[];
     if (notes.length === 0) return;
 
     ctx.save();
@@ -583,8 +635,7 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
       const br = corners.br;
       
       const lineHeight = fontSize * 1.2;
-      const text = note.description || 'New Note';
-      const paragraphs = text.split('\n');
+      const paragraphs = (note.description || '').split('\n');
       
       const lines: { text: string; x: number; y: number }[] = [];
       
@@ -594,12 +645,12 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
       
       const getBoundsAtY = (y: number) => {
          const leftX = tl.y === bl.y ? Math.min(tl.x, bl.x) : tl.x + (y - tl.y) * (bl.x - tl.x) / (bl.y - tl.y);
-         const rightX = tr.y === br.y ? Math.max(tr.x, br.x) : tr.x + (y - tr.y) * (br.x - tr.x) / (br.y - tr.y);
+         const rightX = tr.y === br.y ? Math.min(tr.x, br.x) : tr.x + (y - tr.y) * (br.x - tr.x) / (br.y - tr.y);
          return { leftX, rightX };
       };
 
-      paragraphs.forEach(paragraph => {
-        const words = paragraph.split(' ');
+      paragraphs.forEach((paragraph: any) => {
+        const words = (paragraph as string).split(' ');
         let currentLine = '';
         
         words.forEach(word => {
@@ -627,7 +678,7 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
         }
       });
 
-      const isSelected = selectedObjectIndex !== null && objects[selectedObjectIndex]?.name === note.name;
+      const isSelected = selectedObjectId !== null && objects.find((o: any) => o.id === selectedObjectId)?.name === note.name;
       
       const drawPolyPath = () => {
         ctx.beginPath();
@@ -684,15 +735,15 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
     ctx.restore();
   }
 
-  #drawLegends({ ctx, activeZoom, project, selectedObjectIndex, objects }: MapStyleContext, visibleObjects: CelestialObject[]): void {
-    const legends = visibleObjects.filter(o => o.type === 'legend');
+  #drawLegends({ ctx, activeZoom, project, selectedObjectId, objects }: MapStyleContext, visibleObjects: any[]): void {
+    const legends = visibleObjects.filter(o => o.type === 'legend') as any[];
     if (legends.length === 0) return;
 
     // Filter used attributes for partial legends
     const usedElements = new Set<string>();
     const usedTypes = new Set<string>();
     const usedOrbits = new Set<string>();
-    objects.forEach(o => {
+    objects.forEach((o: any) => {
         if (o.type === 'note' || o.type === 'legend' || o.type === 'moon' || o.type === 'constellation') return;
         usedElements.add(o.elementAffinity || 'none');
         usedTypes.add(o.type);
@@ -831,7 +882,7 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
       });
 
       // Draw selection indicator
-      const isSelected = selectedObjectIndex !== null && objects[selectedObjectIndex]?.name === legend.name;
+      const isSelected = selectedObjectId !== null && objects.find((o: any) => o.id === selectedObjectId)?.name === legend.name;
       if (isSelected) {
           ctx.fillStyle = this.#config.strokeColor;
           ctx.beginPath();
@@ -846,7 +897,7 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
   }
 
   #drawSystemDirectory(context: MapStyleContext, bounds: any): void {
-    const { ctx, activeSphere, visibleObjects, project, activeZoom } = context;
+    const { ctx, activeSphere, visibleObjects, project, activeZoom, currentSystemDate } = context;
     if (!this.#imagesLoaded) return;
 
     ctx.save();
@@ -856,17 +907,9 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
     // A value of 800 means if the column is 400px wide, 'z' is 0.5 (Title: 24px, Name: 16px)
     const z = bounds.shellRadiusPx / 800; 
 
-    // Draw divider line
-    const dividerX = bounds.x + bounds.directoryWidthPx + bounds.paddingPx * 0.5;
-    ctx.beginPath();
-    ctx.moveTo(dividerX, bounds.y + bounds.paddingPx);
-    ctx.lineTo(dividerX, bounds.y + bounds.height - bounds.paddingPx);
-    ctx.strokeStyle = this.#config.directoryDividerColor;
-    ctx.lineWidth = 4 * z;
-    ctx.stroke();
 
     // Render Directory Header
-    const startX = bounds.x + bounds.paddingPx;
+    const startX = bounds.directoryStartX;
     
     const shellProj = project(0, 0);
     // Start at the exact same height as the crystal shell
@@ -894,7 +937,7 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
 
       // Determine Orbital Symbol
       let orbitIconType = 'standard';
-      if (obj.orbitedObjectName === null || obj.distanceOrbited === 0) {
+      if (obj.orbitedObjectName === null || (obj.distanceOrbited || 0) === 0) {
         orbitIconType = 'central';
       } else if (obj.isStationary) {
         orbitIconType = 'fixed';
@@ -977,9 +1020,10 @@ export class NavigationChartRenderer implements INavigationChartRenderer {
       ctx.font = `italic ${20 * z}px ${this.#config.defaultFontFamily}`;
       ctx.fillStyle = this.#config.directorySubTitleColor;
       
-      const period = calculateSystemPositions([obj], 0)[obj.name]?.period || 0;
+      const positions = calculateSystemPositions(activeSphere as any, currentSystemDate);
+      const period = positions[obj.name]?.period || 0;
       ctx.fillText(
-        `Dist: ${obj.distanceOrbited.toFixed(2)} AU | Period: ${Math.round(period)} Days`,
+        `Dist: ${(obj.distanceOrbited || 0).toFixed(2)} AU | Period: ${Math.round(period)} Days`,
         startX + textOffsetX,
         curY
       );

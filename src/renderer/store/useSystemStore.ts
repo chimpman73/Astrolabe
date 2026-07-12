@@ -1,5 +1,8 @@
 import { create } from 'zustand';
-import { CrystalSphere, SaveFileInfo, CelestialObject } from '../../types/astrolabe';
+import { 
+  CrystalSphere, SaveFileInfo, CelestialObject, ICelestialBase,
+  IPhysicalBody, IPhenomenon, IConstellation, IMapOverlay, IGroup 
+} from '../../types/astrolabe';
 import { ParchmentDecoration } from '../../types/renderer';
 
 interface SystemState {
@@ -26,19 +29,178 @@ interface SystemState {
   setBookmarkShowDistance: (show: boolean) => void;
   setCurrentSystemDate: (date: number) => void;
   advanceSystemDate: (days: number) => void;
-  updateCelestialObject: (index: number, updated: Partial<CelestialObject>) => void;
-  reorderCelestialObjects: (sourceIndex: number, destinationIndex: number) => void;
+  
+  // V2 Actions using ID instead of index
+  updateCelestialObject: (id: string, updated: Partial<CelestialObject>) => void;
+  removeCelestialObject: (id: string) => void;
   addCelestialObject: (object: CelestialObject) => void;
-  removeCelestialObject: (index: number) => void;
-  updateActiveSphereMeta: (meta: Partial<Omit<CrystalSphere, 'objects'>>) => void;
+  // Reorder needs to know which list and where, or just pass a new flattened structure
+  // For simplicity, we can provide a method to set the entire array of a category
+  setCategoryArray: <K extends keyof CrystalSphere>(category: K, arr: CrystalSphere[K]) => void;
+  
+  updateActiveSphereMeta: (meta: Partial<Omit<CrystalSphere, 'objects' | 'groups' | 'celestialBodies' | 'phenomena' | 'constellations' | 'mapOverlays'>>) => void;
   setSphere: (sphere: CrystalSphere) => void;
   setToastMessage: (toast: { type: 'success' | 'error'; text: string } | null) => void;
   viewMode: 'PC' | 'DM';
   setViewMode: (mode: 'PC' | 'DM') => void;
   generateDecorations: (maxRadius: number) => void;
   clearDecorations: () => void;
-  selectedObjectIndex: number | null;
-  setSelectedObjectIndex: (index: number | null) => void;
+  selectedObjectId: string | null;
+  setSelectedObjectId: (id: string | null) => void;
+}
+
+// Generate a simple ID
+const generateId = () => Math.random().toString(36).substring(2, 9);
+
+function migrateToV2(v1Data: any): CrystalSphere {
+  if (v1Data.version === 2) return v1Data; // already migrated
+  
+  const v2Sphere: CrystalSphere = {
+    version: 2,
+    sphereName: v1Data.sphereName || 'Untitled System',
+    currentCampaignDate: v1Data.currentCampaignDate || new Date().toISOString().split('T')[0],
+    currentSystemDate: v1Data.currentSystemDate || 0,
+    shellBoundaryType: v1Data.shellBoundaryType || 'double',
+    shellCustomScale: v1Data.shellCustomScale,
+    orbitalDrawStrength: v1Data.orbitalDrawStrength,
+    navChartPlanetSizeOffset: v1Data.navChartPlanetSizeOffset,
+    navTitleStrike: v1Data.navTitleStrike,
+    groups: [],
+    celestialBodies: [],
+    phenomena: [],
+    constellations: [],
+    mapOverlays: []
+  };
+
+  const oldObjects = v1Data.objects || [];
+  
+  // Map old names to new IDs since orbitedObjectName uses names
+  const nameToId = new Map<string, string>();
+  oldObjects.forEach((obj: any) => {
+    const id = generateId();
+    nameToId.set(obj.name, id);
+    obj.id = id;
+  });
+
+  oldObjects.forEach((obj: any) => {
+    // Basic fields
+    const base: any = {
+      id: obj.id,
+      name: obj.name,
+      type: obj.type,
+      description: obj.description || '',
+      isHidden: obj.isHidden,
+      isDMOnly: obj.isDMOnly,
+      groupId: obj.groupName, // Legacy fallback for now, we will link it later if it's a real group
+      orbitedObjectName: obj.orbitedObjectName // Keep legacy reference for now
+    };
+
+    if (obj.type === 'group') {
+      v2Sphere.groups!.push(base as IGroup);
+    } 
+    else if (obj.type === 'cloud') {
+      v2Sphere.phenomena!.push({
+        ...base,
+        distanceOrbited: obj.distanceOrbited || 0,
+        initialAngle: obj.initialAngle || 0,
+        orbitalPeriodDays: obj.orbitalPeriodDays,
+        orbitEccentricity: obj.orbitEccentricity,
+        orbitRotation: obj.orbitRotation,
+        isStationary: obj.isStationary,
+        orbitDirection: obj.orbitDirection,
+        affectsShellBoundary: obj.affectsShellBoundary ?? true,
+        arcDegrees: obj.arcDegrees,
+        cloudTransparency: obj.cloudTransparency,
+        cloudiness: obj.cloudiness,
+        cloudObjectShape: obj.cloudObjectShape,
+        cloudObjectSizeClass: obj.cloudObjectSizeClass,
+        cloudObjectPhysicalSize: obj.cloudObjectPhysicalSize || obj.cloudObjectSize,
+        cloudObjectDensity: obj.cloudObjectDensity
+      } as IPhenomenon);
+    }
+    else if (obj.type === 'constellation') {
+      v2Sphere.constellations!.push({
+        ...base,
+        constellationDetail: obj.constellationDetail,
+        constellationStarCount: obj.constellationStarCount,
+        constellationStarMinSizeClass: obj.constellationStarMinSizeClass,
+        constellationStarMaxSizeClass: obj.constellationStarMaxSizeClass,
+        constellationStyle: obj.constellationStyle,
+        constellationFillAlpha: obj.constellationFillAlpha,
+        constellationFlipX: obj.constellationFlipX,
+        initialAngle: obj.initialAngle,
+        distanceOrbited: obj.distanceOrbited
+      } as IConstellation);
+    }
+    else if (obj.type === 'note' || obj.type === 'legend') {
+      v2Sphere.mapOverlays!.push({
+        ...base,
+        noteDistanceAU: obj.noteDistanceAU || obj.distanceOrbited,
+        noteAngle: obj.noteAngle || obj.initialAngle,
+        noteRotation: obj.noteRotation,
+        noteFontSize: obj.noteFontSize,
+        noteFontFamily: obj.noteFontFamily,
+        noteMaxWidth: obj.noteMaxWidth,
+        noteMaxHeight: obj.noteMaxHeight,
+        noteCorners: obj.noteCorners,
+        legendType: obj.legendType,
+        legendMode: obj.legendMode,
+        legendDistanceAU: obj.legendDistanceAU || obj.distanceOrbited,
+        legendAngle: obj.legendAngle || obj.initialAngle,
+        legendFontSize: obj.legendFontSize,
+        legendFontFamily: obj.legendFontFamily,
+        legendScale: obj.legendScale
+      } as IMapOverlay);
+    }
+    else {
+      // Physical bodies
+      v2Sphere.celestialBodies!.push({
+        ...base,
+        sizeClass: obj.sizeClass || 'D',
+        physicalSize: obj.physicalSize || obj.size || 1000,
+        sizeUnit: obj.sizeUnit || 'miles',
+        distanceOrbited: obj.distanceOrbited || 0,
+        initialAngle: obj.initialAngle || 0,
+        orbitalPeriodDays: obj.orbitalPeriodDays,
+        orbitEccentricity: obj.orbitEccentricity,
+        orbitRotation: obj.orbitRotation,
+        isStationary: obj.isStationary,
+        orbitDirection: obj.orbitDirection,
+        worldShape: obj.worldShape,
+        customShapeName: obj.customShapeName,
+        elementAffinity: obj.elementAffinity,
+        affectsShellBoundary: obj.affectsShellBoundary ?? true,
+        coronaSize: obj.coronaSize,
+        coronaAlpha: obj.coronaAlpha,
+        branchLevels: obj.branchLevels,
+        branchDensity: obj.branchDensity,
+        hasLeaves: obj.hasLeaves,
+        branchBend: obj.branchBend
+      } as IPhysicalBody);
+    }
+  });
+
+  // Convert groupName to groupId
+  const findGroupIdByName = (name: string) => {
+    const grp = v2Sphere.groups!.find(g => g.name === name);
+    return grp ? grp.id : undefined;
+  };
+
+  const updateGroupId = (arr: ICelestialBase[]) => {
+    arr.forEach(obj => {
+      if (obj.groupId && !v2Sphere.groups!.find(g => g.id === obj.groupId)) {
+        // It's probably a legacy name, convert to ID
+        obj.groupId = findGroupIdByName(obj.groupId);
+      }
+    });
+  };
+
+  updateGroupId(v2Sphere.celestialBodies!);
+  updateGroupId(v2Sphere.phenomena!);
+  updateGroupId(v2Sphere.constellations!);
+  updateGroupId(v2Sphere.mapOverlays!);
+
+  return v2Sphere;
 }
 
 export const useSystemStore = create<SystemState>((set, get) => ({
@@ -53,20 +215,18 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   toastMessage: null,
   viewMode: 'PC',
   decorations: [],
-  selectedObjectIndex: null,
+  selectedObjectId: null,
 
-  setSelectedObjectIndex: (index) => set({ selectedObjectIndex: index }),
-
+  setSelectedObjectId: (id) => set({ selectedObjectId: id }),
   setViewMode: (mode) => set({ viewMode: mode }),
 
   generateDecorations: (maxRadius: number) => {
-    const numDecorations = Math.floor(Math.random() * 5) + 5; // 5 to 9 decorations
+    const numDecorations = Math.floor(Math.random() * 5) + 5;
     const newDecorations: ParchmentDecoration[] = [];
     const types: ('ink' | 'coffee' | 'burn')[] = ['ink', 'ink', 'ink', 'coffee', 'burn'];
 
     for (let i = 0; i < numDecorations; i++) {
       const angle = Math.random() * Math.PI * 2;
-      // Keep radius outside the immediate center (at least 40% of maxRadius out to 150%)
       const minRadius = maxRadius * 0.4;
       const radius = minRadius + (Math.random() * (maxRadius * 1.5 - minRadius));
       newDecorations.push({
@@ -75,7 +235,6 @@ export const useSystemStore = create<SystemState>((set, get) => ({
         y: Math.sin(angle) * radius,
         rotation: Math.random() * Math.PI * 2,
         scale: 0.5 + Math.random() * 1.5,
-        // Lower opacity so they are not too dark
         opacity: 0.15 + Math.random() * 0.25,
       });
     }
@@ -113,25 +272,11 @@ export const useSystemStore = create<SystemState>((set, get) => ({
       try {
         const res = await window.astrolabeAPI.loadJsonFile(filePath);
         if (res.success && res.data) {
-          // MIGRATION LOGIC: Ensure all objects have size properties
-          const migratedSphere: CrystalSphere = {
-            ...res.data,
-            objects: res.data.objects.map(obj => {
-              if (!obj.sizeClass) {
-                return {
-                  ...obj,
-                  sizeClass: 'D',
-                  physicalSize: 1000,
-                  sizeUnit: 'miles'
-                };
-              }
-              return obj;
-            })
-          };
-
+          const migratedSphere = migrateToV2(res.data);
           set({
             activeSphere: migratedSphere,
             currentSystemDate: migratedSphere.currentSystemDate || 0,
+            selectedObjectId: null
           });
           localStorage.setItem('astrolabe_last_loaded_file', filePath);
           return true;
@@ -149,23 +294,19 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     const { activeSphere, saveDirectory, currentSystemDate } = get();
     if (!activeSphere || !saveDirectory) return false;
 
-    // Synchronize latest activeSystemDate inside saved data payload
     const dataToSave: CrystalSphere = {
       ...activeSphere,
       currentSystemDate: currentSystemDate,
     };
 
     const fileName = `${dataToSave.sphereName.toLowerCase().replace(/[^a-z0-9]/g, '_')}.json`;
-    const filePath = window.astrolabeAPI
-      ? `${saveDirectory}/${fileName}`
-      : fileName; // Fallback path
+    const filePath = window.astrolabeAPI ? `${saveDirectory}/${fileName}` : fileName;
 
     if (window.astrolabeAPI) {
       try {
         const res = await window.astrolabeAPI.saveJsonFile(filePath, dataToSave);
         if (res.success) {
           localStorage.setItem('astrolabe_last_loaded_file', filePath);
-          // Refresh saves directory to show updated state
           await get().loadSavesList();
           return true;
         } else {
@@ -180,15 +321,21 @@ export const useSystemStore = create<SystemState>((set, get) => ({
 
   createNewSphere: async () => {
     const defaultSphere: CrystalSphere = {
+      version: 2,
       sphereName: 'Untitled System',
       currentCampaignDate: new Date().toISOString().split('T')[0],
       currentSystemDate: 0,
-      objects: [],
+      groups: [],
+      celestialBodies: [],
+      phenomena: [],
+      constellations: [],
+      mapOverlays: []
     };
 
     set({
       activeSphere: defaultSphere,
       currentSystemDate: 0,
+      selectedObjectId: null
     });
   },
 
@@ -200,7 +347,6 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     set({ toastMessage: toast });
     if (toast) {
       setTimeout(() => {
-        // Only clear if it hasn't been overwritten by another toast
         const currentToast = get().toastMessage;
         if (currentToast && currentToast.text === toast.text) {
           set({ toastMessage: null });
@@ -213,9 +359,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     set({ currentSystemDate: date });
     const { activeSphere } = get();
     if (activeSphere) {
-      set({
-        activeSphere: { ...activeSphere, currentSystemDate: date },
-      });
+      set({ activeSphere: { ...activeSphere, currentSystemDate: date } });
     }
   },
 
@@ -224,63 +368,85 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     get().setCurrentSystemDate(newDate);
   },
 
-  updateCelestialObject: (index, updated) => {
+  updateCelestialObject: (id, updated) => {
     const { activeSphere } = get();
     if (!activeSphere) return;
 
-    const objects = [...activeSphere.objects];
-    objects[index] = { ...objects[index], ...updated };
+    const replaceInArray = <T extends ICelestialBase>(arr: T[]): T[] => {
+      const idx = arr.findIndex(o => o.id === id);
+      if (idx !== -1) {
+        const newArr = [...arr];
+        newArr[idx] = { ...newArr[idx], ...updated };
+        return newArr;
+      }
+      return arr;
+    };
 
     set({
-      activeSphere: { ...activeSphere, objects },
-    });
-  },
-
-  reorderCelestialObjects: (sourceIndex, destinationIndex) => {
-    const { activeSphere } = get();
-    if (!activeSphere) return;
-
-    const objects = [...activeSphere.objects];
-    const [movedItem] = objects.splice(sourceIndex, 1);
-    objects.splice(destinationIndex, 0, movedItem);
-
-    set({
-      activeSphere: { ...activeSphere, objects },
+      activeSphere: {
+        ...activeSphere,
+        groups: replaceInArray(activeSphere.groups || []),
+        celestialBodies: replaceInArray(activeSphere.celestialBodies || []),
+        phenomena: replaceInArray(activeSphere.phenomena || []),
+        constellations: replaceInArray(activeSphere.constellations || []),
+        mapOverlays: replaceInArray(activeSphere.mapOverlays || [])
+      }
     });
   },
 
   addCelestialObject: (object) => {
     const { activeSphere } = get();
     if (!activeSphere) return;
+    
+    // Ensure it has an ID
+    if (!object.id) object.id = generateId();
+
+    const addToArray = <T extends ICelestialBase>(arr: T[], obj: any): T[] => [...arr, obj];
+
+    let newSphere = { ...activeSphere };
+    if (object.type === 'group') newSphere.groups = addToArray(newSphere.groups || [], object);
+    else if (object.type === 'cloud') newSphere.phenomena = addToArray(newSphere.phenomena || [], object);
+    else if (object.type === 'constellation') newSphere.constellations = addToArray(newSphere.constellations || [], object);
+    else if (object.type === 'note' || object.type === 'legend') newSphere.mapOverlays = addToArray(newSphere.mapOverlays || [], object);
+    else newSphere.celestialBodies = addToArray(newSphere.celestialBodies || [], object);
+
+    set({ activeSphere: newSphere });
+  },
+
+  removeCelestialObject: (id) => {
+    const { activeSphere } = get();
+    if (!activeSphere) return;
+
+    const filterArray = <T extends ICelestialBase>(arr: T[]): T[] => arr.filter(o => o.id !== id);
 
     set({
       activeSphere: {
         ...activeSphere,
-        objects: [...activeSphere.objects, object],
+        groups: filterArray(activeSphere.groups || []),
+        celestialBodies: filterArray(activeSphere.celestialBodies || []),
+        phenomena: filterArray(activeSphere.phenomena || []),
+        constellations: filterArray(activeSphere.constellations || []),
+        mapOverlays: filterArray(activeSphere.mapOverlays || [])
       },
+      selectedObjectId: get().selectedObjectId === id ? null : get().selectedObjectId
     });
   },
 
-  removeCelestialObject: (index) => {
+  setCategoryArray: (category, arr) => {
     const { activeSphere } = get();
     if (!activeSphere) return;
-
-    const objects = activeSphere.objects.filter((_, i) => i !== index);
     set({
-      activeSphere: { ...activeSphere, objects },
+      activeSphere: {
+        ...activeSphere,
+        [category]: arr
+      }
     });
   },
 
   updateActiveSphereMeta: (meta) => {
     const { activeSphere } = get();
     if (!activeSphere) return;
-
-    set({
-      activeSphere: {
-        ...activeSphere,
-        ...meta,
-      },
-    });
+    set({ activeSphere: { ...activeSphere, ...meta } });
   },
 
   setSphere: (sphere) => {

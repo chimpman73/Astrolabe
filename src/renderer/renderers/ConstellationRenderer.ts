@@ -28,7 +28,7 @@ export class ConstellationRenderer extends BaseRenderer {
     
     const detail = obj.constellationDetail || 1;
     const starCount = obj.constellationStarCount ?? 5;
-    const style = obj.constellationStyle || 'internal';
+    const style = (obj.constellationStyle || 'outline') as 'outline' | 'internal';
     const seed = obj.name || 'default';
 
     const constellationData = shapeManager.getConstellationData(shapeName, style, detail, seed);

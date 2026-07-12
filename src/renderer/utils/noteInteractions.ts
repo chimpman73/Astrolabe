@@ -11,7 +11,7 @@ interface NoteNodes {
   br: { x: number; y: number };
 }
 
-export function getNoteCorners(note: CelestialObject) {
+export function getNoteCorners(note: any) {
   const maxWidth = note.noteMaxWidth || 120;
   const maxHeight = note.noteMaxHeight || 60;
   const halfW = maxWidth / 2;

@@ -1,4 +1,7 @@
-import { CelestialObject, OrbitDirection } from '../../types/astrolabe';
+import { 
+  CrystalSphere, CelestialObject, OrbitDirection, 
+  IPhysicalBody, IPhenomenon, IConstellation, IMapOverlay 
+} from '../../types/astrolabe';
 
 /**
  * Calculates the orbital period (P) in days using Keplerian scaling: P = k * d^1.5.
@@ -66,7 +69,7 @@ function calculateCoordinates(
   };
 }
 
-interface PositionDetails {
+export interface PositionDetails {
   x: number;      // global X position in system scale
   y: number;      // global Y position in system scale
   angle: number;  // current active angle in degrees
@@ -74,54 +77,156 @@ interface PositionDetails {
 }
 
 /**
+ * Helper to recursively flatten celestial bodies with subOrbiters.
+ */
+export function flattenCelestialTree(
+  bodies: IPhysicalBody[], 
+  parentMap: Map<string, string> = new Map()
+): IPhysicalBody[] {
+  let flat: IPhysicalBody[] = [];
+  for (const body of bodies) {
+    flat.push(body);
+    if (body.subOrbiters && body.subOrbiters.length > 0) {
+      for (const sub of body.subOrbiters) {
+        if (sub.type !== 'cloud') {
+          // It's a body
+          parentMap.set(sub.id, body.id);
+        }
+      }
+      flat = flat.concat(flattenCelestialTree(body.subOrbiters.filter(s => s.type !== 'cloud') as IPhysicalBody[], parentMap));
+    }
+  }
+  return flat;
+}
+
+export function flattenPhenomenaTree(
+  bodies: IPhysicalBody[], 
+  parentMap: Map<string, string>
+): IPhenomenon[] {
+  let flat: IPhenomenon[] = [];
+  for (const body of bodies) {
+    if (body.subOrbiters && body.subOrbiters.length > 0) {
+      for (const sub of body.subOrbiters) {
+        if (sub.type === 'cloud') {
+          parentMap.set(sub.id, body.id);
+          flat.push(sub as IPhenomenon);
+        }
+      }
+      flat = flat.concat(flattenPhenomenaTree(body.subOrbiters.filter(s => s.type !== 'cloud') as IPhysicalBody[], parentMap));
+    }
+  }
+  return flat;
+}
+
+export function getAllSystemObjects(sphere: Pick<CrystalSphere, 'celestialBodies' | 'phenomena' | 'constellations' | 'mapOverlays' | 'groups'>): CelestialObject[] {
+  const parentMap = new Map<string, string>();
+  const flatBodies = flattenCelestialTree(sphere.celestialBodies || [], parentMap);
+  const flatPhenomena = flattenPhenomenaTree(sphere.celestialBodies || [], parentMap);
+  
+  return [
+    ...(sphere.groups || []),
+    ...flatBodies,
+    ...(sphere.phenomena || []),
+    ...flatPhenomena,
+    ...(sphere.constellations || []),
+    ...(sphere.mapOverlays || [])
+  ];
+}
+
+/**
  * Hierarchical solver that resolves the global 2D positions of all objects.
  * Memoizes results to prevent redundant parent resolutions.
  */
 export function calculateSystemPositions(
-  objects: CelestialObject[],
+  sphere: Pick<CrystalSphere, 'celestialBodies' | 'phenomena' | 'constellations' | 'mapOverlays'>,
   currentDays: number
 ): Record<string, PositionDetails> {
   const results: Record<string, PositionDetails> = {};
+  
   const lookup = new Map<string, CelestialObject>();
+  const parentMap = new Map<string, string>(); // child.id -> parent.id
+  const nameToIdMap = new Map<string, string>(); // for legacy orbitedObjectName resolving
 
-  for (const obj of objects) {
-    lookup.set(obj.name, obj);
+  // Flatten the nested bodies and phenomena
+  const allObjects = getAllSystemObjects(sphere);
+
+  for (const obj of allObjects as any[]) {
+    lookup.set(obj.id, obj);
+    nameToIdMap.set(obj.name, obj.id);
   }
 
-  function resolve(name: string): PositionDetails {
-    if (results[name]) return results[name];
+  function resolve(id: string): PositionDetails {
+    if (results[id]) return results[id];
 
-    const obj = lookup.get(name);
+    const obj = lookup.get(id);
     if (!obj) {
       return { x: 0, y: 0, angle: 0, period: 1 };
     }
 
-    const period = calculateOrbitalPeriod(obj.distanceOrbited, obj.orbitalPeriodDays);
-    const angle = calculateAngle(obj.initialAngle, period, currentDays, obj.isStationary, obj.orbitDirection);
+    let distanceOrbited = 0;
+    let initialAngle = 0;
+    let orbitalPeriodDays = 0;
+    let isStationary = false;
+    let orbitDirection: OrbitDirection = 'prograde';
+    let orbitEccentricity = 0;
+    let orbitRotation = 0;
 
-    // If it has no parent, it orbits the central star at coordinate (0, 0)
-    if (!obj.orbitedObjectName || obj.orbitedObjectName === name) {
-      const rel = calculateCoordinates(obj.distanceOrbited, angle, obj.orbitEccentricity, obj.orbitRotation);
+    // Type guard / extraction
+    if ('distanceOrbited' in obj) {
+      distanceOrbited = obj.distanceOrbited ?? 0;
+      initialAngle = obj.initialAngle ?? 0;
+      orbitalPeriodDays = (obj as any).orbitalPeriodDays ?? 0;
+      isStationary = (obj as any).isStationary ?? false;
+      orbitDirection = (obj as any).orbitDirection ?? 'prograde';
+      orbitEccentricity = ('orbitEccentricity' in obj) ? (obj as any).orbitEccentricity ?? 0 : 0;
+      orbitRotation = ('orbitRotation' in obj) ? (obj as any).orbitRotation ?? 0 : 0;
+    } else if (obj.type === 'note' || obj.type === 'legend') {
+      const ol = obj as IMapOverlay;
+      distanceOrbited = (ol.type === 'note' ? ol.noteDistanceAU : ol.legendDistanceAU) ?? 0;
+      initialAngle = (ol.type === 'note' ? ol.noteAngle : ol.legendAngle) ?? 0;
+      isStationary = true;
+    }
+
+    const period = calculateOrbitalPeriod(distanceOrbited, orbitalPeriodDays);
+    const angle = calculateAngle(initialAngle, period, currentDays, isStationary, orbitDirection);
+
+    // Determine parent
+    let parentId: string | null = null;
+    
+    // 1. Check tree nesting map
+    if (parentMap.has(id)) {
+      parentId = parentMap.get(id) || null;
+    } 
+    // 2. Check legacy orbitedObjectName
+    else if ('orbitedObjectName' in obj && obj.orbitedObjectName) {
+      parentId = nameToIdMap.get(obj.orbitedObjectName) || null;
+    }
+
+    // If it has no parent or orbits itself, it orbits the central star at coordinate (0, 0)
+    if (!parentId || parentId === id) {
+      const rel = calculateCoordinates(distanceOrbited, angle, orbitEccentricity, orbitRotation);
       const res = { x: rel.x, y: rel.y, angle, period };
-      results[name] = res;
+      results[id] = res;
+      if (obj.name) results[obj.name] = res;
       return res;
     }
 
     // Resolve parent global position recursively
-    const parentPos = resolve(obj.orbitedObjectName);
-    const rel = calculateCoordinates(obj.distanceOrbited, angle, obj.orbitEccentricity, obj.orbitRotation);
+    const parentPos = resolve(parentId);
+    const rel = calculateCoordinates(distanceOrbited, angle, orbitEccentricity, orbitRotation);
     const res = {
       x: parentPos.x + rel.x,
       y: parentPos.y + rel.y,
       angle,
       period,
     };
-    results[name] = res;
+    results[id] = res;
+    if (obj.name) results[obj.name] = res;
     return res;
   }
 
-  for (const obj of objects) {
-    resolve(obj.name);
+  for (const obj of allObjects as any[]) {
+    resolve(obj.id);
   }
 
   return results;

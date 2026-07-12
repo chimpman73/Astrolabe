@@ -43,7 +43,7 @@ class FileService {
             const raw = fs.readFileSync(fullPath, 'utf8');
             const data = JSON.parse(raw);
             // Simple validation check: ensure it looks like a CrystalSphere configuration
-            if (data.sphereName && Array.isArray(data.objects)) {
+            if (data.sphereName && (Array.isArray(data.objects) || data.version === 2)) {
               jsonFiles.push({
                 filename: file,
                 fullPath: fullPath,

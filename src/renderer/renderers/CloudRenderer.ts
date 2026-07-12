@@ -76,7 +76,7 @@ export class CloudRenderer extends BaseRenderer {
       });
     } else {
       if (parentX === undefined || parentY === undefined || orbitRadius === undefined || orbitAngle === undefined) return;
-      if (obj.distanceOrbited <= 0) return;
+      if ((obj.distanceOrbited || 0) <= 0) return;
       
       const arcHalf = (arcDegrees / 2) * (Math.PI / 180);
       const centerAngle = orbitAngle * (Math.PI / 180);

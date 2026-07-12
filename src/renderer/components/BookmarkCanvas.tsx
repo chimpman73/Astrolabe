@@ -1,6 +1,7 @@
 import { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useFontsLoaded } from '../hooks/useFontsLoaded';
 import { useSystemStore } from '../store/useSystemStore';
+import { getAllSystemObjects } from '../utils/orbitMath';
 import { saveCanvasExport } from '../utils/exportHelper';
 import { drawBookmark } from '../renderers/SimpleVertBookmarkRenderer';
 import { vellumBookmarkStyleConfig, spaceBookmarkStyleConfig } from '../renderers/BookmarkStyleConfigs';
@@ -24,16 +25,18 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  const allObjects = activeSphere ? getAllSystemObjects(activeSphere) : [];
+
   const isPrimary = (obj: any) => {
     if (!obj.orbitedObjectName) return true;
-    const parent = activeSphere?.objects.find((o) => o.name === obj.orbitedObjectName);
+    const parent = allObjects.find((o) => o.id === obj.orbitedObjectName || o.name === obj.orbitedObjectName);
     if (parent && !parent.orbitedObjectName && parent.distanceOrbited === 0) return true;
     return false;
   };
 
-  const isGroupHidden = (groupName?: string) => {
-    if (!groupName) return false;
-    const group = activeSphere?.objects.find((o) => o.type === 'group' && o.name === groupName);
+  const isGroupHidden = (groupId?: string) => {
+    if (!groupId) return false;
+    const group = allObjects.find((o) => o.type === 'group' && (o.id === groupId || o.name === groupId));
     return group ? (group.isHidden || (viewMode !== 'DM' && group.isDMOnly)) : false;
   };
 
@@ -42,13 +45,13 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
 
   // Filter objects to only those that orbit the central point (0,0) or orbit a body at (0,0)
   const planetaryObjects = activeSphere
-    ? activeSphere.objects.filter((obj) => 
-        isValidBookmarkObject(obj) && !obj.isHidden && (viewMode === 'DM' || !obj.isDMOnly) && !isGroupHidden(obj.groupName)
+    ? allObjects.filter((obj) => 
+        isValidBookmarkObject(obj) && !obj.isHidden && (viewMode === 'DM' || !obj.isDMOnly) && !isGroupHidden(obj.groupId)
       )
     : [];
 
   const shellBasisDistance = activeSphere 
-    ? activeSphere.objects
+    ? allObjects
         .filter((obj) => isValidBookmarkObject(obj) && obj.affectsShellBoundary !== false)
         .reduce((max, obj) => {
           const reach = ScaleManager.getPhysicalReachAU(obj);
@@ -57,7 +60,7 @@ export const BookmarkCanvas = forwardRef<BookmarkCanvasHandle>((_props, ref) => 
     : 0.1;
 
   const absoluteMaxDistance = activeSphere 
-    ? activeSphere.objects
+    ? allObjects
         .filter((obj) => isValidBookmarkObject(obj))
         .reduce((max, obj) => {
           const reach = ScaleManager.getPhysicalReachAU(obj);

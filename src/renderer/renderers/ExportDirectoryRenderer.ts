@@ -8,9 +8,9 @@ interface ExportNavigationChartParams {
   mapTheme: 'parchment' | 'space';
   activeSphere: CrystalSphere | null;
   currentSystemDate: number;
-  objects: CelestialObject[];
-  visibleObjects: CelestialObject[];
-  isPrimary: (obj: CelestialObject) => boolean;
+  objects: any[];
+  visibleObjects: any[];
+  isPrimary: (obj: any) => boolean;
   setToastMessage: (msg: any) => void;
   renderer: INavigationChartRenderer;
 }
@@ -22,7 +22,7 @@ export async function exportNavigationChart(params: ExportNavigationChartParams)
     o.distanceOrbited >= 0 && isPrimary(o)
   );
   let maxDist = 0.1;
-  primaryObjects.forEach(o => {
+  primaryObjects.forEach((o: any) => {
     const reach = ScaleManager.getPhysicalReachAU(o);
     if (reach > maxDist) maxDist = reach;
   });
@@ -57,7 +57,7 @@ export async function exportNavigationChart(params: ExportNavigationChartParams)
     y: exportHeight / 2 
   };
 
-  const positions = calculateSystemPositions(objects, currentSystemDate);
+  const positions = activeSphere ? calculateSystemPositions(activeSphere, currentSystemDate) : {};
   const project = (xModel: number, yModel: number) => {
     return {
       x: exportPan.x + xModel * exportZoom,
@@ -98,7 +98,7 @@ export async function exportNavigationChart(params: ExportNavigationChartParams)
     project,
     fontsLoaded: true, // assuming fonts are loaded for export
     isExport: true,
-    selectedObjectIndex: null,
+    selectedObjectId: null,
   };
 
   // Render the view

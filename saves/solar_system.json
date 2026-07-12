@@ -1,122 +1,164 @@
 {
+  "version": 2,
   "sphereName": "Solar System",
   "currentCampaignDate": "2026-06-30",
   "currentSystemDate": 3241,
-  "objects": [
+  "shellBoundaryType": "double",
+  "groups": [],
+  "celestialBodies": [
     {
+      "id": "qqxat1b",
       "name": "Sol",
       "type": "star",
-      "size": 60,
       "description": "The central star of the Solar System, providing light and heat to all orbiting worlds.",
       "orbitedObjectName": null,
+      "sizeClass": "D",
+      "physicalSize": 60,
+      "sizeUnit": "miles",
       "distanceOrbited": 0,
       "initialAngle": 0,
       "orbitalPeriodDays": 1,
       "isStationary": true,
-      "elementAffinity": "fire"
+      "elementAffinity": "fire",
+      "affectsShellBoundary": true
     },
     {
+      "id": "i7flqm0",
       "name": "Mercury",
       "type": "planet",
-      "size": 6,
       "description": "The smallest planet, closest to Sol, experiencing extreme temperature variations.",
       "orbitedObjectName": "Sol",
+      "sizeClass": "D",
+      "physicalSize": 6,
+      "sizeUnit": "miles",
       "distanceOrbited": 0.39,
       "initialAngle": 45,
       "orbitalPeriodDays": 88,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "affectsShellBoundary": true
     },
     {
+      "id": "3cx8sei",
       "name": "Venus",
       "type": "planet",
-      "size": 12,
       "description": "A terrestrial planet enveloped in a dense, carbon dioxide-rich atmosphere with runaway greenhouse temperatures.",
       "orbitedObjectName": "Sol",
+      "sizeClass": "D",
+      "physicalSize": 12,
+      "sizeUnit": "miles",
       "distanceOrbited": 0.72,
       "initialAngle": 120,
       "orbitalPeriodDays": 225,
-      "elementAffinity": "air"
+      "elementAffinity": "air",
+      "affectsShellBoundary": true
     },
     {
+      "id": "0j3emlm",
       "name": "Earth",
       "type": "planet",
-      "size": 13,
       "description": "Our home planet, a vibrant blue world rich in water, oxygen, and diverse life.",
       "orbitedObjectName": "Sol",
+      "sizeClass": "D",
+      "physicalSize": 13,
+      "sizeUnit": "miles",
       "distanceOrbited": 1,
       "initialAngle": 0,
       "orbitalPeriodDays": 365,
-      "elementAffinity": "mixed"
+      "elementAffinity": "mixed",
+      "affectsShellBoundary": true
     },
     {
+      "id": "6dy3yrd",
       "name": "Luna",
       "type": "moon",
-      "size": 3.5,
       "description": "Earth's single natural satellite, responsible for tidal locks and ocean movements.",
       "orbitedObjectName": "Earth",
+      "sizeClass": "D",
+      "physicalSize": 3.5,
+      "sizeUnit": "miles",
       "distanceOrbited": 0.15,
       "initialAngle": 90,
-      "orbitalPeriodDays": 27
+      "orbitalPeriodDays": 27,
+      "affectsShellBoundary": true
     },
     {
+      "id": "1cuc0wk",
       "name": "Mars",
       "type": "planet",
-      "size": 8,
       "description": "The Red Planet, characterized by iron oxide soil, polar ice caps, and historical water channels.",
       "orbitedObjectName": "Sol",
+      "sizeClass": "D",
+      "physicalSize": 8,
+      "sizeUnit": "miles",
       "distanceOrbited": 1.52,
       "initialAngle": 220,
       "orbitalPeriodDays": 687,
-      "elementAffinity": "fire"
+      "elementAffinity": "fire",
+      "affectsShellBoundary": true
     },
     {
+      "id": "he44hf8",
       "name": "Phobos",
       "type": "moon",
-      "size": 1.5,
       "description": "The larger and inner moon of Mars, orbiting extremely close to its parent body.",
       "orbitedObjectName": "Mars",
+      "sizeClass": "D",
+      "physicalSize": 1.5,
+      "sizeUnit": "miles",
       "distanceOrbited": 0.08,
       "initialAngle": 0,
-      "orbitalPeriodDays": 0.3
+      "orbitalPeriodDays": 0.3,
+      "affectsShellBoundary": true
     },
     {
+      "id": "cb5k00q",
       "name": "Deimos",
       "type": "moon",
-      "size": 1,
       "description": "The smaller and outer moon of Mars, taking a longer orbit around the red planet.",
       "orbitedObjectName": "Mars",
+      "sizeClass": "D",
+      "physicalSize": 1,
+      "sizeUnit": "miles",
       "distanceOrbited": 0.14,
       "initialAngle": 180,
-      "orbitalPeriodDays": 1.2
+      "orbitalPeriodDays": 1.2,
+      "affectsShellBoundary": true
     },
     {
+      "id": "l2basla",
       "name": "Jupiter",
       "type": "planet",
-      "size": 32,
       "description": "The largest planet in the system, a gas giant with massive storms and a powerful magnetic field.",
       "orbitedObjectName": "Sol",
+      "sizeClass": "D",
+      "physicalSize": 32,
+      "sizeUnit": "miles",
       "distanceOrbited": 2.8,
       "initialAngle": 315,
       "orbitalPeriodDays": 4333,
-      "elementAffinity": "water"
-    },
+      "elementAffinity": "water",
+      "affectsShellBoundary": true
+    }
+  ],
+  "phenomena": [
     {
+      "id": "8ehlcn7",
       "name": "Asteroid Field",
       "type": "cloud",
-      "size": 25,
       "description": "A newly added planetary body.",
       "orbitedObjectName": null,
       "distanceOrbited": 2.1,
       "initialAngle": 0,
       "orbitalPeriodDays": 365,
+      "affectsShellBoundary": true,
       "arcDegrees": 360,
       "cloudTransparency": 0,
       "cloudiness": 0.5,
       "cloudObjectShape": "irregular",
-      "cloudObjectSize": 6,
-      "cloudObjectDensity": 50,
-      "elementAffinity": "earth"
+      "cloudObjectPhysicalSize": 6,
+      "cloudObjectDensity": 50
     }
   ],
-  "shellBoundaryType": "double"
+  "constellations": [],
+  "mapOverlays": []
 }

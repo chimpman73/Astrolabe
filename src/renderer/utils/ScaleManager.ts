@@ -1,4 +1,4 @@
-import { SizeClass, SizeUnit, CelestialObject } from '../../types/astrolabe';
+import { SizeClass, SizeUnit, CelestialObject, IPhysicalBody, IPhenomenon, IMapOverlay } from '../../types/astrolabe';
 import { IVisualScaleStrategy } from './IVisualScaleStrategy';
 import { HybridScaleStrategy } from './HybridScaleStrategy';
 
@@ -94,16 +94,28 @@ export class ScaleManager {
    * Returns the physical radius of the object in AU.
    */
   public static getPhysicalRadiusAU(obj: CelestialObject): number {
-    if (!obj.physicalSize) return 0;
-    const radius = obj.physicalSize / 2;
-    return obj.sizeUnit === 'AU' ? radius : this.milesToAu(radius);
+    if (obj.type === 'note' || obj.type === 'legend' || obj.type === 'group') return 0;
+    
+    // Typecast since we know it's a body or constellation that might have physical size
+    const body = obj as IPhysicalBody;
+    
+    if (!body.physicalSize) return 0;
+    const radius = body.physicalSize / 2;
+    return body.sizeUnit === 'AU' ? radius : this.milesToAu(radius);
   }
 
   /**
    * Returns the maximum physical boundary distance (reach) of the object from its parent in AU.
    */
   public static getPhysicalReachAU(obj: CelestialObject): number {
-    const dist = obj.distanceOrbited || 0;
+    let dist = 0;
+    if (obj.type === 'note' || obj.type === 'legend') {
+      const overlay = obj as IMapOverlay;
+      dist = overlay.type === 'note' ? (overlay.noteDistanceAU || 0) : (overlay.legendDistanceAU || 0);
+    } else if (obj.type !== 'group') {
+      const body = obj as IPhysicalBody;
+      dist = body.distanceOrbited || 0;
+    }
     return dist + this.getPhysicalRadiusAU(obj);
   }
 }

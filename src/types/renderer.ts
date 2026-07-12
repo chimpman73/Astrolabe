@@ -40,7 +40,7 @@ export interface MapStyleContext {
   decorations?: ParchmentDecoration[];
   fontsLoaded?: boolean;
   isExport?: boolean;
-  selectedObjectIndex: number | null;
+  selectedObjectId: string | null;
 }
 
 export interface ParchmentDecoration {

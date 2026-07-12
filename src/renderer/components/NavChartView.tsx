@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useSystemStore } from '../store/useSystemStore';
 import { Play, Pause, FastForward, RotateCcw, Download, ZoomIn, ZoomOut, Maximize, ChevronLeft, Sparkles } from 'lucide-react';
 import { NavChartCanvas, NavChartCanvasHandle } from './NavChartCanvas';
+import { getAllSystemObjects } from '../utils/orbitMath';
 
 interface NavChartViewProps {
   onCollapse?: () => void;
@@ -134,8 +135,10 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
             <button
               onClick={() => {
                 let maxDist = 0.1;
-                activeSphere?.objects.forEach(o => {
-                  if (o.distanceOrbited > maxDist) maxDist = o.distanceOrbited;
+                (activeSphere ? getAllSystemObjects(activeSphere as any) : []).forEach((o: any) => {
+                  if (o.type === 'note' || o.type === 'legend' || o.type === 'constellation') return;
+                  const dist = (o.distanceOrbited || 0) * (activeSphere?.orbitalDrawStrength || 1);
+                  if (dist > maxDist) maxDist = dist;
                 });
                 generateDecorations(maxDist * 2);
               }}

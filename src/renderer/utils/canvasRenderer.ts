@@ -6,7 +6,7 @@ export const drawSolidBody = (
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
-  obj: CelestialObject,
+  obj: any,
   size: number,
   bodyFill: string,
   bodyStroke: string,
@@ -60,7 +60,7 @@ export const getElementColor = (affinity: string | null) => {
 };
 
 export const getBodyColors = (
-  obj: CelestialObject,
+  obj: any,
   isParchment: boolean,
   defaultBg: string,
   defaultStroke: string,

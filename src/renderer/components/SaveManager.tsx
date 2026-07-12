@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSystemStore } from '../store/useSystemStore';
+import { getAllSystemObjects } from '../utils/orbitMath';
 import { 
   Trash2, 
   Plus, 
@@ -43,20 +44,21 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
     activeSphere,
     updateActiveSphereMeta,
     updateCelestialObject,
-    reorderCelestialObjects,
-    addCelestialObject,
+        addCelestialObject,
     removeCelestialObject,
     setToastMessage,
-    selectedObjectIndex,
-    setSelectedObjectIndex,
+    selectedObjectId,
+    setSelectedObjectId,
   } = useSystemStore();
 
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [isSystemConfigExpanded, setIsSystemConfigExpanded] = useState<boolean>(true);
 
   // If no active sphere is loaded
+  const allObjects = activeSphere ? getAllSystemObjects(activeSphere) : [];
+
   if (!activeSphere) {
     return (
       <div className="save-manager-container">
@@ -86,37 +88,37 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
     );
   }
 
-  const handleUpdateObject = (index: number, updated: Partial<CelestialObject>) => {
+  const handleUpdateObject = (id: string, updated: Partial<CelestialObject>) => {
     if (updated.type === 'star') {
       updated.initialAngle = 0;
       updated.orbitalPeriodDays = 1;
     }
     // If changing type to a cloud object, ensure a default arc width exists
     if (updated.type === 'cloud') {
-      const current = activeSphere!.objects[index];
+      const current = allObjects.find(o => o.id === id)!;
       updated.arcDegrees = updated.arcDegrees ?? current.arcDegrees ?? 30;
       updated.cloudTransparency = updated.cloudTransparency ?? current.cloudTransparency ?? 0.45;
       updated.cloudiness = updated.cloudiness ?? current.cloudiness ?? 0.5;
     }
     if (updated.type === 'living_world') {
-      const current = activeSphere!.objects[index];
+      const current = allObjects.find(o => o.id === id)!;
       updated.branchLevels = updated.branchLevels ?? current.branchLevels ?? 2;
       updated.branchDensity = updated.branchDensity ?? current.branchDensity ?? 3;
       updated.hasLeaves = updated.hasLeaves ?? current.hasLeaves ?? true;
       updated.branchBend = updated.branchBend ?? current.branchBend ?? 0.5;
     }
     if (updated.type === 'constellation') {
-      const current = activeSphere!.objects[index];
+      const current = allObjects.find(o => o.id === id)!;
       updated.constellationDetail = updated.constellationDetail ?? current.constellationDetail ?? 1;
       updated.constellationStarCount = updated.constellationStarCount ?? current.constellationStarCount ?? 5;
       updated.constellationFlipX = updated.constellationFlipX ?? current.constellationFlipX ?? false;
     }
-    updateCelestialObject(index, updated);
+    updateCelestialObject(id, updated);
   };
 
   const handleAddObject = () => {
-    const newObj: CelestialObject = {
-      name: `New Body ${activeSphere.objects.length + 1}`,
+    const newObj: any = { id: Date.now().toString(),
+      name: `New Body ${allObjects.length + 1}`,
       type: 'planet',
       sizeClass: 'D',
       physicalSize: 1000,
@@ -129,13 +131,13 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
       affectsShellBoundary: true,
     };
     addCelestialObject(newObj);
-    setSelectedObjectIndex(activeSphere.objects.length);
+    setSelectedObjectId(newObj.id || null);
     setToastMessage({ type: 'success', text: `Added new celestial body "${newObj.name}"` });
   };
 
   const handleAddGroup = () => {
-    const newObj: CelestialObject = {
-      name: `New Group ${activeSphere.objects.filter(o => o.type === 'group').length + 1}`,
+    const newObj: any = { id: Date.now().toString(),
+      name: `New Group ${allObjects.filter(o => o.type === 'group').length + 1}`,
       type: 'group',
       description: 'A structural group for celestial bodies.',
       orbitedObjectName: null,
@@ -145,22 +147,22 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
       affectsShellBoundary: false,
     };
     addCelestialObject(newObj);
-    setSelectedObjectIndex(activeSphere.objects.length);
+    setSelectedObjectId(newObj.id || null);
     setToastMessage({ type: 'success', text: `Added new group "${newObj.name}"` });
   };
 
-  const handleDeleteObject = (index: number, name: string) => {
+  const handleDeleteObject = (id: string, name: string) => {
     if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
 
     // Correct broken references for sub-orbiting moons
-    activeSphere.objects.forEach((obj, idx) => {
+    allObjects.forEach((obj) => {
       if (obj.orbitedObjectName === name) {
-        updateCelestialObject(idx, { orbitedObjectName: null });
+        updateCelestialObject(obj.id, { orbitedObjectName: null });
       }
     });
 
-    removeCelestialObject(index);
-    setSelectedObjectIndex(null);
+    removeCelestialObject(id);
+    setSelectedObjectId(null);
     setToastMessage({ type: 'success', text: `Deleted "${name}"` });
   };
 
@@ -345,31 +347,32 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
         {/* Dynamic Accordion list of bodies */}
         <div className="save-manager-list pb-8">
           {(() => {
-            const renderOrder: {obj: CelestialObject, index: number, isChild: boolean, parentExpanded: boolean}[] = [];
-            activeSphere.objects.forEach((obj, index) => {
-              if (!obj.groupName) {
-                renderOrder.push({obj, index, isChild: false, parentExpanded: true});
+            const renderOrder: {obj: CelestialObject, isChild: boolean, parentExpanded: boolean}[] = [];
+            allObjects.forEach((obj) => {
+              if (!obj.groupId) {
+                renderOrder.push({obj, isChild: false, parentExpanded: true});
                 if (obj.type === 'group') {
                   const isGroupExpanded = expandedGroups[obj.name] === true;
-                  activeSphere.objects.forEach((child, childIndex) => {
-                    if (child.groupName === obj.name) {
-                      renderOrder.push({obj: child, index: childIndex, isChild: true, parentExpanded: isGroupExpanded});
+                  allObjects.forEach((child) => {
+                    if (child.groupId === obj.id) {
+                      renderOrder.push({obj: child, isChild: true, parentExpanded: isGroupExpanded});
                     }
                   });
                 }
               }
             });
 
-            return renderOrder.map(({ obj, index, isChild, parentExpanded }) => {
+            return renderOrder.map(({ obj, isChild, parentExpanded }) => {
+              const id = obj.id;
               if (isChild && !parentExpanded) return null;
-              const isExpanded = obj.type === 'group' ? (expandedGroups[obj.name] === true) : (selectedObjectIndex === index);
+              const isExpanded = obj.type === 'group' ? (expandedGroups[obj.name] === true) : (selectedObjectId === id);
               
               return (
                 <div 
-                  key={'celestial-obj-' + index} 
-                  className={`editor-card ${isChild ? 'ml-4 border-l-2 border-l-[var(--color-accent-gold)]' : ''} ${draggedIndex === index ? 'opacity-50' : ''} ${
-                    dragOverIndex === index 
-                      ? (draggedIndex !== null && draggedIndex < index 
+                  key={'celestial-obj-' + id} 
+                  className={`editor-card ${isChild ? 'ml-4 border-l-2 border-l-[var(--color-accent-gold)]' : ''} ${draggedId === id ? 'opacity-50' : ''} ${
+                    dragOverId === id 
+                      ? (draggedId !== null && draggedId < id 
                           ? 'border-b-2 border-b-[var(--color-accent-gold)]' 
                           : 'border-t-2 border-t-[var(--color-accent-gold)]') 
                       : ''
@@ -377,38 +380,38 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                   onDragOver={(e) => {
                     e.preventDefault();
                     e.dataTransfer.dropEffect = 'move';
-                    if (dragOverIndex !== index) {
-                      setDragOverIndex(index);
+                    if (dragOverId !== id) {
+                      setDragOverId(id);
                     }
                   }}
                   onDragLeave={() => {
-                    if (dragOverIndex === index) {
-                      setDragOverIndex(null);
+                    if (dragOverId === id) {
+                      setDragOverId(null);
                     }
                   }}
                   onDrop={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    if (draggedIndex !== null && draggedIndex !== index) {
-                      const draggedObj = activeSphere.objects[draggedIndex];
+                    if (draggedId !== null && draggedId !== id) {
+                      const draggedObj = allObjects.find(o => o.id === draggedId); if(!draggedObj) return;
                       
                       // If dropping a group onto another object, groups cannot be nested, so they stay at root
                       if (draggedObj.type === 'group') {
-                        updateCelestialObject(draggedIndex, { groupName: undefined });
+                        updateCelestialObject(draggedId!, { groupId: undefined });
                       } 
                       // If dropping onto a group header, move into that group
                       else if (obj.type === 'group') {
-                        updateCelestialObject(draggedIndex, { groupName: obj.name });
+                        updateCelestialObject(draggedId!, { groupId: id });
                       } 
                       // If dropping onto a child or root object, inherit its group
                       else {
-                        updateCelestialObject(draggedIndex, { groupName: obj.groupName || undefined });
+                        updateCelestialObject(draggedId!, { groupId: obj.groupId || undefined });
                       }
                       
-                      reorderCelestialObjects(draggedIndex, index);
+                      // 
                     }
-                    setDraggedIndex(null);
-                    setDragOverIndex(null);
+                    setDraggedId(null);
+                    setDragOverId(null);
                   }}
                 >
                 
@@ -418,19 +421,19 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                     if (obj.type === 'group') {
                       setExpandedGroups(prev => ({ ...prev, [obj.name]: prev[obj.name] === true ? false : true }));
                     } else {
-                      setSelectedObjectIndex(isExpanded ? null : index);
+                      setSelectedObjectId(isExpanded ? null : id);
                     }
                   }}
                   className="editor-card-header"
                   draggable
                   onDragStart={(e) => {
-                    if (obj.type !== 'group') setSelectedObjectIndex(null);
-                    setDraggedIndex(index);
+                    if (obj.type !== 'group') setSelectedObjectId(null);
+                    setDraggedId(id);
                     e.dataTransfer.effectAllowed = 'move';
                   }}
                   onDragEnd={() => {
-                    setDraggedIndex(null);
-                    setDragOverIndex(null);
+                    setDraggedId(null);
+                    setDragOverId(null);
                   }}
                 >
                   <div className={`editor-card-title ${obj.isHidden ? 'opacity-40' : ''}`}>
@@ -443,14 +446,14 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                   
                   <div className="editor-card-actions" onClick={e => e.stopPropagation()}>
                     <button
-                      onClick={() => handleUpdateObject(index, { isHidden: !obj.isHidden })}
+                      onClick={() => handleUpdateObject(id, { isHidden: !obj.isHidden })}
                       className="editor-card-delete-btn"
                       title={obj.isHidden ? `Show ${obj.name}` : `Hide ${obj.name}`}
                     >
                       {obj.isHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                     </button>
                     <button
-                      onClick={() => handleDeleteObject(index, obj.name)}
+                      onClick={() => handleDeleteObject(id, obj.name)}
                       className="editor-card-delete-btn"
                       title={`Delete ${obj.name}`}
                     >
@@ -471,12 +474,12 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                         <div className="flex items-center gap-2 cursor-pointer">
                           <input 
                             type="checkbox"
-                            id={`boundary-check-${index}`}
+                            id={`boundary-check-${id}`}
                             checked={obj.affectsShellBoundary ?? true}
-                            onChange={e => handleUpdateObject(index, { affectsShellBoundary: e.target.checked })}
+                            onChange={e => handleUpdateObject(id, { affectsShellBoundary: e.target.checked })}
                             className="cursor-pointer"
                           />
-                          <label htmlFor={`boundary-check-${index}`} className="text-[var(--color-text-muted)] text-sm cursor-pointer select-none">
+                          <label htmlFor={`boundary-check-${id}`} className="text-[var(--color-text-muted)] text-sm cursor-pointer select-none">
                             ⛶ Affects Shell Boundary
                           </label>
                         </div>
@@ -485,12 +488,12 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                       <div className={`flex items-center gap-2 cursor-pointer ${obj.type !== 'group' ? 'border-l border-[var(--color-border-parchment)] pl-4' : ''}`}>
                         <input 
                           type="checkbox"
-                          id={`dm-only-check-${index}`}
+                          id={`dm-only-check-${id}`}
                           checked={obj.isDMOnly ?? false}
-                          onChange={e => handleUpdateObject(index, { isDMOnly: e.target.checked })}
+                          onChange={e => handleUpdateObject(id, { isDMOnly: e.target.checked })}
                           className="cursor-pointer"
                         />
-                        <label htmlFor={`dm-only-check-${index}`} className="text-[var(--color-text-muted)] text-sm cursor-pointer select-none" title="If checked, this object is hidden from Player views.">
+                        <label htmlFor={`dm-only-check-${id}`} className="text-[var(--color-text-muted)] text-sm cursor-pointer select-none" title="If checked, this object is hidden from Player views.">
                           👁️ DM Only
                         </label>
                       </div>
@@ -502,7 +505,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                         type="text" 
                         className="editor-input"
                         value={obj.name}
-                        onChange={e => handleUpdateObject(index, { name: e.target.value })}
+                        onChange={e => handleUpdateObject(id, { name: e.target.value })}
                       />
                     </div>
 
@@ -525,7 +528,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               updates.worldShape = 'sphere';
                             }
                           }
-                          handleUpdateObject(index, updates);
+                          handleUpdateObject(id, updates);
                         }}
                       >
                         <option value="star">⭐ Star</option>
@@ -551,7 +554,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                             onChange={e => {
                               const newClass = e.target.value as SizeClass;
                               const newUnit = newClass === 'J' ? 'AU' : 'miles';
-                              handleUpdateObject(index, { sizeClass: newClass, sizeUnit: newUnit });
+                              handleUpdateObject(id, { sizeClass: newClass, sizeUnit: newUnit });
                             }}
                           >
                             <option value="A">Size A (&lt; 10 mi)</option>
@@ -574,7 +577,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                             step="any"
                             className={`editor-input ${!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') ? 'border-[var(--color-accent-red)] text-[var(--color-accent-red)]' : ''}`}
                             value={obj.physicalSize ?? 1000}
-                            onChange={e => handleUpdateObject(index, { physicalSize: parseFloat(e.target.value) || 0 })}
+                            onChange={e => handleUpdateObject(id, { physicalSize: parseFloat(e.target.value) || 0 })}
                             title={!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') ? 'Physical size is out of bounds for the selected Size Class.' : ''}
                           />
                         </div>
@@ -594,7 +597,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               max="359"
                               className="editor-input"
                               value={obj.arcDegrees ?? 30}
-                              onChange={e => handleUpdateObject(index, { arcDegrees: parseFloat(e.target.value) || 30 })}
+                              onChange={e => handleUpdateObject(id, { arcDegrees: parseFloat(e.target.value) || 30 })}
                             />
                           </div>
                         )}
@@ -608,10 +611,10 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                           <select 
                             className="editor-select"
                             value={obj.orbitedObjectName || ''}
-                            onChange={e => handleUpdateObject(index, { orbitedObjectName: e.target.value === '' ? null : e.target.value })}
+                            onChange={e => handleUpdateObject(id, { orbitedObjectName: e.target.value === '' ? null : e.target.value })}
                           >
                             <option value="">None (System Center)</option>
-                            {activeSphere.objects
+                            {allObjects
                               .filter(o => o.name !== obj.name && o.type !== 'moon')
                               .map(o => (
                                 <option key={o.name} value={o.name}>{o.name}</option>
@@ -625,8 +628,8 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                             type="number" 
                             step="any"
                             className="editor-input"
-                            value={obj.distanceOrbited}
-                            onChange={e => handleUpdateObject(index, { distanceOrbited: parseFloat(e.target.value) || 0 })}
+                            value={(obj.distanceOrbited || 0)}
+                            onChange={e => handleUpdateObject(id, { distanceOrbited: parseFloat(e.target.value) || 0 })}
                           />
                         </div>
 
@@ -639,11 +642,11 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               className="editor-input"
                               style={{ flex: 1 }}
                               value={obj.initialAngle}
-                              onChange={e => handleUpdateObject(index, { initialAngle: parseFloat(e.target.value) || 0 })}
+                              onChange={e => handleUpdateObject(id, { initialAngle: parseFloat(e.target.value) || 0 })}
                             />
                             <button
                               type="button"
-                              onClick={() => handleUpdateObject(index, { initialAngle: Math.floor(Math.random() * 360) })}
+                              onClick={() => handleUpdateObject(id, { initialAngle: Math.floor(Math.random() * 360) })}
                               className="px-2 text-xs bg-transparent border border-[var(--color-border-parchment)] text-[var(--color-text-muted)] hover:bg-[var(--color-accent-gold)] hover:text-[#2b2316] transition-colors"
                               title="Randomize Angle"
                             >
@@ -659,7 +662,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                             step="any"
                             className="editor-input"
                             value={obj.orbitalPeriodDays}
-                            onChange={e => handleUpdateObject(index, { orbitalPeriodDays: parseFloat(e.target.value) || 0 })}
+                            onChange={e => handleUpdateObject(id, { orbitalPeriodDays: parseFloat(e.target.value) || 0 })}
                           />
                         </div>
 
@@ -675,7 +678,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 <button
                                   key={motion}
                                   type="button"
-                                  onClick={() => handleUpdateObject(index, {
+                                  onClick={() => handleUpdateObject(id, {
                                     isStationary: motion === 'stationary',
                                     orbitDirection: motion !== 'stationary' ? motion : obj.orbitDirection,
                                   })}
@@ -706,7 +709,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                   step="0.01"
                                   className="flex-1"
                                   value={obj.orbitEccentricity || 0}
-                                  onChange={e => handleUpdateObject(index, { orbitEccentricity: parseFloat(e.target.value) || 0 })}
+                                  onChange={e => handleUpdateObject(id, { orbitEccentricity: parseFloat(e.target.value) || 0 })}
                                 />
                                 <span className="text-[9px] w-6">{obj.orbitEccentricity?.toFixed(2) || '0.00'}</span>
                               </div>
@@ -718,13 +721,13 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 step="any"
                                 className="editor-input"
                                 value={obj.orbitRotation || 0}
-                                onChange={e => handleUpdateObject(index, { orbitRotation: parseFloat(e.target.value) || 0 })}
+                                onChange={e => handleUpdateObject(id, { orbitRotation: parseFloat(e.target.value) || 0 })}
                               />
                             </div>
                             {(obj.orbitEccentricity || 0) > 0 && (
                               <div className="flex justify-between text-[9px] text-[var(--color-text-muted)] mt-1 border-t border-[var(--color-border-parchment)] pt-1">
-                                <span>Periapsis: {(obj.distanceOrbited * (1 - (obj.orbitEccentricity || 0))).toFixed(2)} AU</span>
-                                <span>Apoapsis: {(obj.distanceOrbited * (1 + (obj.orbitEccentricity || 0))).toFixed(2)} AU</span>
+                                <span>Periapsis: {((obj.distanceOrbited || 0) * (1 - (obj.orbitEccentricity || 0))).toFixed(2)} AU</span>
+                                <span>Apoapsis: {((obj.distanceOrbited || 0) * (1 + (obj.orbitEccentricity || 0))).toFixed(2)} AU</span>
                               </div>
                             )}
                           </div>
@@ -740,7 +743,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               <select
                                 className="editor-select"
                                 value={obj.worldShape ?? 'ring'}
-                                onChange={e => handleUpdateObject(index, { worldShape: e.target.value as WorldShape })}
+                                onChange={e => handleUpdateObject(id, { worldShape: e.target.value as WorldShape })}
                               >
                                 <option value="ring">◎ Ring</option>
                                 <option value="cylinder">▱ Cylinder</option>
@@ -752,7 +755,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               <select
                                 className="editor-select"
                                 value={obj.worldShape ?? 'sphere'}
-                                onChange={e => handleUpdateObject(index, { worldShape: e.target.value as WorldShape })}
+                                onChange={e => handleUpdateObject(id, { worldShape: e.target.value as WorldShape })}
                               >
                                 <option value="sphere">● Sphere (Default)</option>
                                 <option value="disc">⬡ Disc World</option>
@@ -775,7 +778,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                             <select
                               className="editor-select"
                               value={obj.customShapeName ?? ''}
-                              onChange={e => handleUpdateObject(index, { customShapeName: e.target.value })}
+                              onChange={e => handleUpdateObject(id, { customShapeName: e.target.value })}
                             >
                               <option value="">-- Select Shape --</option>
                               {shapeManager.getAvailableShapes().map(shape => (
@@ -811,7 +814,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                             <select
                               className="editor-select"
                               value={obj.elementAffinity ?? ''}
-                              onChange={e => handleUpdateObject(index, { elementAffinity: (e.target.value || null) as ElementAffinity | null })}
+                              onChange={e => handleUpdateObject(id, { elementAffinity: (e.target.value || null) as ElementAffinity | null })}
                             >
                               <option value="">None</option>
                               <option value="fire">🔥 Fire</option>
@@ -835,7 +838,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 min="1.0"
                                 className="editor-input"
                                 value={obj.coronaSize ?? 1.5}
-                                onChange={e => handleUpdateObject(index, { coronaSize: parseFloat(e.target.value) || 1.5 })}
+                                onChange={e => handleUpdateObject(id, { coronaSize: parseFloat(e.target.value) || 1.5 })}
                               />
                             </div>
                             <div className="editor-form-group">
@@ -847,7 +850,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 max="1.0"
                                 className="editor-input"
                                 value={obj.coronaAlpha ?? 0.3}
-                                onChange={e => handleUpdateObject(index, { coronaAlpha: parseFloat(e.target.value) || 0.3 })}
+                                onChange={e => handleUpdateObject(id, { coronaAlpha: parseFloat(e.target.value) || 0.3 })}
                               />
                             </div>
                           </>
@@ -865,7 +868,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 max="1"
                                 className="editor-input"
                                 value={obj.cloudTransparency ?? 0.45}
-                                onChange={e => handleUpdateObject(index, { cloudTransparency: parseFloat(e.target.value) || 0 })}
+                                onChange={e => handleUpdateObject(id, { cloudTransparency: parseFloat(e.target.value) || 0 })}
                               />
                             </div>
                             <div className="editor-form-group">
@@ -877,7 +880,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 max="1"
                                 className="editor-input"
                                 value={obj.cloudiness ?? 0.5}
-                                onChange={e => handleUpdateObject(index, { cloudiness: parseFloat(e.target.value) || 0 })}
+                                onChange={e => handleUpdateObject(id, { cloudiness: parseFloat(e.target.value) || 0 })}
                               />
                             </div>
                             <div className="editor-form-group">
@@ -885,7 +888,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               <select
                                 className="editor-select"
                                 value={obj.cloudObjectShape ?? 'sphere'}
-                                onChange={e => handleUpdateObject(index, { cloudObjectShape: e.target.value as WorldShape })}
+                                onChange={e => handleUpdateObject(id, { cloudObjectShape: e.target.value as WorldShape })}
                               >
                                 <option value="sphere">● Sphere (Default)</option>
                                 <option value="disc">⬡ Disc</option>
@@ -900,7 +903,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               <select
                                 className="editor-select"
                                 value={obj.cloudObjectSizeClass ?? 'A'}
-                                onChange={e => handleUpdateObject(index, { cloudObjectSizeClass: e.target.value as SizeClass })}
+                                onChange={e => handleUpdateObject(id, { cloudObjectSizeClass: e.target.value as SizeClass })}
                               >
                                 <option value="A">Size A (&lt; 10 mi)</option>
                                 <option value="B">Size B (10 - 100 mi)</option>
@@ -921,7 +924,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 min="0"
                                 className="editor-input"
                                 value={obj.cloudObjectPhysicalSize ?? 5}
-                                onChange={e => handleUpdateObject(index, { cloudObjectPhysicalSize: parseFloat(e.target.value) || 0 })}
+                                onChange={e => handleUpdateObject(id, { cloudObjectPhysicalSize: parseFloat(e.target.value) || 0 })}
                               />
                             </div>
                             <div className="editor-form-group">
@@ -932,7 +935,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 min="0"
                                 className="editor-input"
                                 value={obj.cloudObjectDensity ?? 0}
-                                onChange={e => handleUpdateObject(index, { cloudObjectDensity: parseInt(e.target.value, 10) || 0 })}
+                                onChange={e => handleUpdateObject(id, { cloudObjectDensity: parseInt(e.target.value, 10) || 0 })}
                               />
                             </div>
                           </>
@@ -950,7 +953,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 max="6"
                                 className="editor-input"
                                 value={obj.branchLevels ?? 2}
-                                onChange={e => handleUpdateObject(index, { branchLevels: parseInt(e.target.value, 10) || 2 })}
+                                onChange={e => handleUpdateObject(id, { branchLevels: parseInt(e.target.value, 10) || 2 })}
                               />
                             </div>
                             <div className="editor-form-group">
@@ -962,7 +965,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 max="10"
                                 className="editor-input"
                                 value={obj.branchDensity ?? 3}
-                                onChange={e => handleUpdateObject(index, { branchDensity: parseInt(e.target.value, 10) || 3 })}
+                                onChange={e => handleUpdateObject(id, { branchDensity: parseInt(e.target.value, 10) || 3 })}
                               />
                             </div>
                             <div className="editor-form-group flex items-center justify-between mt-2">
@@ -970,7 +973,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               <input
                                 type="checkbox"
                                 checked={obj.hasLeaves ?? true}
-                                onChange={e => handleUpdateObject(index, { hasLeaves: e.target.checked })}
+                                onChange={e => handleUpdateObject(id, { hasLeaves: e.target.checked })}
                               />
                             </div>
                             <div className="editor-form-group">
@@ -982,7 +985,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 max="2.0"
                                 className="editor-input"
                                 value={obj.branchBend ?? 0.5}
-                                onChange={e => handleUpdateObject(index, { branchBend: parseFloat(e.target.value) || 0.0 })}
+                                onChange={e => handleUpdateObject(id, { branchBend: parseFloat(e.target.value) || 0.0 })}
                               />
                             </div>
                           </>
@@ -997,7 +1000,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 <input
                                   type="checkbox"
                                   checked={obj.constellationFlipX || false}
-                                  onChange={e => handleUpdateObject(index, { constellationFlipX: e.target.checked })}
+                                  onChange={e => handleUpdateObject(id, { constellationFlipX: e.target.checked })}
                                 />
                                 <span>Mirror image horizontally</span>
                               </label>
@@ -1011,7 +1014,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 max="1.0"
                                 className="editor-input"
                                 value={obj.constellationFillAlpha ?? 0.2}
-                                onChange={e => handleUpdateObject(index, { constellationFillAlpha: parseFloat(e.target.value) || 0.0 })}
+                                onChange={e => handleUpdateObject(id, { constellationFillAlpha: parseFloat(e.target.value) || 0.0 })}
                               />
                             </div>
                             <div className="editor-form-group">
@@ -1019,7 +1022,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               <select
                                 className="editor-select"
                                 value={obj.constellationStyle || 'internal'}
-                                onChange={e => handleUpdateObject(index, { constellationStyle: e.target.value as 'outline' | 'internal' })}
+                                onChange={e => handleUpdateObject(id, { constellationStyle: e.target.value as 'outline' | 'internal' })}
                               >
                                 <option value="internal">Internal Geometric Graph</option>
                                 <option value="outline">Shape Outline</option>
@@ -1034,7 +1037,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 max="20"
                                 className="editor-input"
                                 value={obj.constellationDetail ?? 1}
-                                onChange={e => handleUpdateObject(index, { constellationDetail: parseInt(e.target.value, 10) || 1 })}
+                                onChange={e => handleUpdateObject(id, { constellationDetail: parseInt(e.target.value, 10) || 1 })}
                                 title="Complexity Level (1 to 20)."
                               />
                             </div>
@@ -1046,7 +1049,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 min="0"
                                 className="editor-input"
                                 value={obj.constellationStarCount ?? 5}
-                                onChange={e => handleUpdateObject(index, { constellationStarCount: parseInt(e.target.value, 10) || 0 })}
+                                onChange={e => handleUpdateObject(id, { constellationStarCount: parseInt(e.target.value, 10) || 0 })}
                               />
                             </div>
                             <div className="editor-form-group">
@@ -1054,7 +1057,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               <select
                                 className="editor-select"
                                 value={obj.constellationStarMinSizeClass || 'A'}
-                                onChange={e => handleUpdateObject(index, { constellationStarMinSizeClass: e.target.value as SizeClass })}
+                                onChange={e => handleUpdateObject(id, { constellationStarMinSizeClass: e.target.value as SizeClass })}
                               >
                                 {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].map(size => (
                                   <option key={size} value={size}>Size {size}</option>
@@ -1066,7 +1069,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               <select
                                 className="editor-select"
                                 value={obj.constellationStarMaxSizeClass || 'C'}
-                                onChange={e => handleUpdateObject(index, { constellationStarMaxSizeClass: e.target.value as SizeClass })}
+                                onChange={e => handleUpdateObject(id, { constellationStarMaxSizeClass: e.target.value as SizeClass })}
                               >
                                 {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].map(size => (
                                   <option key={size} value={size}>Size {size}</option>
@@ -1087,7 +1090,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 min="0"
                                 className="editor-input"
                                 value={obj.noteDistanceAU ?? 0}
-                                onChange={e => handleUpdateObject(index, { noteDistanceAU: parseFloat(e.target.value) || 0 })}
+                                onChange={e => handleUpdateObject(id, { noteDistanceAU: parseFloat(e.target.value) || 0 })}
                               />
                             </div>
                             <div className="editor-form-group">
@@ -1099,7 +1102,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 max="360"
                                 className="editor-input"
                                 value={obj.noteAngle ?? 0}
-                                onChange={e => handleUpdateObject(index, { noteAngle: parseFloat(e.target.value) || 0 })}
+                                onChange={e => handleUpdateObject(id, { noteAngle: parseFloat(e.target.value) || 0 })}
                               />
                             </div>
                             <div className="editor-form-group">
@@ -1111,7 +1114,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 max="360"
                                 className="editor-input"
                                 value={obj.noteRotation ?? 0}
-                                onChange={e => handleUpdateObject(index, { noteRotation: parseFloat(e.target.value) || 0 })}
+                                onChange={e => handleUpdateObject(id, { noteRotation: parseFloat(e.target.value) || 0 })}
                               />
                             </div>
                             <div className="editor-form-group">
@@ -1119,7 +1122,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               <select
                                 className="editor-select"
                                 value={obj.noteFontFamily || 'Elan'}
-                                onChange={e => handleUpdateObject(index, { noteFontFamily: e.target.value })}
+                                onChange={e => handleUpdateObject(id, { noteFontFamily: e.target.value })}
                               >
                                 {[
                                   'Elan', 'Mephisto', 'Cinzel', 'Architects Daughter', 'Caveat',
@@ -1141,7 +1144,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 max="144"
                                 className="editor-input"
                                 value={obj.noteFontSize ?? 16}
-                                onChange={e => handleUpdateObject(index, { noteFontSize: parseInt(e.target.value, 10) || 16 })}
+                                onChange={e => handleUpdateObject(id, { noteFontSize: parseInt(e.target.value, 10) || 16 })}
                               />
                             </div>
                             <div className="editor-form-group">
@@ -1153,7 +1156,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 max="2000"
                                 className="editor-input"
                                 value={obj.noteMaxWidth ?? 120}
-                                onChange={e => handleUpdateObject(index, { noteMaxWidth: parseInt(e.target.value, 10) || 120 })}
+                                onChange={e => handleUpdateObject(id, { noteMaxWidth: parseInt(e.target.value, 10) || 120 })}
                               />
                             </div>
                             <div className="editor-form-group">
@@ -1165,7 +1168,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 max="2000"
                                 className="editor-input"
                                 value={obj.noteMaxHeight ?? 60}
-                                onChange={e => handleUpdateObject(index, { noteMaxHeight: parseInt(e.target.value, 10) || 60 })}
+                                onChange={e => handleUpdateObject(id, { noteMaxHeight: parseInt(e.target.value, 10) || 60 })}
                               />
                             </div>
                           </>
@@ -1182,7 +1185,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 min="0"
                                 className="editor-input"
                                 value={obj.legendDistanceAU ?? 0}
-                                onChange={e => handleUpdateObject(index, { legendDistanceAU: parseFloat(e.target.value) || 0 })}
+                                onChange={e => handleUpdateObject(id, { legendDistanceAU: parseFloat(e.target.value) || 0 })}
                               />
                             </div>
                             <div className="editor-form-group">
@@ -1194,7 +1197,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 max="360"
                                 className="editor-input"
                                 value={obj.legendAngle ?? 0}
-                                onChange={e => handleUpdateObject(index, { legendAngle: parseFloat(e.target.value) || 0 })}
+                                onChange={e => handleUpdateObject(id, { legendAngle: parseFloat(e.target.value) || 0 })}
                               />
                             </div>
                             <div className="editor-form-group">
@@ -1202,7 +1205,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               <select
                                 className="editor-select"
                                 value={obj.legendType || 'PlanetType'}
-                                onChange={e => handleUpdateObject(index, { legendType: e.target.value as any })}
+                                onChange={e => handleUpdateObject(id, { legendType: e.target.value as any })}
                               >
                                 <option value="PlanetType">Planet Type</option>
                                 <option value="OrbitType">Orbit Type</option>
@@ -1214,7 +1217,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               <select
                                 className="editor-select"
                                 value={obj.legendMode || 'partial'}
-                                onChange={e => handleUpdateObject(index, { legendMode: e.target.value as any })}
+                                onChange={e => handleUpdateObject(id, { legendMode: e.target.value as any })}
                               >
                                 <option value="full">Full (All Icons)</option>
                                 <option value="partial">Partial (Present in System)</option>
@@ -1225,7 +1228,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                               <select
                                 className="editor-select"
                                 value={obj.legendFontFamily || 'Elan'}
-                                onChange={e => handleUpdateObject(index, { legendFontFamily: e.target.value })}
+                                onChange={e => handleUpdateObject(id, { legendFontFamily: e.target.value })}
                               >
                                 {[
                                   'Elan', 'Mephisto', 'Cinzel', 'Architects Daughter', 'Caveat',
@@ -1244,7 +1247,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 max="144"
                                 className="editor-input"
                                 value={obj.legendFontSize ?? 16}
-                                onChange={e => handleUpdateObject(index, { legendFontSize: parseInt(e.target.value, 10) || 16 })}
+                                onChange={e => handleUpdateObject(id, { legendFontSize: parseInt(e.target.value, 10) || 16 })}
                               />
                             </div>
                             <div className="editor-form-group">
@@ -1256,7 +1259,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                                 max="10.0"
                                 className="editor-input"
                                 value={obj.legendScale ?? 1.0}
-                                onChange={e => handleUpdateObject(index, { legendScale: parseFloat(e.target.value) || 1.0 })}
+                                onChange={e => handleUpdateObject(id, { legendScale: parseFloat(e.target.value) || 1.0 })}
                               />
                             </div>
                           </>
@@ -1270,13 +1273,13 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                         <textarea 
                           className="editor-textarea"
                           value={obj.description || ''}
-                          onChange={e => handleUpdateObject(index, { description: e.target.value })}
+                          onChange={e => handleUpdateObject(id, { description: e.target.value })}
                         />
                       </div>
                     )}
 
                     {obj.type === 'group' && (() => {
-                      const children = activeSphere.objects.filter(o => o.groupName === obj.name);
+                      const children = allObjects.filter(o => o.groupName === obj.name);
                       return (
                         <div className="editor-form-group mt-2">
                            <label className="text-[var(--color-text-main)] mb-2 font-bold block">Group Contents</label>
@@ -1306,23 +1309,23 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
 
           {/* Root Dropzone to drag objects out of groups */}
           <div 
-            className={`h-10 mt-4 border-2 border-dashed rounded flex items-center justify-center text-xs font-bold transition-colors ${dragOverIndex === -1 ? 'border-[var(--color-accent-gold)] bg-[var(--color-bg-light)] text-[var(--color-accent-gold)]' : 'border-[var(--color-border-parchment)] text-[var(--color-text-muted)]'}`}
+            className={`h-10 mt-4 border-2 border-dashed rounded flex items-center justify-center text-xs font-bold transition-colors ${dragOverId === '-1' ? 'border-[var(--color-accent-gold)] bg-[var(--color-bg-light)] text-[var(--color-accent-gold)]' : 'border-[var(--color-border-parchment)] text-[var(--color-text-muted)]'}`}
             onDragOver={(e) => {
               e.preventDefault();
               e.dataTransfer.dropEffect = 'move';
-              if (dragOverIndex !== -1) setDragOverIndex(-1);
+              if (dragOverId !== '-1') setDragOverId('-1');
             }}
             onDragLeave={() => {
-              if (dragOverIndex === -1) setDragOverIndex(null);
+              if (dragOverId === '-1') setDragOverId(null);
             }}
             onDrop={(e) => {
               e.preventDefault();
-              if (draggedIndex !== null) {
-                updateCelestialObject(draggedIndex, { groupName: undefined });
-                reorderCelestialObjects(draggedIndex, activeSphere.objects.length - 1);
+              if (draggedId !== null) {
+                updateCelestialObject(draggedId!, { groupId: undefined });
+                // removeCelestialObject(draggedId, allObjects.length - 1);
               }
-              setDraggedIndex(null);
-              setDragOverIndex(null);
+              setDraggedId(null);
+              setDragOverId(null);
             }}
           >
             Drop here to move to Root level

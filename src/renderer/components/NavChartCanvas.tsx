@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState, forwardRef, useImperativeHandle, useMemo } from 'react';
 import { useFontsLoaded } from '../hooks/useFontsLoaded';
 import { useSystemStore } from '../store/useSystemStore';
+import { getAllSystemObjects } from '../utils/orbitMath';
 import { calculateSystemPositions } from '../utils/orbitMath';
 import { ScaleManager } from '../utils/ScaleManager';
 import { AutoFitCalculator } from '../utils/AutoFitCalculator';
@@ -31,7 +32,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     setToastMessage,
     viewMode,
     decorations,
-    selectedObjectIndex,
+    selectedObjectId,
     updateCelestialObject,
   } = useSystemStore();
 
@@ -44,7 +45,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     space: new NavigationChartRenderer(spaceStyleConfig, forceRedraw)
   });
 
-  const objects = activeSphere?.objects || [];
+  const objects = activeSphere ? getAllSystemObjects(activeSphere) : [];
   
   const isPrimary = (obj: any) => {
     if (!obj.orbitedObjectName) return true;
@@ -65,9 +66,9 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   };
 
   const panLimits = useMemo(() => {
-    
     let maxDist = 0.1;
     objects.forEach((o: any) => {
+      if (o.type === 'note' || o.type === 'legend' || o.type === 'constellation') return;
       if (!isPrimary(o) || o.affectsShellBoundary === false) return;
       const reach = ScaleManager.getPhysicalReachAU(o);
       if (reach > maxDist) maxDist = reach;
@@ -76,14 +77,71 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     const shellScale = isCustom ? (activeSphere?.shellCustomScale ?? 1.2) : 2.0;
     const shellRadiusModel = maxDist * shellScale;
     
-    // 25% padding ensures the 24px title has room to breathe horizontally
+    const getMaxAbsoluteReach = (obj: any, allObjs: any[]): number => {
+      let reach = ScaleManager.getPhysicalReachAU(obj);
+      let curr = obj;
+      while (curr.orbitedObjectName) {
+        const parent = allObjs.find((p: any) => p.name === curr.orbitedObjectName);
+        if (parent) {
+          reach += (parent.distanceOrbited || 0);
+          curr = parent;
+        } else {
+          break;
+        }
+      }
+      return reach;
+    };
+
+    let maxOrbitX_AU = shellRadiusModel;
+    let maxOrbitY_AU = shellRadiusModel;
+
+    const visibleObjects = objects;
+    visibleObjects.forEach((o: any) => {
+      if (o.type === 'note' || o.type === 'legend' || o.type === 'constellation') return;
+      const objMaxReach = getMaxAbsoluteReach(o, objects);
+      if (objMaxReach > maxOrbitX_AU) maxOrbitX_AU = objMaxReach;
+      if (objMaxReach > maxOrbitY_AU) maxOrbitY_AU = objMaxReach;
+    });
+
+    let maxNoteX_AU = maxOrbitX_AU;
+    let maxNoteY_AU = maxOrbitY_AU;
+
+    visibleObjects.filter((o:any) => o.type === 'note').forEach((note: any) => {
+      const distAU = note.noteDistanceAU || 0;
+      const rad = ((note.noteAngle || 0) * Math.PI) / 180;
+      const noteX_AU = Math.cos(rad) * distAU;
+      const noteY_AU = Math.sin(rad) * distAU;
+      const textBufferAU = 0; 
+      if (noteX_AU + textBufferAU > maxNoteX_AU) maxNoteX_AU = noteX_AU + textBufferAU;
+      if (noteY_AU + textBufferAU > maxNoteY_AU) maxNoteY_AU = noteY_AU + textBufferAU;
+    });
+
+    let minLegendX_AU = -shellRadiusModel - shellRadiusModel;
+    const legends = visibleObjects.filter((o:any) => o.type === 'legend');
+    if (legends.length > 0) {
+      minLegendX_AU = 0;
+      legends.forEach((legend: any) => {
+        const distAU = legend.legendDistanceAU || 0;
+        const rad = ((legend.legendAngle || 0) * Math.PI) / 180;
+        const legX_AU = Math.cos(rad) * distAU;
+        const textBufferAU = 0;
+        if (legX_AU - textBufferAU < minLegendX_AU) minLegendX_AU = legX_AU - textBufferAU;
+      });
+    }
+
+    const directoryStartX_AU = minLegendX_AU;
+    const directoryWidthModel = shellRadiusModel;
+    
+    const mapTopY_AU = -shellRadiusModel;
+    const mapBottomY_AU = Math.max(maxOrbitY_AU, maxNoteY_AU);
+    const mapRightX_AU = Math.max(maxOrbitX_AU, maxNoteX_AU);
+    
     const paddingModel = shellRadiusModel * 0.25;
-    const directoryWidthModel = shellRadiusModel; // 0.5 * diameter = 1.0 * radius
+
+    const paperWidthModel = (mapRightX_AU - directoryStartX_AU) + paddingModel * 2;
+    const paperHeightModel = (mapBottomY_AU - mapTopY_AU) + paddingModel * 2;
     
-    const paperWidthModel = shellRadiusModel * 2 + paddingModel * 2 + directoryWidthModel;
-    const paperHeightModel = shellRadiusModel * 2 + paddingModel * 2;
-    
-    const totalWidthModel = paperWidthModel * 1.06; // rod margins
+    const totalWidthModel = paperWidthModel * 1.06;
     const totalHeightModel = paperHeightModel * 1.06;
     
     return { width: totalWidthModel, height: totalHeightModel, directoryWidthModel };
@@ -175,10 +233,10 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     !isGroupHidden(o.groupName)
   );  
   // Resolve positions
-  const positions = calculateSystemPositions(objects, currentSystemDate);
+  const positions = activeSphere ? calculateSystemPositions(activeSphere as any, currentSystemDate) : {};
 
   const handleAutoFit = () => {
-    const { zoom, pan } = AutoFitCalculator.calculateAutoFit(dimensions, objects, activeSphere);
+    const { zoom, pan } = AutoFitCalculator.calculateAutoFit(dimensions, activeSphere as any);
     setViewport({ zoom, pan });
   };
 
@@ -261,7 +319,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
       project,
       decorations,
       fontsLoaded,
-      selectedObjectIndex,
+      selectedObjectId,
     };
 
     renderer.render(context);
@@ -269,8 +327,8 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   }, [activeSphere, currentSystemDate, zoom, pan, mapTheme, objects, positions, dimensions, fontsLoaded, decorations, forceRenderState]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (selectedObjectIndex !== null) {
-      const selectedObject = objects[selectedObjectIndex];
+    if (selectedObjectId !== null) {
+      const selectedObject = objects.find(o => o.id === selectedObjectId);
       if (selectedObject && (selectedObject.type === 'note' || selectedObject.type === 'legend')) {
         const rect = canvasRef.current?.getBoundingClientRect();
         if (rect) {
@@ -292,7 +350,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (activeNodeDrag && selectedObjectIndex !== null) {
+    if (activeNodeDrag && selectedObjectId !== null) {
       const rect = canvasRef.current?.getBoundingClientRect();
       if (!rect) return;
       const mouseX = e.clientX - rect.left;
@@ -322,12 +380,12 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
         if (newAngle < 0) newAngle += 360;
         
         if (initialNote.type === 'legend') {
-          updateCelestialObject(selectedObjectIndex, {
+          updateCelestialObject(selectedObjectId, {
             legendDistanceAU: newDist,
             legendAngle: newAngle,
           });
         } else {
-          updateCelestialObject(selectedObjectIndex, {
+          updateCelestialObject(selectedObjectId, {
             noteDistanceAU: newDist,
             noteAngle: newAngle,
           });
@@ -344,7 +402,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
          let newRot = (mouseAngle - localAngle) * 180 / Math.PI;
          if (newRot < 0) newRot += 360;
          
-         updateCelestialObject(selectedObjectIndex, { noteRotation: newRot });
+         updateCelestialObject(selectedObjectId, { noteRotation: newRot });
       } else if ((id === 'tl' || id === 'tr' || id === 'bl' || id === 'br') && initialNote.type === 'note') {
          const centerScreenX = pan.x + (Math.cos((initialNote.noteAngle || 0) * Math.PI / 180) * (initialNote.noteDistanceAU || 0)) * zoom;
          const centerScreenY = pan.y + (Math.sin((initialNote.noteAngle || 0) * Math.PI / 180) * (initialNote.noteDistanceAU || 0)) * zoom;
@@ -366,7 +424,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
          
          newCorners[id] = { x: Math.round(localDx), y: Math.round(localDy) };
          
-         updateCelestialObject(selectedObjectIndex, {
+         updateCelestialObject(selectedObjectId, {
            noteCorners: newCorners,
          });
       }
@@ -381,9 +439,9 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   };
 
   const handleMouseUpOrLeave = () => {
-    if (activeNodeDrag && selectedObjectIndex !== null) {
+    if (activeNodeDrag && selectedObjectId !== null) {
       if (['tl', 'tr', 'bl', 'br'].includes(activeNodeDrag.id)) {
-        const note = activeSphere?.objects[selectedObjectIndex];
+        const note = (activeSphere ? getAllSystemObjects(activeSphere) : []).find(o => o.id === selectedObjectId);
         if (note && note.type === 'note') {
           const corners = getNoteCorners(note);
           const cx = (corners.tl.x + corners.tr.x + corners.bl.x + corners.br.x) / 4;
@@ -412,7 +470,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
               br: { x: corners.br.x - cx, y: corners.br.y - cy }
             };
             
-            updateCelestialObject(selectedObjectIndex, {
+            updateCelestialObject(selectedObjectId, {
               noteDistanceAU: newDist,
               noteAngle: newAngle,
               noteCorners: newCorners

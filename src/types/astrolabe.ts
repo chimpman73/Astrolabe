@@ -1,6 +1,10 @@
-export type CelestialObjectType =
-  | 'star' | 'planet' | 'moon' | 'asteroid'
-  | 'station' | 'cloud' | 'custom' | 'living_world' | 'constellation' | 'group' | 'note' | 'legend';
+export type PhysicalBodyType = 'star' | 'planet' | 'moon' | 'asteroid' | 'station' | 'custom' | 'living_world';
+export type PhenomenonType = 'cloud';
+export type ConstellationType = 'constellation';
+export type MapOverlayType = 'note' | 'legend';
+export type GroupType = 'group';
+
+export type CelestialObjectType = PhysicalBodyType | PhenomenonType | ConstellationType | MapOverlayType | GroupType;
 
 export type WorldShape = 'sphere' | 'disc' | 'pyramid' | 'cluster' | 'irregular' | 'elliptical' | 'ring' | 'cylinder' | 'ship' | 'rectangular' | 'castle' | 'skull' | 'custom' | 'hollow_world';
 export type ElementAffinity = 'fire' | 'water' | 'earth' | 'air' | 'mixed' | 'none';
@@ -8,141 +12,179 @@ export type OrbitDirection = 'prograde' | 'retrograde';
 export type SizeClass = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J';
 export type SizeUnit = 'miles' | 'AU';
 
-export interface CelestialObject {
+export interface ICelestialBase {
+  id: string;
   name: string;
   type: CelestialObjectType;
+  description: string;
+  isHidden?: boolean;
+  isDMOnly?: boolean;
+  groupId?: string;
+  
+  // Legacy support during migration/renderers
+  groupName?: string;
+  orbitedObjectName?: string | null;
+  
+  // Optional shared properties
+  distanceOrbited?: number;
+  initialAngle?: number;
+  sizeClass?: SizeClass;
+  physicalSize?: number;
+  sizeUnit?: SizeUnit;
+  isStationary?: boolean;
+  orbitEccentricity?: number;
+  orbitRotation?: number;
+  orbitDirection?: string;
+  orbitalPeriodDays?: number;
+  affectsShellBoundary?: boolean;
+  elementAffinity?: ElementAffinity | null;
+  worldShape?: WorldShape;
+  customShapeName?: string;
+  hasLeaves?: boolean;
+  branchLevels?: number;
+  branchDensity?: number;
+  branchBend?: number;
+  coronaSize?: number;
+  coronaAlpha?: number;
+  cloudTransparency?: number;
+  cloudiness?: number;
+  cloudObjectShape?: WorldShape;
+  cloudObjectSizeClass?: SizeClass;
+  cloudObjectPhysicalSize?: number;
+  cloudObjectDensity?: number;
+  arcDegrees?: number;
+  constellationDetail?: number;
+  constellationStarCount?: number;
+  constellationStyle?: string;
+  constellationFlipX?: boolean;
+  constellationFillAlpha?: number;
+  constellationStarMinSizeClass?: SizeClass;
+  constellationStarMaxSizeClass?: SizeClass;
+  noteDistanceAU?: number;
+  noteAngle?: number;
+  noteRotation?: number;
+}
+
+export interface IGroup extends ICelestialBase {
+  type: GroupType;
+}
+
+export interface IPhysicalBody extends ICelestialBase {
+  type: PhysicalBodyType;
   sizeClass?: SizeClass;
   physicalSize?: number;
   sizeUnit?: SizeUnit;
   /** @deprecated The old visual size property. Use physicalSize instead. */
   size?: number;
-  // Structural hierarchy
-  groupName?: string;
-  description: string;
-  orbitedObjectName: string | null;
-  distanceOrbited: number; // radius from parent in AU or system units
-  initialAngle: number; // angle in degrees at t=0
-  orbitalPeriodDays?: number; // optional orbital override
   
-  // --- Orbit Extensions ---
-  /** Eccentricity of the orbit (0.0 to 0.99). 0 is a circle. */
+  subOrbiters?: (IPhysicalBody | IPhenomenon)[];
+  
+  distanceOrbited: number; 
+  initialAngle: number; 
+  orbitalPeriodDays?: number; 
   orbitEccentricity?: number;
-  /** Rotation of the orbit (Argument of Periapsis) in degrees. */
   orbitRotation?: number;
-
-  // --- Fantasy Extensions ---
-  /** If true, the object is completely hidden from map canvases (but still affects boundary calculations). */
-  isHidden?: boolean;
-  /** If false, the object is ignored when calculating the system's Crystal Sphere shell bounds. Defaults to true. */
-  affectsShellBoundary?: boolean;
-  /** If true, the object is only visible to the DM (not a PC object). By default, everything is a PC object (false). */
-  isDMOnly?: boolean;
-  /** If true, the object remains fixed at initialAngle and does not advance with time. */
   isStationary?: boolean;
-  /** Direction of orbital travel. Retrograde moves clockwise (negative angular velocity). Defaults to prograde. */
   orbitDirection?: OrbitDirection;
-  /** Visual shape of the celestial body. Defaults to sphere. */
+  
   worldShape?: WorldShape;
-  /** Name of the custom SVG shape to use when worldShape is 'custom'. */
   customShapeName?: string;
-  /** Elemental association for fantasy worlds. */
   elementAffinity?: ElementAffinity | null;
-  /** For cloud types: angular arc width in degrees along the orbital path. */
-  arcDegrees?: number;
-  /** For cloud types: alpha transparency of the cloud (0.0 to 1.0). */
-  cloudTransparency?: number;
-  /** For cloud types: bumpiness of the cloud edges (0.0 is smooth, 1.0 is max cloudy). */
-  cloudiness?: number;
-  /** For cloud types: shape of objects drawn inside the cloud. */
-  cloudObjectShape?: WorldShape;
-  /** @deprecated Use cloudObjectPhysicalSize instead. */
-  cloudObjectSize?: number;
-  /** For cloud types: size class of objects drawn inside the cloud. */
-  cloudObjectSizeClass?: SizeClass;
-  /** For cloud types: physical size of objects drawn inside the cloud (in miles). */
-  cloudObjectPhysicalSize?: number;
-  /** For cloud types: density (or count) of objects drawn inside the cloud. */
-  cloudObjectDensity?: number;
-  /** For living_world types: depth/tiers of branching. */
-  branchLevels?: number;
-  /** For living_world types: branching factor. */
-  branchDensity?: number;
-
-  /** For living_world types: whether to draw leaves at the tips. */
-  hasLeaves?: boolean;
-  /** For living_world types: how much the branches bend at nodes. */
-  branchBend?: number;
-  /** For star types: multiplier for the corona size (default 1.5). */
+  affectsShellBoundary?: boolean;
+  
   coronaSize?: number;
-  /** For star types: alpha transparency of the corona (0.0 to 1.0, default 0.3). */
   coronaAlpha?: number;
+  
+  branchLevels?: number;
+  branchDensity?: number;
+  hasLeaves?: boolean;
+  branchBend?: number;
+}
 
-  // --- Constellation Extensions ---
-  /** For constellation types: the number of line segments to break the SVG path into (determines wireframe detail). */
+export interface IPhenomenon extends ICelestialBase {
+  type: PhenomenonType;
+  
+  distanceOrbited: number;
+  initialAngle: number;
+  orbitalPeriodDays?: number;
+  orbitEccentricity?: number;
+  orbitRotation?: number;
+  isStationary?: boolean;
+  orbitDirection?: OrbitDirection;
+  affectsShellBoundary?: boolean;
+  
+  arcDegrees?: number;
+  cloudTransparency?: number;
+  cloudiness?: number;
+  cloudObjectShape?: WorldShape;
+  cloudObjectSizeClass?: SizeClass;
+  cloudObjectPhysicalSize?: number;
+  cloudObjectDensity?: number;
+}
+
+export interface IConstellation extends ICelestialBase {
+  type: ConstellationType;
   constellationDetail?: number;
-  /** For constellation types: the number of stars to place along the wireframe nodes. */
   constellationStarCount?: number;
-  /** For constellation types: the min size class of internal stars. */
   constellationStarMinSizeClass?: SizeClass;
-  /** For constellation types: the max size class of internal stars. */
   constellationStarMaxSizeClass?: SizeClass;
-  /** For constellation types: rendering style. */
   constellationStyle?: 'outline' | 'internal';
-  /** For constellation types: the alpha transparency of the inner cloud fill (0.0 to 1.0). */
   constellationFillAlpha?: number;
-  /** For constellation types: whether to flip the rendering horizontally. */
   constellationFlipX?: boolean;
+  
+  // They sometimes orbit or have placement angles based on initialAngle in legacy
+  initialAngle?: number;
+  distanceOrbited?: number;
+}
 
-  // --- Note Extensions ---
-  /** For note types: distance from the system center in AU. */
+export interface IMapOverlay extends ICelestialBase {
+  type: MapOverlayType;
   noteDistanceAU?: number;
-  /** For note types: placement angle from the center (0-360 degrees). */
   noteAngle?: number;
-  /** For note types: rotation of the text (in degrees). */
   noteRotation?: number;
-  /** For note types: font size in pixels (rendered statically regardless of camera zoom). */
   noteFontSize?: number;
-  /** For note types: CSS font-family string. */
   noteFontFamily?: string;
-  /** For note types: maximum width in pixels before text wraps to the next line. */
   noteMaxWidth?: number;
-  /** For note types: maximum height in pixels. If text exceeds this, it is clipped. */
   noteMaxHeight?: number;
-  /** For note types: custom 4-node polygon offsets. Overrides noteMaxWidth and noteMaxHeight. */
   noteCorners?: {
     tl: { x: number; y: number };
     tr: { x: number; y: number };
     bl: { x: number; y: number };
     br: { x: number; y: number };
   };
-
-  // --- Legend Extensions ---
-  /** For legend types: what the legend displays. */
+  
   legendType?: 'OrbitType' | 'ElementalAffinity' | 'PlanetType';
-  /** For legend types: whether to show all possible icons or just the ones present in the system. */
   legendMode?: 'full' | 'partial';
-  /** For legend types: distance from the system center in AU. */
   legendDistanceAU?: number;
-  /** For legend types: placement angle from the center (0-360 degrees). */
   legendAngle?: number;
-  /** For legend types: font size in pixels. */
   legendFontSize?: number;
-  /** For legend types: CSS font-family string. */
   legendFontFamily?: string;
-  /** For legend types: overall scale multiplier. */
   legendScale?: number;
 }
 
+// Keeping this as a union type so that generic components like 'ObjectIcon' can still accept any of them
+export type CelestialObject = IPhysicalBody | IPhenomenon | IConstellation | IMapOverlay | IGroup;
+
 export interface CrystalSphere {
+  version?: number; // 2 for V2 Schema
   sphereName: string;
   currentCampaignDate: string;
-  currentSystemDate: number; // elapsed days from start epoch
-  shellBoundaryType?: 'double' | 'relativeMargin' | 'custom'; // 'double' = maxDist * 2, 'relativeMargin' = maxDist * 1.2, 'custom' = uses shellCustomScale
+  currentSystemDate: number; 
+  shellBoundaryType?: 'double' | 'relativeMargin' | 'custom'; 
   shellCustomScale?: number;
   orbitalDrawStrength?: number;
   navChartPlanetSizeOffset?: number;
   navTitleStrike?: boolean;
-  objects: CelestialObject[];
+  
+  // V1 Schema
+  objects?: CelestialObject[];
+  
+  // V2 Schema
+  groups?: IGroup[];
+  celestialBodies?: IPhysicalBody[];
+  phenomena?: IPhenomenon[];
+  constellations?: IConstellation[];
+  mapOverlays?: IMapOverlay[];
 }
 
 interface IpcResponse<T> {
