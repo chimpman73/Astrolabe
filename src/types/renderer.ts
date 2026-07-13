@@ -29,6 +29,7 @@ export interface MapStyleContext {
   width: number;
   height: number;
   activeZoom: number;
+  baseZoom: number;
   activePan: { x: number; y: number };
   objects: CelestialObject[];
   visibleObjects: CelestialObject[];

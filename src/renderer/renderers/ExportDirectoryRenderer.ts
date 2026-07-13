@@ -3,6 +3,7 @@ import { MapStyleContext, INavigationChartRenderer } from '../../types/renderer'
 import { ScaleManager } from '../utils/ScaleManager';
 import { calculateSystemPositions } from '../utils/orbitMath';
 import { saveCanvasExport } from '../utils/exportHelper';
+import { AutoFitCalculator } from '../utils/AutoFitCalculator';
 
 interface ExportNavigationChartParams {
   mapTheme: 'parchment' | 'space';
@@ -83,11 +84,14 @@ export async function exportNavigationChart(params: ExportNavigationChartParams)
 
   const activeVisibleObjects = visibleObjects.filter((obj: any) => !culledObjects.has(obj.name));
 
+  const baseZoom = activeSphere ? AutoFitCalculator.calculateAutoFit({ width: 1200, height: 800 }, activeSphere).zoom : 1;
+  
   const context: MapStyleContext = {
     ctx,
     width: exportWidth,
     height: exportHeight,
     activeZoom: exportZoom,
+    baseZoom,
     activePan: exportPan,
     objects,
     visibleObjects: activeVisibleObjects,

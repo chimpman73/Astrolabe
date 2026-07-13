@@ -252,11 +252,14 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
 
     const activeVisibleObjects = visibleObjects.filter((obj: any) => !culledObjects.has(obj.name));
 
+    const baseZoom = activeSphere ? AutoFitCalculator.calculateAutoFit(dimensions, activeSphere as any).zoom : 1;
+
     const context: MapStyleContext = {
       ctx,
       width: dimensions.width,
       height: dimensions.height,
       activeZoom: zoom,
+      baseZoom,
       activePan,
       objects,
       visibleObjects: activeVisibleObjects,

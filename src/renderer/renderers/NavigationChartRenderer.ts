@@ -564,7 +564,7 @@ context.activeSphere?.shellBoundaryType === 'relativeMargin')
     this.drawForeground(context);
   }
 
-  #drawNotes({ ctx, activeZoom, project, selectedObjectId, objects }: MapStyleContext, visibleObjects: any[]): void {
+  #drawNotes({ ctx, activeZoom, baseZoom, project, selectedObjectId, objects }: MapStyleContext, visibleObjects: any[]): void {
     const notes = visibleObjects.filter(o => o.type === 'note') as any[];
     if (notes.length === 0) return;
 
@@ -585,7 +585,9 @@ context.activeSphere?.shellBoundaryType === 'relativeMargin')
       ctx.save();
       ctx.translate(proj.x, proj.y);
       ctx.rotate((rot * Math.PI) / 180);
-      ctx.scale(activeZoom, activeZoom);
+      
+      const normalizedZoom = activeZoom / (baseZoom || 1);
+      ctx.scale(normalizedZoom, normalizedZoom);
 
       ctx.font = `${fontSize}px '${fontFamily}', sans-serif`;
       ctx.fillStyle = this.#config.strokeColor;
@@ -699,7 +701,7 @@ context.activeSphere?.shellBoundaryType === 'relativeMargin')
     ctx.restore();
   }
 
-  #drawLegends({ ctx, activeZoom, project, selectedObjectId, objects }: MapStyleContext, visibleObjects: any[]): void {
+  #drawLegends({ ctx, activeZoom, baseZoom, project, selectedObjectId, objects }: MapStyleContext, visibleObjects: any[]): void {
     const legends = visibleObjects.filter(o => o.type === 'legend') as any[];
     if (legends.length === 0) return;
 
@@ -730,7 +732,8 @@ context.activeSphere?.shellBoundaryType === 'relativeMargin')
 
       ctx.save();
       ctx.translate(proj.x, proj.y);
-      ctx.scale(activeZoom * lScale, activeZoom * lScale);
+      const normalizedZoom = activeZoom / (baseZoom || 1);
+      ctx.scale(normalizedZoom * lScale, normalizedZoom * lScale);
 
       ctx.font = `bold ${fontSize}px '${fontFamily}', sans-serif`;
       let title = 'Legend';
