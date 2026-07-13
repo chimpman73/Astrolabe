@@ -14,6 +14,13 @@ export const GroupEditor: React.FC<GroupEditorProps> = ({ obj, allObjects, handl
 
   return (
     <>
+      {/* SECTION 1: General Information */}
+      <div className="save-manager-section-header mt-4 mb-2 border-b border-[var(--color-border-parchment)] pb-1">
+        <h5 className="font-title text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
+          General Information
+        </h5>
+      </div>
+
       <div className="editor-form-group">
         <label>Description</label>
         <textarea 
@@ -23,8 +30,14 @@ export const GroupEditor: React.FC<GroupEditorProps> = ({ obj, allObjects, handl
         />
       </div>
       
+      {/* SECTION 2: Group Contents */}
+      <div className="save-manager-section-header mt-5 mb-2 border-b border-[var(--color-border-parchment)] pb-1">
+        <h5 className="font-title text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
+          Group Contents
+        </h5>
+      </div>
+
       <div className="editor-form-group mt-2">
-         <label className="text-[var(--color-text-main)] mb-2 font-bold block">Group Contents</label>
          {children.length === 0 ? (
             <div className="p-4 border border-dashed border-[var(--color-border-parchment)] rounded text-center text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">
               Empty Group

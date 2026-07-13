@@ -283,6 +283,7 @@ This file tracks the design, development, and integration tasks for the Astrolab
   * Corrected `AutoFitCalculator` algebra and `constrainPan` boundaries to guarantee the drawn parchment perfectly maximizes the viewport area without clipping.
 
 ### Phase 13: UI Polish
-- [x] **AST-046: Editor UI Refactor - Map Overlays**
+- [x] **AST-046: Editor UI Refactor - Map Overlays & Groups**
   * Updated `MapOverlayEditor.tsx` to use the standardized 3-section layout (`Type & Configuration`, `Placement & Layout`, `Typography`).
   * Grouped related inputs (e.g. Type and Mode, or Distance and Angle) into side-by-side flex containers to significantly reduce vertical scrolling and improve layout aesthetics.
+  * Updated `GroupEditor.tsx` to use the standardized sectioned layout (`General Information`, `Group Contents`), matching the styling of the other editors.
