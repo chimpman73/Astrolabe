@@ -7,7 +7,30 @@
   "shellCustomScale": 1.05,
   "navChartPlanetSizeOffset": 0,
   "navTitleStrike": true,
-  "groups": [],
+  "groups": [
+    {
+      "id": "1783909719895",
+      "name": "Planets",
+      "type": "group",
+      "description": "A structural group for celestial bodies.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 0,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 0,
+      "affectsShellBoundary": false
+    },
+    {
+      "id": "1783909759054",
+      "name": "Notes",
+      "type": "group",
+      "description": "A structural group for celestial bodies.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 0,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 0,
+      "affectsShellBoundary": false
+    }
+  ],
   "celestialBodies": [
     {
       "id": "c2z67qo",
@@ -29,7 +52,8 @@
       "branchLevels": 4,
       "branchDensity": 7,
       "hasLeaves": true,
-      "branchBend": 0.5
+      "branchBend": 0.5,
+      "groupId": "1783909719895"
     },
     {
       "id": "92qdfi8",
@@ -50,7 +74,8 @@
       "branchLevels": 4,
       "branchDensity": 8,
       "hasLeaves": true,
-      "branchBend": 0.5
+      "branchBend": 0.5,
+      "groupId": "1783909719895"
     },
     {
       "id": "d655qbx",
@@ -70,7 +95,8 @@
       "worldShape": "custom",
       "customShapeName": "fish",
       "elementAffinity": "fire",
-      "affectsShellBoundary": true
+      "affectsShellBoundary": true,
+      "groupId": "1783909719895"
     }
   ],
   "phenomena": [
@@ -93,7 +119,8 @@
       "elementAffinity": "water",
       "sizeClass": "J",
       "sizeUnit": "AU",
-      "physicalSize": 4
+      "physicalSize": 4,
+      "groupId": "1783909719895"
     },
     {
       "id": "ep1zmzp",
@@ -112,7 +139,8 @@
       "elementAffinity": "water",
       "physicalSize": 4,
       "sizeClass": "J",
-      "sizeUnit": "AU"
+      "sizeUnit": "AU",
+      "groupId": "1783909719895"
     },
     {
       "id": "e7qzkc2",
@@ -130,17 +158,35 @@
       "arcDegrees": 360,
       "cloudTransparency": 1,
       "cloudiness": 0,
-      "elementAffinity": "water"
+      "elementAffinity": "water",
+      "groupId": "1783909719895"
     }
   ],
   "constellations": [],
-  "mapOverlays": [],
+  "mapOverlays": [
+    {
+      "id": "1783909898861",
+      "name": "Planet Legend",
+      "type": "legend",
+      "noteDistanceAU": 0,
+      "noteAngle": 0,
+      "noteFontSize": 16,
+      "noteMaxWidth": 120,
+      "legendMode": "full",
+      "legendDistanceAU": 49.627517231947586,
+      "legendAngle": 170.66066762349067,
+      "legendScale": 0.1
+    }
+  ],
   "objectOrder": [
     "c2z67qo",
     "92qdfi8",
     "o9jhfb5",
     "ep1zmzp",
     "e7qzkc2",
-    "d655qbx"
+    "d655qbx",
+    "1783909719895",
+    "1783909759054",
+    "1783909898861"
   ]
 }

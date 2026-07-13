@@ -365,7 +365,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
               if (!obj.groupId) {
                 renderOrder.push({obj, isChild: false, parentExpanded: true});
                 if (obj.type === 'group') {
-                  const isGroupExpanded = expandedGroups[obj.name] === true;
+                  const isGroupExpanded = expandedGroups[obj.id] === true;
                   allObjects.forEach((child) => {
                     if (child.groupId === obj.id) {
                       renderOrder.push({obj: child, isChild: true, parentExpanded: isGroupExpanded});
