@@ -121,6 +121,9 @@ function migrateToV2(v1Data: any): CrystalSphere {
     else if (obj.type === 'constellation') {
       v2Sphere.constellations!.push({
         ...base,
+        customShapeName: obj.customShapeName,
+        arcDegrees: obj.arcDegrees,
+        elementAffinity: obj.elementAffinity,
         constellationDetail: obj.constellationDetail,
         constellationStarCount: obj.constellationStarCount,
         constellationStarMinSizeClass: obj.constellationStarMinSizeClass,

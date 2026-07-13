@@ -115,7 +115,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
     } else if (type === 'cloud') {
       newObj = { ...newObj, arcDegrees: 30, cloudTransparency: 0.45, cloudiness: 0.5, cloudObjectShape: 'sphere', cloudObjectSizeClass: 'A', cloudObjectPhysicalSize: 5, orbitedObjectName: null, distanceOrbited: 1.0, initialAngle: 0 };
     } else if (type === 'constellation') {
-      newObj = { ...newObj, arcDegrees: 30, constellationFillAlpha: 0.2, constellationStyle: 'internal', constellationDetail: 1, constellationStarCount: 5, constellationStarMinSizeClass: 'A', constellationStarMaxSizeClass: 'C' };
+      newObj = { ...newObj, arcDegrees: 30, customShapeName: 'Aries', constellationFillAlpha: 0.2, constellationStyle: 'internal', constellationDetail: 1, constellationStarCount: 5, constellationStarMinSizeClass: 'A', constellationStarMaxSizeClass: 'C' };
     } else if (type === 'note' || type === 'legend') {
       newObj = { ...newObj, noteDistanceAU: 0, noteAngle: 0, noteFontSize: 16 };
       if (type === 'note') newObj.noteMaxWidth = 120;

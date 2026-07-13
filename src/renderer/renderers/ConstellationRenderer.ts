@@ -28,7 +28,7 @@ export class ConstellationRenderer extends BaseRenderer {
     
     const detail = obj.constellationDetail || 1;
     const starCount = obj.constellationStarCount ?? 5;
-    const style = (obj.constellationStyle || 'outline') as 'outline' | 'internal';
+    const style = (obj.constellationStyle || 'internal') as 'outline' | 'internal';
     const seed = obj.name || 'default';
 
     const constellationData = shapeManager.getConstellationData(shapeName, style, detail, seed);
@@ -123,7 +123,8 @@ export class ConstellationRenderer extends BaseRenderer {
       }
 
       // Star Color logic
-      const starColor = obj.elementAffinity ? bodyFill : '#ffffff';
+      const baseStarColor = obj.elementAffinity ? bodyFill : '#ffffff';
+      const mixedColors = ['#eab308', '#3b82f6', '#8b4513', '#ffffff'];
 
       // We have `starCount` stars to place.
       // We can place them anywhere along the valid mappedEdges.
@@ -165,11 +166,17 @@ export class ConstellationRenderer extends BaseRenderer {
         const twinkleAlpha = 0.6 + 0.4 * Math.sin(time * 3 + twinklePhase); // 0.2 to 1.0
         const currentRadius = baseStarRadius * (0.8 + 0.2 * twinkleAlpha);
 
+        let currentStarColor = baseStarColor;
+        if (obj.elementAffinity === 'mixed') {
+          const colorIdx = Math.floor(rng.next() * mixedColors.length);
+          currentStarColor = mixedColors[colorIdx];
+        }
+
         ctx.beginPath();
         ctx.arc(pt.x, pt.y, currentRadius, 0, Math.PI * 2);
-        ctx.fillStyle = starColor;
+        ctx.fillStyle = currentStarColor;
         ctx.shadowBlur = currentRadius * 2;
-        ctx.shadowColor = starColor;
+        ctx.shadowColor = currentStarColor;
         ctx.fill();
         ctx.shadowBlur = 0;
       }

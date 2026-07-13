@@ -413,7 +413,9 @@
       "constellationFillAlpha": 0.25,
       "constellationFlipX": false,
       "initialAngle": 90,
-      "distanceOrbited": 26
+      "distanceOrbited": 26,
+      "customShapeName": "basilisk_silhouette_1783562403952",
+      "arcDegrees": 15
     },
     {
       "id": "cfsm7e9",
@@ -427,7 +429,9 @@
       "constellationStarMinSizeClass": "C",
       "constellationStarMaxSizeClass": "E",
       "initialAngle": 270,
-      "distanceOrbited": 26
+      "distanceOrbited": 26,
+      "customShapeName": "chimera_silhouette_1783562371269",
+      "arcDegrees": 15
     },
     {
       "id": "4z6srlu",
@@ -438,10 +442,14 @@
       "orbitedObjectName": "The Sun",
       "constellationDetail": 15,
       "constellationStarCount": 17,
-      "constellationStarMinSizeClass": "C",
+      "constellationStarMinSizeClass": "B",
       "constellationStarMaxSizeClass": "F",
       "initialAngle": 180,
-      "distanceOrbited": 26
+      "distanceOrbited": 26,
+      "customShapeName": "minotaur_silhouette_1783562357921",
+      "arcDegrees": 15,
+      "constellationStyle": "internal",
+      "elementAffinity": "mixed"
     },
     {
       "id": "uk5n99e",
@@ -455,7 +463,9 @@
       "constellationStarMinSizeClass": "C",
       "constellationStarMaxSizeClass": "F",
       "initialAngle": 0,
-      "distanceOrbited": 26
+      "distanceOrbited": 26,
+      "customShapeName": "kraken_silhouette_1783562326802",
+      "arcDegrees": 15
     },
     {
       "id": "0idenf0",
@@ -469,7 +479,9 @@
       "constellationStarMinSizeClass": "B",
       "constellationStarMaxSizeClass": "E",
       "initialAngle": 315,
-      "distanceOrbited": 26
+      "distanceOrbited": 26,
+      "customShapeName": "pegasus_silhouette_1783562364640",
+      "arcDegrees": 15
     },
     {
       "id": "zcykcj8",
@@ -483,7 +495,10 @@
       "constellationStarMinSizeClass": "C",
       "constellationStarMaxSizeClass": "E",
       "initialAngle": 220,
-      "distanceOrbited": 26
+      "distanceOrbited": 26,
+      "customShapeName": "treant_silhouette_1783562412147",
+      "arcDegrees": 15,
+      "constellationStyle": "internal"
     },
     {
       "id": "3d4988m",
@@ -497,7 +512,9 @@
       "constellationStarMinSizeClass": "C",
       "constellationStarMaxSizeClass": "E",
       "initialAngle": 140,
-      "distanceOrbited": 26
+      "distanceOrbited": 26,
+      "customShapeName": "sphinx_silhouette_1783562397445",
+      "arcDegrees": 15
     },
     {
       "id": "74640v7",
@@ -511,8 +528,11 @@
       "constellationStarMinSizeClass": "C",
       "constellationStarMaxSizeClass": "E",
       "initialAngle": 48,
-      "distanceOrbited": 26
+      "distanceOrbited": 26,
+      "customShapeName": "dragon_silhouette_1783562307820",
+      "arcDegrees": 15
     }
   ],
-  "mapOverlays": []
+  "mapOverlays": [],
+  "orbitalDrawStrength": 2.5
 }
