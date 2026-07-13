@@ -1,5 +1,6 @@
 import React from 'react';
 import { CelestialObject, CelestialObjectType, WorldShape, SizeClass, ElementAffinity } from '../../../types/astrolabe';
+import { ScaleManager } from '../../utils/ScaleManager';
 
 interface PhenomenonEditorProps {
   obj: any;
@@ -48,6 +49,48 @@ export const PhenomenonEditor: React.FC<PhenomenonEditorProps> = ({ obj, allObje
           </select>
         </div>
       </div>
+
+      <div className="editor-form-group">
+        <label>Size Class & Size ({obj.sizeUnit || 'miles'})</label>
+        <div style={{ display: 'flex', flexDirection: 'row', gap: '8px', width: '100%' }}>
+          <select
+            className="editor-select"
+            style={{ flex: '1 1 0%', minWidth: 0 }}
+            value={obj.sizeClass || 'D'}
+            onChange={e => {
+              const newClass = e.target.value as SizeClass;
+              const newUnit = newClass === 'J' ? 'AU' : 'miles';
+              handleUpdateObject(id, { sizeClass: newClass, sizeUnit: newUnit });
+            }}
+          >
+            <option value="A">A (&lt; 10 mi)</option>
+            <option value="B">B (10-100 mi)</option>
+            <option value="C">C (100-1k mi)</option>
+            <option value="D">D (1k-4k mi)</option>
+            <option value="E">E (4k-10k mi)</option>
+            <option value="F">F (10k-40k mi)</option>
+            <option value="G">G (40k-100k mi)</option>
+            <option value="H">H (100k-1M mi)</option>
+            <option value="I">I (1M-10M mi)</option>
+            <option value="J">J (&ge; AU)</option>
+          </select>
+          <input 
+            type="number" 
+            step="any"
+            className={`editor-input ${!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') ? 'border-[var(--color-accent-red)] text-[var(--color-accent-red)]' : ''}`}
+            style={{ flex: '1 1 0%', minWidth: 0 }}
+            value={obj.physicalSize ?? 1000}
+            onChange={e => handleUpdateObject(id, { physicalSize: parseFloat(e.target.value) || 0 })}
+            title={!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') ? 'Physical size is out of bounds for the selected Size Class.' : ''}
+          />
+        </div>
+      </div>
+      
+      {!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') && (
+        <div className="text-[var(--color-accent-red)] text-[10px] -mt-1 mb-2 px-1 font-bold">
+          Warning: Size is out of bounds for Class {obj.sizeClass || 'D'}
+        </div>
+      )}
 
       <div className="editor-form-group">
         <label>Arc Width (Degrees)</label>
