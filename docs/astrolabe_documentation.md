@@ -226,9 +226,23 @@ The application saves and loads system states via JSON configuration files store
           "maximum": 1.0,
           "description": "For constellation types: the alpha transparency of the inner background fill."
         },
+        "constellationStyle": {
+          "type": "string",
+          "enum": ["outline", "internal"],
+          "description": "For constellation types: the line drawing style. Defaults to 'internal'."
+        },
         "constellationFlipX": {
           "type": "boolean",
           "description": "For constellation types: whether to perfectly mirror the constellation horizontally."
+        },
+        "elementAffinity": {
+          "type": ["string", "null"],
+          "enum": ["fire", "water", "earth", "air", "mixed", null],
+          "description": "The elemental affinity of a celestial body or constellation, affecting its rendered color."
+        },
+        "customShapeName": {
+          "type": ["string", "null"],
+          "description": "The name of the custom shape/SVG (from the shapes directory) to render for this object."
         },
         "noteDistanceAU": {
           "type": "number",

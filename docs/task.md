@@ -131,9 +131,11 @@ This file tracks the design, development, and integration tasks for the Astrolab
   * System Editor: dropdown selector hidden for nebula/sargasso types
 
 - [x] **AST-020: Elemental Affinity Icons**
-  * Added `elementAffinity` field: `fire` (red), `water` (blue), `earth` (brown), `air` (grey), or `null`
+  * Added `elementAffinity` field: `fire` (red/yellow), `water` (blue), `earth` (brown), `air` (grey/white), `mixed` (green/random), or `null`
   * Both canvas views render a small color-coded filled circle badge in the upper-right quadrant of the body sprite
   * System Editor: dropdown selector for all non-star objects
+  * Extended `elementAffinity` to apply to Constellations, randomly coloring individual stars if set to `mixed`
+  * Added `customShapeName` field to support loading SVG paths from the shapes directory
 
 - [x] **AST-021: Nebula & Sargasso Cloud Objects**
   * Added `nebula` and `sargasso` to `CelestialObjectType` enum
