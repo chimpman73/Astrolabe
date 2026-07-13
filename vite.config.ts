@@ -4,7 +4,15 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'remove-crossorigin',
+      transformIndexHtml(html) {
+        return html.replace(/\s?crossorigin(="[^"]*")?/g, '');
+      }
+    }
+  ],
   base: './',
   resolve: {
     alias: {

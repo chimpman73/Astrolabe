@@ -118,12 +118,12 @@ export function flattenPhenomenaTree(
   return flat;
 }
 
-export function getAllSystemObjects(sphere: Pick<CrystalSphere, 'celestialBodies' | 'phenomena' | 'constellations' | 'mapOverlays' | 'groups'>): CelestialObject[] {
+export function getAllSystemObjects(sphere: Pick<CrystalSphere, 'celestialBodies' | 'phenomena' | 'constellations' | 'mapOverlays' | 'groups' | 'objectOrder'>): CelestialObject[] {
   const parentMap = new Map<string, string>();
   const flatBodies = flattenCelestialTree(sphere.celestialBodies || [], parentMap);
   const flatPhenomena = flattenPhenomenaTree(sphere.celestialBodies || [], parentMap);
   
-  return [
+  const combined = [
     ...(sphere.groups || []),
     ...flatBodies,
     ...(sphere.phenomena || []),
@@ -131,6 +131,19 @@ export function getAllSystemObjects(sphere: Pick<CrystalSphere, 'celestialBodies
     ...(sphere.constellations || []),
     ...(sphere.mapOverlays || [])
   ];
+
+  if (sphere.objectOrder && sphere.objectOrder.length > 0) {
+    const orderMap = new Map<string, number>();
+    sphere.objectOrder.forEach((id, idx) => orderMap.set(id, idx));
+    
+    combined.sort((a, b) => {
+      const idxA = orderMap.has(a.id) ? orderMap.get(a.id)! : 999999;
+      const idxB = orderMap.has(b.id) ? orderMap.get(b.id)! : 999999;
+      return idxA - idxB;
+    });
+  }
+
+  return combined;
 }
 
 /**

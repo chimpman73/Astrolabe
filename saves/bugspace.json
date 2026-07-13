@@ -121,7 +121,8 @@
       "affectsShellBoundary": true,
       "arcDegrees": 360,
       "cloudTransparency": 1,
-      "cloudiness": 0
+      "cloudiness": 0,
+      "elementAffinity": "water"
     }
   ],
   "constellations": [],

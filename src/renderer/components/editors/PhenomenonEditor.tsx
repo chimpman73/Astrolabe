@@ -1,5 +1,5 @@
 import React from 'react';
-import { CelestialObject, CelestialObjectType, WorldShape, SizeClass } from '../../../types/astrolabe';
+import { CelestialObject, CelestialObjectType, WorldShape, SizeClass, ElementAffinity } from '../../../types/astrolabe';
 
 interface PhenomenonEditorProps {
   obj: any;
@@ -19,15 +19,34 @@ export const PhenomenonEditor: React.FC<PhenomenonEditorProps> = ({ obj, allObje
         </h5>
       </div>
 
-      <div className="editor-form-group">
-        <label>Type</label>
-        <select 
-          className="editor-select"
-          value={obj.type}
-          onChange={e => handleUpdateObject(id, { type: e.target.value as CelestialObjectType })}
-        >
-          <option value="cloud">☁️ Cloud</option>
-        </select>
+      <div className="flex gap-2">
+        <div className="editor-form-group flex-1">
+          <label>Type</label>
+          <select 
+            className="editor-select"
+            value={obj.type}
+            onChange={e => handleUpdateObject(id, { type: e.target.value as CelestialObjectType })}
+          >
+            <option value="cloud">☁️ Cloud</option>
+          </select>
+        </div>
+
+        <div className="editor-form-group flex-1">
+          <label>Element Affinity</label>
+          <select
+            className="editor-select"
+            value={obj.elementAffinity ?? ''}
+            onChange={e => handleUpdateObject(id, { elementAffinity: (e.target.value || null) as ElementAffinity | null })}
+          >
+            <option value="">None</option>
+            <option value="fire">🔥 Fire</option>
+            <option value="water">💧 Water</option>
+            <option value="earth">🪨 Earth</option>
+            <option value="air">💨 Air</option>
+            <option value="mixed">🌿 Mixed</option>
+            <option value="none">⋄ No Affinity</option>
+          </select>
+        </div>
       </div>
 
       <div className="editor-form-group">

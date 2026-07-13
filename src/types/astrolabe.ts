@@ -185,6 +185,9 @@ export interface CrystalSphere {
   phenomena?: IPhenomenon[];
   constellations?: IConstellation[];
   mapOverlays?: IMapOverlay[];
+  
+  // Ordering across all object categories
+  objectOrder?: string[];
 }
 
 interface IpcResponse<T> {

@@ -51,6 +51,19 @@ The application saves and loads system states via JSON configuration files store
       "minimum": 1.0,
       "description": "The exact multiplier used for the Crystal Shell distance when shellBoundaryType is set to 'custom' or 'relativeMargin'. Defaults to 1.2."
     },
+    "mapOverlays": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/CelestialObject"
+      }
+    },
+    "objectOrder": {
+      "type": "array",
+      "description": "Unified rendering and drawing order of all object IDs across categories",
+      "items": {
+        "type": "string"
+      }
+    },
     "objects": {
       "type": "array",
       "items": {

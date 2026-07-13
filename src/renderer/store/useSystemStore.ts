@@ -4,6 +4,7 @@ import {
   IPhysicalBody, IPhenomenon, IConstellation, IMapOverlay, IGroup 
 } from '../../types/astrolabe';
 import { ParchmentDecoration } from '../../types/renderer';
+import { getAllSystemObjects } from '../utils/orbitMath';
 
 interface SystemState {
   saveDirectory: string | null;
@@ -34,7 +35,7 @@ interface SystemState {
   updateCelestialObject: (id: string, updated: Partial<CelestialObject>) => void;
   removeCelestialObject: (id: string) => void;
   addCelestialObject: (object: CelestialObject) => void;
-  // Reorder needs to know which list and where, or just pass a new flattened structure
+  reorderCelestialObject: (draggedId: string, targetId: string) => void;
   // For simplicity, we can provide a method to set the entire array of a category
   setCategoryArray: <K extends keyof CrystalSphere>(category: K, arr: CrystalSphere[K]) => void;
   
@@ -413,6 +414,8 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     else if (object.type === 'note' || object.type === 'legend') newSphere.mapOverlays = addToArray(newSphere.mapOverlays || [], object);
     else newSphere.celestialBodies = addToArray(newSphere.celestialBodies || [], object);
 
+    newSphere.objectOrder = [...(newSphere.objectOrder || []), object.id];
+
     set({ activeSphere: newSphere });
   },
 
@@ -429,10 +432,50 @@ export const useSystemStore = create<SystemState>((set, get) => ({
         celestialBodies: filterArray(activeSphere.celestialBodies || []),
         phenomena: filterArray(activeSphere.phenomena || []),
         constellations: filterArray(activeSphere.constellations || []),
-        mapOverlays: filterArray(activeSphere.mapOverlays || [])
+        mapOverlays: filterArray(activeSphere.mapOverlays || []),
+        objectOrder: (activeSphere.objectOrder || []).filter(oId => oId !== id)
       },
       selectedObjectId: get().selectedObjectId === id ? null : get().selectedObjectId
     });
+  },
+
+  reorderCelestialObject: (draggedId, targetId) => {
+    const { activeSphere } = get();
+    if (!activeSphere) return;
+
+    // Get current combined order
+    const allObjects = getAllSystemObjects(activeSphere);
+    let currentOrder = activeSphere.objectOrder || allObjects.map((o: any) => o.id);
+    
+    // Add any missing IDs to the end to ensure we don't lose items
+    const missing = allObjects.map((o: any) => o.id).filter((id: string) => !currentOrder.includes(id));
+    if (missing.length > 0) {
+      currentOrder = [...currentOrder, ...missing];
+    }
+    
+    // Perform the splice
+    const draggedIdx = currentOrder.indexOf(draggedId);
+    const targetIdx = currentOrder.indexOf(targetId);
+    
+    if (draggedIdx !== -1 && targetIdx !== -1 && draggedIdx !== targetIdx) {
+      const newOrder = [...currentOrder];
+      newOrder.splice(draggedIdx, 1);
+      
+      const newTargetIdx = newOrder.indexOf(targetId);
+      
+      if (draggedIdx < targetIdx) {
+        newOrder.splice(newTargetIdx + 1, 0, draggedId);
+      } else {
+        newOrder.splice(newTargetIdx, 0, draggedId);
+      }
+      
+      set({
+        activeSphere: {
+          ...activeSphere,
+          objectOrder: newOrder
+        }
+      });
+    }
   },
 
   setCategoryArray: (category, arr) => {

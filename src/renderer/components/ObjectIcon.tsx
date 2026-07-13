@@ -46,7 +46,7 @@ export const ObjectIcon: React.FC<ObjectIconProps> = ({ type, className = "", si
         className={`${className} ${colorClass}`} 
         style={{
           backgroundColor: 'currentColor',
-          WebkitMaskImage: `url(${svgUrls[type]})`,
+          WebkitMaskImage: `url("${svgUrls[type]}")`,
           WebkitMaskSize: 'contain',
           WebkitMaskRepeat: 'no-repeat',
           WebkitMaskPosition: 'center',

@@ -287,3 +287,10 @@ This file tracks the design, development, and integration tasks for the Astrolab
   * Updated `MapOverlayEditor.tsx` to use the standardized 3-section layout (`Type & Configuration`, `Placement & Layout`, `Typography`).
   * Grouped related inputs (e.g. Type and Mode, or Distance and Angle) into side-by-side flex containers to significantly reduce vertical scrolling and improve layout aesthetics.
   * Updated `GroupEditor.tsx` to use the standardized sectioned layout (`General Information`, `Group Contents`), matching the styling of the other editors.
+
+### Phase 14: Core Features
+- [x] **AST-047: Cross-Category Rendering Order**
+  * Add `objectOrder` array to `CrystalSphere` schema to track absolute rendering order across all object types.
+  * Update `getAllSystemObjects` in `orbitMath.ts` to sort the combined objects list by `objectOrder`.
+  * Refactor `reorderCelestialObject` in `useSystemStore.ts` to manage the unified `objectOrder` list instead of sorting isolated type arrays.
+  * Update `astrolabe_documentation.md` to reflect `objectOrder` in the JSON schema.

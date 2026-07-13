@@ -30,8 +30,9 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
     activeSphere,
     updateActiveSphereMeta,
     updateCelestialObject,
-        addCelestialObject,
+    addCelestialObject,
     removeCelestialObject,
+    reorderCelestialObject,
     setToastMessage,
     selectedObjectId,
     setSelectedObjectId,
@@ -374,17 +375,19 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
               }
             });
 
-            return renderOrder.map(({ obj, isChild, parentExpanded }) => {
+            return renderOrder.map(({ obj, isChild, parentExpanded }, index) => {
               const id = obj.id;
               if (isChild && !parentExpanded) return null;
               const isExpanded = obj.type === 'group' ? (expandedGroups[obj.name] === true) : (selectedObjectId === id);
+              
+              const draggedIndex = draggedId ? renderOrder.findIndex(item => item.obj.id === draggedId) : -1;
               
               return (
                 <div 
                   key={'celestial-obj-' + id} 
                   className={`editor-card ${isChild ? 'ml-4 border-l-2 border-l-[var(--color-accent-gold)]' : ''} ${draggedId === id ? 'opacity-50' : ''} ${
                     dragOverId === id 
-                      ? (draggedId !== null && draggedId < id 
+                      ? (draggedIndex !== -1 && draggedIndex < index 
                           ? 'border-b-2 border-b-[var(--color-accent-gold)]' 
                           : 'border-t-2 border-t-[var(--color-accent-gold)]') 
                       : ''
@@ -418,6 +421,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                       // If dropping onto a child or root object, inherit its group
                       else {
                         updateCelestialObject(draggedId!, { groupId: obj.groupId || undefined });
+                        reorderCelestialObject(draggedId!, id);
                       }
                       
                       // 

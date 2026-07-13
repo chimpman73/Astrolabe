@@ -12,6 +12,10 @@
     "generate-shape": "node tools/generate-shape.js"
   },
   "build": {
+    "files": [
+      "**/*",
+      "dist/**/*"
+    ],
     "extraResources": [
       {
         "from": "assets",

@@ -90,7 +90,7 @@ export const PhysicalBodyEditor: React.FC<PhysicalBodyEditorProps> = ({ obj, all
                   width: '14px',
                   height: '14px',
                   backgroundColor: getElementColor(obj.elementAffinity) || '#fff',
-                  WebkitMaskImage: `url(${elementSvgUrls[obj.elementAffinity] || ''})`,
+                  WebkitMaskImage: `url("${elementSvgUrls[obj.elementAffinity] || ''}")`,
                   WebkitMaskSize: 'contain',
                   WebkitMaskRepeat: 'no-repeat',
                   WebkitMaskPosition: 'center',

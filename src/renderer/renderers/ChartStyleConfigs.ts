@@ -45,8 +45,8 @@ export const vellumStyleConfig: NavigationChartStyleConfig = {
   mutedColor: '#7c694e',
   goldColor: '#b58315',
   
-  backgroundImageUrl: '/images/vellum_bg.png',
-  foregroundImageUrl: '/images/wood_desk.png',
+  backgroundImageUrl: './images/vellum_bg.png',
+  foregroundImageUrl: './images/wood_desk.png',
   
   titleFontFamily: "'Elan', 'Cinzel', serif",
   starFontFamily: "'Elan', 'Cinzel', serif",
@@ -82,9 +82,9 @@ export const vellumStyleConfig: NavigationChartStyleConfig = {
   assets: {
     ...defaultAssets,
     decorations: {
-      ink: '/images/stain_ink.png',
-      coffee: '/images/stain_coffee.png',
-      burn: '/images/stain_burn.png'
+      ink: './images/stain_ink.png',
+      coffee: './images/stain_coffee.png',
+      burn: './images/stain_burn.png'
     }
   }
 };
@@ -98,7 +98,7 @@ export const spaceStyleConfig: NavigationChartStyleConfig = {
   goldColor: '#e2b34a',
   
   backgroundImageUrl: undefined,
-  foregroundImageUrl: '/images/wood_desk.png',
+  foregroundImageUrl: './images/wood_desk.png',
   
   titleFontFamily: "'Elan', 'Cinzel', serif",
   starFontFamily: "'Elan', 'Cinzel', serif",
