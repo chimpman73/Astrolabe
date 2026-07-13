@@ -1,6 +1,6 @@
 import { 
   CrystalSphere, CelestialObject, OrbitDirection, 
-  IPhysicalBody, IPhenomenon, IConstellation, IMapOverlay 
+  IPhysicalBody, IPhenomenon, IMapOverlay 
 } from '../../types/astrolabe';
 
 /**

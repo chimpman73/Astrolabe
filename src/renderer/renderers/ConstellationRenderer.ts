@@ -124,7 +124,7 @@ export class ConstellationRenderer extends BaseRenderer {
 
       // Star Color logic
       const baseStarColor = obj.elementAffinity ? bodyFill : '#ffffff';
-      const mixedColors = ['#eab308', '#3b82f6', '#8b4513', '#ffffff'];
+      const mixedColors = ['#eab308', '#3b82f6', '#8b4513', '#ffffff', '#22c55e'];
 
       // We have `starCount` stars to place.
       // We can place them anywhere along the valid mappedEdges.

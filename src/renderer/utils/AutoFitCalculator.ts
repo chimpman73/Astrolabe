@@ -1,6 +1,6 @@
 import { CrystalSphere } from '../../types/astrolabe';
 import { ScaleManager } from './ScaleManager';
-import { flattenCelestialTree, flattenPhenomenaTree, calculateSystemPositions } from './orbitMath';
+import { flattenCelestialTree, flattenPhenomenaTree } from './orbitMath';
 
 export class AutoFitCalculator {
   /**
@@ -63,14 +63,8 @@ export class AutoFitCalculator {
     const leftMarginAU = shellRadius * 2.184;
 
     const directoryStartX_AU = -leftMarginAU;
-    const directoryWidthModel = shellRadius;
-    
-    const mapTopY_AU = -topMarginAU;
-    const mapBottomY_AU = topMarginAU;
     const mapRightX_AU = rightMarginAU;
     
-    const paddingAU = 0;
-
     const paperWidthAU = leftMarginAU + rightMarginAU;
     const paperHeightAU = topMarginAU * 2;
 

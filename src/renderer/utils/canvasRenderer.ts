@@ -1,4 +1,4 @@
-import { CelestialObject } from '../../types/astrolabe';
+
 
 import { CelestialRendererFactory } from '../renderers';
 

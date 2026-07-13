@@ -81,7 +81,6 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
     const rightMarginAU = shellRadiusModel * 1.375;
     const leftMarginAU = shellRadiusModel * 2.184;
 
-    const directoryStartX_AU = -leftMarginAU;
     const directoryWidthModel = shellRadiusModel;
 
     const paperWidthModel = leftMarginAU + rightMarginAU;

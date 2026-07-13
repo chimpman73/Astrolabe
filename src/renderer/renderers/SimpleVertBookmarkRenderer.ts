@@ -1,4 +1,4 @@
-import { CrystalSphere, CelestialObject } from '../../types/astrolabe';
+import { CrystalSphere } from '../../types/astrolabe';
 import { BookmarkStyleConfig } from '../../types/renderer';
 import { drawSolidBody, getBodyColors } from '../utils/canvasRenderer';
 import { ScaleManager } from '../utils/ScaleManager';

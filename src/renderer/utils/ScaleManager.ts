@@ -1,4 +1,4 @@
-import { SizeClass, SizeUnit, CelestialObject, IPhysicalBody, IPhenomenon, IMapOverlay } from '../../types/astrolabe';
+import { SizeClass, SizeUnit, CelestialObject, IPhysicalBody, IMapOverlay } from '../../types/astrolabe';
 import { IVisualScaleStrategy } from './IVisualScaleStrategy';
 import { HybridScaleStrategy } from './HybridScaleStrategy';
 

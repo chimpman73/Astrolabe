@@ -1,4 +1,4 @@
-import { CelestialObject, CrystalSphere } from '../../types/astrolabe';
+import { CrystalSphere } from '../../types/astrolabe';
 import { MapStyleContext, INavigationChartRenderer } from '../../types/renderer';
 import { ScaleManager } from '../utils/ScaleManager';
 import { calculateSystemPositions } from '../utils/orbitMath';
