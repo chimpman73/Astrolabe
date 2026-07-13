@@ -151,8 +151,8 @@ export const MapOverlayEditor: React.FC<MapOverlayEditorProps> = ({ obj, handleU
           <label>Scale Multiplier</label>
           <input
             type="number"
-            step="0.05"
-            min="0.05"
+            step="0.01"
+            min="0.001"
             max="10.0"
             className="editor-input"
             value={obj.legendScale ?? 1.0}
