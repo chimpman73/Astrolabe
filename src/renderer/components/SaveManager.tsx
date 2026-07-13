@@ -378,7 +378,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
             return renderOrder.map(({ obj, isChild, parentExpanded }, index) => {
               const id = obj.id;
               if (isChild && !parentExpanded) return null;
-              const isExpanded = obj.type === 'group' ? (expandedGroups[obj.name] === true) : (selectedObjectId === id);
+              const isExpanded = obj.type === 'group' ? (expandedGroups[obj.id] === true) : (selectedObjectId === id);
               
               const draggedIndex = draggedId ? renderOrder.findIndex(item => item.obj.id === draggedId) : -1;
               
@@ -435,7 +435,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                 <div 
                   onClick={() => {
                     if (obj.type === 'group') {
-                      setExpandedGroups(prev => ({ ...prev, [obj.name]: prev[obj.name] === true ? false : true }));
+                      setExpandedGroups(prev => ({ ...prev, [obj.id]: prev[obj.id] === true ? false : true }));
                     } else {
                       setSelectedObjectId(isExpanded ? null : id);
                     }

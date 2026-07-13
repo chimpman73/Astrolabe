@@ -80,7 +80,7 @@
       "type": "cloud",
       "description": "A newly added planetary body.",
       "isDMOnly": true,
-      "orbitedObjectName": null,
+      "orbitedObjectName": "World Tree",
       "distanceOrbited": 16.5,
       "initialAngle": 270,
       "orbitalPeriodDays": 365,
@@ -89,7 +89,11 @@
       "affectsShellBoundary": false,
       "arcDegrees": 6,
       "cloudTransparency": 0.45,
-      "cloudiness": 0.5
+      "cloudiness": 0.5,
+      "elementAffinity": "water",
+      "sizeClass": "J",
+      "sizeUnit": "AU",
+      "physicalSize": 4
     },
     {
       "id": "ep1zmzp",
@@ -104,7 +108,11 @@
       "affectsShellBoundary": false,
       "arcDegrees": 8,
       "cloudTransparency": 0.45,
-      "cloudiness": 0.5
+      "cloudiness": 0.5,
+      "elementAffinity": "water",
+      "physicalSize": 4,
+      "sizeClass": "J",
+      "sizeUnit": "AU"
     },
     {
       "id": "e7qzkc2",
