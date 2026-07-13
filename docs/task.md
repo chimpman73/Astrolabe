@@ -281,3 +281,8 @@ This file tracks the design, development, and integration tasks for the Astrolab
   * Scaled the Sphere title text dynamically with `shellRadius` to maintain exact proportions with the sphere edge across all zoom levels.
   * Aligned the top of the System Directory exactly with the top of the dynamic Sphere title.
   * Corrected `AutoFitCalculator` algebra and `constrainPan` boundaries to guarantee the drawn parchment perfectly maximizes the viewport area without clipping.
+
+### Phase 13: UI Polish
+- [x] **AST-046: Editor UI Refactor - Map Overlays**
+  * Updated `MapOverlayEditor.tsx` to use the standardized 3-section layout (`Type & Configuration`, `Placement & Layout`, `Typography`).
+  * Grouped related inputs (e.g. Type and Mode, or Distance and Angle) into side-by-side flex containers to significantly reduce vertical scrolling and improve layout aesthetics.
