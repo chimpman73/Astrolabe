@@ -48,7 +48,9 @@ class FileService {
                 filename: file,
                 fullPath: fullPath,
                 sphereName: data.sphereName,
-                currentCampaignDate: data.currentCampaignDate || '',
+                campaignYear: data.campaignYear,
+                campaignDay: data.campaignDay,
+                epoch: data.epoch,
                 currentSystemDate: data.currentSystemDate || 0,
               });
             }

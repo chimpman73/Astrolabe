@@ -1,5 +1,6 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+const { setupApplicationMenu } = require('./menu');
 
 class AppManager {
   #mainWindow;
@@ -14,6 +15,7 @@ class AppManager {
     this.setupGlobalErrorHandlers();
 
     app.whenReady().then(() => {
+      setupApplicationMenu();
       this.createWindow();
 
       app.on('activate', () => {

@@ -168,7 +168,9 @@ export type CelestialObject = IPhysicalBody | IPhenomenon | IConstellation | IMa
 export interface CrystalSphere {
   version?: number; // 2 for V2 Schema
   sphereName: string;
-  currentCampaignDate: string;
+  campaignYear?: number;
+  campaignDay?: number;
+  epoch?: string;
   currentSystemDate: number; 
   shellBoundaryType?: 'double' | 'relativeMargin' | 'custom'; 
   shellCustomScale?: number;
@@ -201,7 +203,9 @@ export interface SaveFileInfo {
   filename: string;
   fullPath: string;
   sphereName: string;
-  currentCampaignDate: string;
+  campaignYear?: number;
+  campaignDay?: number;
+  epoch?: string;
   currentSystemDate: number;
 }
 
@@ -216,6 +220,7 @@ interface IAstrolabeAPI {
   listShapesDirectory: () => Promise<IpcResponse<string[]>>;
   loadShape: (shapeName: string) => Promise<IpcResponse<string>>;
   onBackendError: (callback: (data: { type: string; message: string; stack?: string }) => void) => void;
+  onMenuAction: (callback: (action: string) => void) => void;
 }
 
 declare global {

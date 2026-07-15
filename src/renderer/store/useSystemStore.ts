@@ -59,7 +59,6 @@ function migrateToV2(v1Data: any): CrystalSphere {
   const v2Sphere: CrystalSphere = {
     version: 2,
     sphereName: v1Data.sphereName || 'Untitled System',
-    currentCampaignDate: v1Data.currentCampaignDate || new Date().toISOString().split('T')[0],
     currentSystemDate: v1Data.currentSystemDate || 0,
     shellBoundaryType: v1Data.shellBoundaryType || 'double',
     shellCustomScale: v1Data.shellCustomScale,
@@ -68,10 +67,15 @@ function migrateToV2(v1Data: any): CrystalSphere {
     navTitleStrike: v1Data.navTitleStrike,
     groups: [],
     celestialBodies: [],
-    phenomena: [],
     constellations: [],
     mapOverlays: []
   };
+
+  v2Sphere.campaignYear = v1Data.campaignYear !== undefined ? v1Data.campaignYear : 1000;
+  v2Sphere.campaignDay = v1Data.campaignDay !== undefined ? v1Data.campaignDay : 1;
+  v2Sphere.epoch = v1Data.epoch || 'AC';
+  // Keep currentSystemDate as elapsed days from the base campaign date
+  v2Sphere.currentSystemDate = v1Data.currentSystemDate || 0;
 
   const oldObjects = v1Data.objects || [];
   
@@ -327,7 +331,9 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     const defaultSphere: CrystalSphere = {
       version: 2,
       sphereName: 'Untitled System',
-      currentCampaignDate: new Date().toISOString().split('T')[0],
+      campaignYear: 1000,
+      campaignDay: 1,
+      epoch: 'AC',
       currentSystemDate: 0,
       groups: [],
       celestialBodies: [],

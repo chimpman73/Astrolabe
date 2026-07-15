@@ -12,4 +12,7 @@ contextBridge.exposeInMainWorld('astrolabeAPI', {
   onBackendError: (callback) => {
     ipcRenderer.on('backend-error', (event, data) => callback(data));
   },
+  onMenuAction: (callback) => {
+    ipcRenderer.on('menu-action', (event, action) => callback(action));
+  }
 });

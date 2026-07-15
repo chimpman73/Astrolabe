@@ -51,6 +51,7 @@ This file tracks the design, development, and integration tasks for the Astrolab
 | **AST-043** | Coding Standards Compliance | High | `Done` | Refactored frontend classes to use `#` for encapsulation and strictly enforce one class per file. |
 | **AST-044** | Legend Object | High | `Done` | Implement dynamic on-canvas map legends for Planets, Orbits, and Elements. |
 | **AST-045** | Fixed Layout Template | High | `Done` | Refactored Nav Chart to use static multipliers for margins, locking parchment proportions independent of orbital objects. |
+| **AST-048** | System Time Calendar Mapping | High | `Done` | Refactor system date logic to use base Year, Day, Epoch decoupled from simulation elapsed time offsets. |
 ---
 
 ## Detailed Task Breakdown
@@ -294,3 +295,9 @@ This file tracks the design, development, and integration tasks for the Astrolab
   * Update `getAllSystemObjects` in `orbitMath.ts` to sort the combined objects list by `objectOrder`.
   * Refactor `reorderCelestialObject` in `useSystemStore.ts` to manage the unified `objectOrder` list instead of sorting isolated type arrays.
   * Update `astrolabe_documentation.md` to reflect `objectOrder` in the JSON schema.
+
+- [x] **AST-048: System Time Calendar Mapping**
+  * Replace static `currentCampaignDate` with `campaignYear`, `campaignDay`, and `epoch` representing the "Time 0" baseline date.
+  * Update `NavChartView` to dynamically calculate the displayed simulation date dynamically from the baseline + elapsed `currentSystemDate`.
+  * Reordered Nav Chart toolbar to prioritize scrubber/animation controls.
+  * Bound "Reset Timeline" to instantly snap `currentSystemDate` back to 0.

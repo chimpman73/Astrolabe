@@ -23,7 +23,9 @@ The application saves and loads system states via JSON configuration files store
   "type": "object",
   "required": [
     "sphereName",
-    "currentCampaignDate",
+    "campaignYear",
+    "campaignDay",
+    "epoch",
     "currentSystemDate",
     "objects"
   ],
@@ -32,14 +34,24 @@ The application saves and loads system states via JSON configuration files store
       "type": "string",
       "description": "The name of the Crystal Sphere system."
     },
-    "currentCampaignDate": {
+    "campaignYear": {
+      "type": "integer",
+      "description": "The base starting year of the campaign calendar."
+    },
+    "campaignDay": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 365,
+      "description": "The base starting day of the campaign calendar (1 to 365)."
+    },
+    "epoch": {
       "type": "string",
-      "description": "The current campaign calendar date (e.g. YYYY-MM-DD or custom calendar format)."
+      "description": "The epoch designation (e.g. 'AC' or 'BC')."
     },
     "currentSystemDate": {
       "type": "integer",
       "minimum": 0,
-      "description": "The system epoch date in elapsed days. Used to calculate active orbital angles."
+      "description": "The elapsed simulation time in days since the base campaign date. Used to calculate active orbital angles."
     },
     "shellBoundaryType": {
       "type": "string",

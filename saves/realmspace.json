@@ -760,5 +760,7 @@
     }
   ],
   "constellations": [],
-  "mapOverlays": []
+  "mapOverlays": [],
+  "orbitalDrawStrength": 3,
+  "navChartPlanetSizeOffset": 3
 }

@@ -24,6 +24,16 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
   const [playSpeed, setPlaySpeed] = useState(1); // days per frame
   const animationRef = useRef<number | null>(null);
 
+  // Calculate dynamic simulation time
+  const baseYear = activeSphere?.campaignYear ?? 1000;
+  const baseDay = activeSphere?.campaignDay ?? 1;
+  const totalDays = Math.floor(currentSystemDate);
+  const displayedYear = baseYear + Math.floor((baseDay - 1 + totalDays) / 365);
+  // Ensure modulo handles negatives correctly if currentSystemDate is negative
+  let dayMod = (baseDay - 1 + totalDays) % 365;
+  if (dayMod < 0) dayMod += 365;
+  const displayedDay = dayMod + 1;
+
   // Map theme (space vs parchment)
   const [mapTheme, setMapTheme] = useState<'parchment' | 'space'>('parchment');
 
@@ -68,12 +78,9 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
           </h4>
           
           <div className="w-[1px] h-4 bg-[var(--color-border-parchment)] mx-1" />
-          
-          <div className="text-[10px] font-semibold hidden md:inline">
-            Epoch: <span className="font-mono text-xs text-[var(--color-accent-red)]">{Math.round(currentSystemDate)}</span> Days
-          </div>
 
-          <div className="flex items-center gap-1 ml-3">
+          {/* Speed Controls */}
+          <div className="flex items-center gap-1 ml-1">
             <button
               onClick={() => setIsPlaying(!isPlaying)}
               className="p-1 rounded bg-[var(--color-border-parchment)] hover:bg-[var(--color-accent-gold)] transition-colors text-[var(--color-text-main)]"
@@ -110,6 +117,42 @@ export const NavChartView: React.FC<NavChartViewProps> = ({ onCollapse }) => {
                 <option value={10}>10.0x</option>
               </select>
             </div>
+          </div>
+
+          <div className="w-[1px] h-4 bg-[var(--color-border-parchment)] mx-2" />
+
+          {/* Calendar Date (Editable) */}
+          <div className="flex items-center gap-1 hidden md:flex text-[10px] font-semibold mr-3">
+            <span className="text-[var(--color-text-muted)] uppercase mr-1">{activeSphere?.epoch || 'AC'}</span>
+            <input
+              type="number"
+              className="font-mono text-xs text-[var(--color-accent-red)] bg-transparent border-b border-transparent hover:border-[var(--color-border-parchment)] focus:border-[var(--color-accent-gold)] focus:outline-none w-14 text-center"
+              value={displayedYear}
+              onChange={e => {
+                const yr = parseInt(e.target.value, 10);
+                if (!isNaN(yr)) {
+                  const baseTotal = baseYear * 365 + (baseDay - 1);
+                  const newTotal = yr * 365 + (displayedDay - 1);
+                  setCurrentSystemDate(newTotal - baseTotal);
+                }
+              }}
+            />
+            <span className="text-[var(--color-text-muted)] mx-1">Day</span>
+            <input
+              type="number"
+              min="1"
+              max="365"
+              className="font-mono text-xs text-[var(--color-accent-red)] bg-transparent border-b border-transparent hover:border-[var(--color-border-parchment)] focus:border-[var(--color-accent-gold)] focus:outline-none w-10 text-center"
+              value={displayedDay}
+              onChange={e => {
+                const dy = parseInt(e.target.value, 10);
+                if (!isNaN(dy)) {
+                  const baseTotal = baseYear * 365 + (baseDay - 1);
+                  const newTotal = displayedYear * 365 + (dy - 1);
+                  setCurrentSystemDate(newTotal - baseTotal);
+                }
+              }}
+            />
           </div>
         </div>
 

@@ -115,6 +115,32 @@ const App: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    if (window.astrolabeAPI?.onMenuAction) {
+      window.astrolabeAPI.onMenuAction((action) => {
+        if (action === 'new-file') {
+          useSystemStore.getState().createNewSphere();
+        } else if (action === 'open-file') {
+          setShowOpenModal(true);
+        } else if (action === 'save-as') {
+          setShowSaveAsModal(true);
+        } else if (action === 'save-file') {
+          const state = useSystemStore.getState();
+          if (!state.activeSphere) return;
+          state.saveCurrentSphere().then(success => {
+            if (success) {
+              state.setToastMessage({ type: 'success', text: 'System successfully saved to local directory.' });
+            } else {
+              state.setToastMessage({ type: 'error', text: 'Failed to save configuration.' });
+            }
+          }).catch((err: any) => {
+            state.setToastMessage({ type: 'error', text: `Save error: ${err.message || err}` });
+          });
+        }
+      });
+    }
+  }, []);
+
   return (
     <div className="app-container">
       

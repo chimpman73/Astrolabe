@@ -223,13 +223,45 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
               </div>
 
               <div className="editor-form-group">
-                <label>Campaign Date</label>
-                <input 
-                  type="text" 
-                  className="editor-input"
-                  value={activeSphere.currentCampaignDate} 
-                  onChange={e => updateActiveSphereMeta({ currentCampaignDate: e.target.value })}
-                />
+                <label>System Time</label>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  <input
+                    type="text"
+                    className="editor-input"
+                    style={{ flex: 1, minWidth: '40px' }}
+                    placeholder="Epoch"
+                    value={activeSphere.epoch || ''}
+                    onChange={e => updateActiveSphereMeta({ epoch: e.target.value })}
+                  />
+                  <input
+                    type="number"
+                    className="editor-input"
+                    style={{ flex: 1, minWidth: '60px' }}
+                    placeholder="Year"
+                    value={activeSphere.campaignYear ?? ''}
+                    onChange={e => {
+                      const yr = parseInt(e.target.value, 10);
+                      if (!isNaN(yr)) {
+                        updateActiveSphereMeta({ campaignYear: yr });
+                      }
+                    }}
+                  />
+                  <input
+                    type="number"
+                    min="1"
+                    max="365"
+                    className="editor-input"
+                    style={{ flex: 1, minWidth: '50px' }}
+                    placeholder="Day"
+                    value={activeSphere.campaignDay ?? ''}
+                    onChange={e => {
+                      let dy = parseInt(e.target.value, 10);
+                      if (!isNaN(dy)) {
+                        updateActiveSphereMeta({ campaignDay: dy });
+                      }
+                    }}
+                  />
+                </div>
               </div>
 
               <div className="editor-form-group" style={{ alignItems: 'flex-start' }}>
