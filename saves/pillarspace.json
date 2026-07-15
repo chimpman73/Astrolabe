@@ -3,7 +3,19 @@
   "sphereName": "Pillarspace",
   "currentCampaignDate": "2026-07-15",
   "currentSystemDate": 10918,
-  "groups": [],
+  "groups": [
+    {
+      "id": "1784087146186",
+      "name": "Planets",
+      "type": "group",
+      "description": "A structural group for celestial bodies.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 0,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 0,
+      "affectsShellBoundary": false
+    }
+  ],
   "celestialBodies": [
     {
       "id": "1784079594501",
@@ -19,7 +31,8 @@
       "affectsShellBoundary": true,
       "elementAffinity": "fire",
       "worldShape": "elliptical",
-      "isStationary": true
+      "isStationary": true,
+      "groupId": "1784087146186"
     },
     {
       "id": "1784079734210",
@@ -33,7 +46,8 @@
       "initialAngle": 74,
       "orbitalPeriodDays": 1314000,
       "affectsShellBoundary": true,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "groupId": "1784087146186"
     },
     {
       "id": "1784079750749",
@@ -47,7 +61,8 @@
       "initialAngle": 10,
       "orbitalPeriodDays": 365,
       "affectsShellBoundary": true,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "groupId": "1784087146186"
     },
     {
       "id": "1784079760739",
@@ -61,7 +76,8 @@
       "initialAngle": 284,
       "orbitalPeriodDays": 21900,
       "affectsShellBoundary": true,
-      "elementAffinity": "earth"
+      "elementAffinity": "earth",
+      "groupId": "1784087146186"
     }
   ],
   "phenomena": [
@@ -84,7 +100,8 @@
       "sizeUnit": "AU",
       "physicalSize": 1,
       "cloudObjectDensity": 0,
-      "isStationary": true
+      "isStationary": true,
+      "groupId": "1784087146186"
     },
     {
       "id": "1784080132897",
@@ -104,7 +121,8 @@
       "sizeClass": "J",
       "sizeUnit": "AU",
       "physicalSize": 1,
-      "isStationary": true
+      "isStationary": true,
+      "groupId": "1784087146186"
     },
     {
       "id": "1784080134938",
@@ -124,7 +142,8 @@
       "sizeClass": "J",
       "sizeUnit": "AU",
       "physicalSize": 1,
-      "isStationary": true
+      "isStationary": true,
+      "groupId": "1784087146186"
     }
   ],
   "constellations": [],
@@ -139,7 +158,8 @@
     "1784079750749",
     "1784080126366",
     "1784080132897",
-    "1784080134938"
+    "1784080134938",
+    "1784087146186"
   ],
   "campaignYear": 1000,
   "campaignDay": 1,

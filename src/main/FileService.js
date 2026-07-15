@@ -119,7 +119,7 @@ class FileService {
 
   getDefaultSaveDirectory() {
     try {
-      let defaultPath = path.join(app.getAppPath(), 'saves');
+      let defaultPath = path.join(app.getPath('userData'), 'saves');
       
       if (!fs.existsSync(defaultPath)) {
         fs.mkdirSync(defaultPath, { recursive: true });

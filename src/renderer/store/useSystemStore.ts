@@ -252,8 +252,21 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   clearDecorations: () => set({ decorations: [] }),
 
   setSaveDirectory: async (path: string) => {
-    set({ saveDirectory: path });
+    // If the path contains '.asar', they are stuck with the old bugged path from a previous version.
+    // We should auto-correct it by fetching the proper default save directory.
+    if (path.includes('.asar') && window.astrolabeAPI) {
+      try {
+        const res = await window.astrolabeAPI.getDefaultSaveDirectory();
+        if (res.success && res.data) {
+          path = res.data;
+        }
+      } catch (err) {
+        console.error('Failed to auto-correct .asar path', err);
+      }
+    }
+    
     localStorage.setItem('astrolabe_save_dir', path);
+    set({ saveDirectory: path });
     await get().loadSavesList();
   },
 

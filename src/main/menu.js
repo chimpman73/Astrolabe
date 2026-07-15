@@ -107,7 +107,8 @@ function setupApplicationMenu() {
           label: 'Documentation / User Manual',
           click: async () => {
             // Open the local user manual HTML file
-            const manualPath = path.join(app.getAppPath(), 'assets', 'docs', 'user_manual.html');
+            const assetsDir = app.isPackaged ? path.join(process.resourcesPath, 'assets') : path.join(app.getAppPath(), 'assets');
+            const manualPath = path.join(assetsDir, 'docs', 'user_manual.html');
             await shell.openPath(manualPath);
           }
         },
