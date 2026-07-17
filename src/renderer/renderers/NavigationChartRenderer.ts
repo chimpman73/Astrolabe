@@ -658,9 +658,9 @@ context.activeSphere?.shellBoundaryType === 'relativeMargin')
       if (isSelected) {
         ctx.save();
         drawPolyPath();
-        ctx.setLineDash([5 / activeZoom, 5 / activeZoom]);
+        ctx.setLineDash([5 / normalizedZoom, 5 / normalizedZoom]);
         ctx.strokeStyle = this.#config.strokeColor;
-        ctx.lineWidth = 1 / activeZoom;
+        ctx.lineWidth = 1 / normalizedZoom;
         ctx.stroke();
         ctx.restore();
       }
@@ -676,7 +676,7 @@ context.activeSphere?.shellBoundaryType === 'relativeMargin')
 
       if (isSelected) {
          ctx.fillStyle = this.#config.strokeColor;
-         const r = 5 / activeZoom;
+         const r = 6 / normalizedZoom;
          ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
          ctx.beginPath(); ctx.arc(tl.x, tl.y, r, 0, Math.PI * 2); ctx.fill();
          ctx.beginPath(); ctx.arc(tr.x, tr.y, r, 0, Math.PI * 2); ctx.fill();
@@ -690,8 +690,8 @@ context.activeSphere?.shellBoundaryType === 'relativeMargin')
          ctx.moveTo(tr.x, tr.y);
          ctx.lineTo(tr.x + 20, tr.y - 20);
          ctx.strokeStyle = this.#config.strokeColor;
-         ctx.lineWidth = 1 / activeZoom;
-         ctx.setLineDash([2 / activeZoom, 2 / activeZoom]);
+         ctx.lineWidth = 1 / normalizedZoom;
+         ctx.setLineDash([2 / normalizedZoom, 2 / normalizedZoom]);
          ctx.stroke();
          ctx.restore();
       }

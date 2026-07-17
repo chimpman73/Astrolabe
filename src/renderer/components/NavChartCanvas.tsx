@@ -57,6 +57,10 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
   const [dimensions, setDimensions] = useState({ width: 850, height: 600 });
   const [{ zoom, pan }, setViewport] = useState({ zoom: 1, pan: { x: 425, y: 300 } });
   
+  const baseZoom = useMemo(() => {
+    return activeSphere ? AutoFitCalculator.calculateAutoFit(dimensions, activeSphere as any).zoom : 1;
+  }, [dimensions, activeSphere]);
+
   const setZoom = (fn: (z: number) => number) => {
       setViewport(prev => ({ ...prev, zoom: fn(prev.zoom) }));
   };
@@ -252,8 +256,6 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
 
     const activeVisibleObjects = visibleObjects.filter((obj: any) => !culledObjects.has(obj.name));
 
-    const baseZoom = activeSphere ? AutoFitCalculator.calculateAutoFit(dimensions, activeSphere as any).zoom : 1;
-
     const context: MapStyleContext = {
       ctx,
       width: dimensions.width,
@@ -286,7 +288,7 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
           const mouseX = e.clientX - rect.left;
           const mouseY = e.clientY - rect.top;
           
-          const nodes = getNoteNodes(selectedObject, zoom, pan);
+          const nodes = getNoteNodes(selectedObject, zoom, pan, baseZoom);
           const hit = hitTestNoteNodes(mouseX, mouseY, nodes);
           if (hit) {
             setActiveNodeDrag({ id: hit, initialNote: selectedObject, initialMouse: { x: mouseX, y: mouseY } });
@@ -361,9 +363,10 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
          const screenDx = mouseX - centerScreenX;
          const screenDy = mouseY - centerScreenY;
          
+         const overlayScale = zoom / (baseZoom || 1);
          const rotRad = (initialNote.noteRotation || 0) * Math.PI / 180;
-         const localDx = (screenDx * Math.cos(-rotRad) - screenDy * Math.sin(-rotRad)) / zoom;
-         const localDy = (screenDx * Math.sin(-rotRad) + screenDy * Math.cos(-rotRad)) / zoom;
+         const localDx = (screenDx * Math.cos(-rotRad) - screenDy * Math.sin(-rotRad)) / overlayScale;
+         const localDy = (screenDx * Math.sin(-rotRad) + screenDy * Math.cos(-rotRad)) / overlayScale;
          
          const corners = getNoteCorners(initialNote);
          const newCorners = {
@@ -400,8 +403,8 @@ export const NavChartCanvas = forwardRef<NavChartCanvasHandle, NavChartCanvasPro
           
           if (Math.abs(cx) > 0.1 || Math.abs(cy) > 0.1) {
             const rotRad = (note.noteRotation || 0) * Math.PI / 180;
-            const globalDx = cx * Math.cos(rotRad) - cy * Math.sin(rotRad);
-            const globalDy = cx * Math.sin(rotRad) + cy * Math.cos(rotRad);
+            const globalDx = (cx * Math.cos(rotRad) - cy * Math.sin(rotRad)) / (baseZoom || 1);
+            const globalDy = (cx * Math.sin(rotRad) + cy * Math.cos(rotRad)) / (baseZoom || 1);
             
             const currentRad = (note.noteAngle || 0) * Math.PI / 180;
             const currentX = (note.noteDistanceAU || 0) * Math.cos(currentRad);

@@ -4,35 +4,200 @@
   <meta charset="UTF-8">
   <title>Astrolabe User Manual</title>
   <style>
+    :root {
+      --bg-color: #fcfaf2;
+      --text-main: #2b2316;
+      --accent: #8b7355;
+      --accent-light: #e0caa6;
+      --border: #d4c4a8;
+    }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       line-height: 1.6;
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
-      padding: 20px;
-      background-color: #fcfaf2;
-      color: #2b2316;
+      padding: 30px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
     }
-    h1, h2, h3 { color: #8b7355; }
-    .header { text-align: center; margin-bottom: 40px; }
+    h1, h2, h3, h4 { color: var(--accent); margin-top: 1.5em; }
+    h1 { text-align: center; font-size: 2.5em; margin-bottom: 0.2em; border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+    .subtitle { text-align: center; font-style: italic; color: #665; margin-bottom: 40px; }
+    
+    .section-box {
+      background: white;
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background-color: var(--accent-light);
+      color: var(--text-main);
+    }
+    
+    ul { padding-left: 20px; }
+    li { margin-bottom: 8px; }
+    
+    .badge {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>Astrolabe User Manual</h1>
-    <p>A comprehensive guide to mapping your Crystal Spheres.</p>
+
+  <h1>Astrolabe User Manual</h1>
+  <div class="subtitle">A comprehensive guide to mapping your Crystal Spheres.</div>
+
+  <div class="section-box">
+    <h2>1. Menu Items</h2>
+    <p>The top application menu provides global controls for file management and application settings.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Menu Item</th>
+          <th>Shortcut</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>File &gt; New Sphere</strong></td>
+          <td>Cmd/Ctrl + N</td>
+          <td>Creates a brand new, blank Crystal Sphere configuration with default starting values.</td>
+        </tr>
+        <tr>
+          <td><strong>File &gt; Open Sphere...</strong></td>
+          <td>Cmd/Ctrl + O</td>
+          <td>Opens the Directory Pane on the left, allowing you to browse and load an existing system save file from your <code>saves/</code> directory.</td>
+        </tr>
+        <tr>
+          <td><strong>File &gt; Save</strong></td>
+          <td>Cmd/Ctrl + S</td>
+          <td>Saves the current state of the system directly to its active JSON file.</td>
+        </tr>
+        <tr>
+          <td><strong>File &gt; Save As...</strong></td>
+          <td>Cmd/Ctrl + Shift + S</td>
+          <td>Prompts you to specify a new filename to duplicate or save your current system state.</td>
+        </tr>
+        <tr>
+          <td><strong>Edit &gt; (Undo/Cut/Copy)</strong></td>
+          <td>Standard</td>
+          <td>Standard text-editing shortcuts for interacting with input fields in the System Editor.</td>
+        </tr>
+        <tr>
+          <td><strong>Help &gt; Documentation</strong></td>
+          <td>-</td>
+          <td>Opens this User Manual.</td>
+        </tr>
+        <tr>
+          <td><strong>Help &gt; About Astrolabe</strong></td>
+          <td>-</td>
+          <td>Shows application version information.</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
-  
-  <h2>Getting Started</h2>
-  <p>Welcome to Astrolabe! This application allows you to create detailed, interactive maps of fantasy star systems.</p>
-  
-  <h3>Basic Controls</h3>
-  <ul>
-    <li><strong>File Menu:</strong> Use the top menu to create new systems, open existing ones, and save your work.</li>
-    <li><strong>System Editor:</strong> The left panel allows you to add, edit, and remove celestial bodies.</li>
-    <li><strong>Drag & Drop:</strong> You can drag celestial bodies in the system editor to reorder them or place them inside groups.</li>
-  </ul>
-  
-  <p><em>(More detailed documentation will be added here in future updates.)</em></p>
+
+  <div class="section-box">
+    <h2>2. System Editor Overview</h2>
+    <p>The System Editor (the left-hand sidebar) is where you configure the physical traits, orbits, and metadata of your star system. It consists of two main sections: <strong>System Config</strong> and <strong>Celestial Bodies</strong>.</p>
+    
+    <h3>System Config</h3>
+    <ul>
+      <li><strong>Sphere Name:</strong> The global name of the system (e.g., "Realmspace").</li>
+      <li><strong>System Time (Epoch, Year, Day):</strong> Sets the baseline "Time 0" calendar date for the system. This is the default date the system resets to.</li>
+      <li><strong>Shell Boundary:</strong> Configures how the outermost crystal shell is calculated (Double distance or Custom multiplier).</li>
+      <li><strong>Orbital Line Strength:</strong> Adjusts the opacity/thickness of the dashed orbital rings on the map.</li>
+      <li><strong>Title Strike Outline:</strong> Adds a legible outline behind text labels to ensure they are readable against busy map backgrounds.</li>
+    </ul>
+
+    <h3>Using the Editor Tools</h3>
+    <ul>
+      <li><strong>Adding Objects:</strong> Click the <strong>Add Object</strong> button to create a new Celestial Body, Phenomenon, Constellation, Overlay Note, or Group folder.</li>
+      <li><strong>Drag &amp; Drop:</strong> Click and hold the header of any object card to drag it up or down the list. Dropping an object onto a <strong>Group</strong> folder will nest it inside. Dropping it in the dashed box at the bottom moves it back to the root level.</li>
+      <li><strong>Visibility Toggle (<span style="font-family: monospace;">👁️</span>):</strong> The eye icon on the card header temporarily hides the object from the map canvases.</li>
+      <li><strong>Delete (<span style="font-family: monospace;">🗑️</span>):</strong> Removes the object entirely. Any objects orbiting a deleted parent will be reset to orbit the center of the system.</li>
+      <li><strong>Affects Shell Boundary:</strong> If unchecked, the object's distance is ignored when calculating the size of the outer crystal shell. (Useful for distant comets or background elements).</li>
+      <li><strong>DM Only:</strong> Hides this object (and its children, if it's a group) when the global view mode is set to "Player View".</li>
+    </ul>
+  </div>
+
+  <div class="section-box">
+    <h2>3. Object Types &amp; Configuration</h2>
+    <p>Every object in Astrolabe has unique configuration parameters based on its type.</p>
+
+    <h3>Physical Bodies <span class="badge">Star, Planet, Moon, Asteroid, Station, Custom</span></h3>
+    <p>Standard solid objects that occupy physical space and orbit a parent body.</p>
+    <ul>
+      <li><strong>Size Class &amp; Physical Size:</strong> Sets the physical diameter (Size A through J).</li>
+      <li><strong>Orbit Parent:</strong> Select which other body this object orbits. If left blank, it orbits the center (0,0). <em>Moons automatically orbit Planets.</em></li>
+      <li><strong>Distance (AU):</strong> The radius of the orbit.</li>
+      <li><strong>Initial Angle:</strong> Where the object starts on its orbital ring (0-360 degrees) at Time 0.</li>
+      <li><strong>Orbital Period:</strong> Determines how fast the object moves. If set to Auto, it is derived mathematically from the distance.</li>
+      <li><strong>Motion Mode:</strong> 
+        <ul>
+          <li><em>Prograde:</em> Standard counter-clockwise orbit.</li>
+          <li><em>Fixed:</em> Stationary object; ignores time progression.</li>
+          <li><em>Retrograde:</em> Clockwise orbit.</li>
+        </ul>
+      </li>
+      <li><strong>World Shape:</strong> Choose the visual representation (Sphere, Disc, Cluster, etc). <strong>Stations</strong> gain access to artificial shapes (Ring, Castle, Skull, Ship).</li>
+      <li><strong>Elemental Affinity:</strong> Applies a color-coded alchemical badge to the object (Fire, Water, Earth, Air).</li>
+    </ul>
+    <p><em>Note: <strong>Living Worlds</strong> feature additional sliders to generate procedural branching tree structures (Levels, Density, Leaves).</em></p>
+
+    <h3>Phenomena <span class="badge">Cloud, Nebula, Sargasso</span></h3>
+    <p>Volumetric environmental hazards or features that smear along an orbital path.</p>
+    <ul>
+      <li><strong>Arc Degrees:</strong> How wide the cloud stretches along its orbital ring (1-360 degrees).</li>
+      <li><strong>Transparency &amp; Cloudiness:</strong> Controls the visual opacity and edge-bumpiness of the phenomenon.</li>
+      <li><strong>Internal Objects:</strong> You can configure the shape, size, and density of particulate matter (e.g., asteroids, debris) drawn inside the cloud volume.</li>
+    </ul>
+
+    <h3>Constellations <span class="badge">Background Stars</span></h3>
+    <p>Decorative star-patterns drawn in the background space.</p>
+    <ul>
+      <li><strong>Shape:</strong> Choose from classic silhouettes or class-based icons (Aries, Dragon, Wizard, etc).</li>
+      <li><strong>Level of Detail (LOD):</strong> Controls the complexity of the connecting wireframe lines (1 = simple, 20 = highly detailed).</li>
+      <li><strong>Star Count:</strong> How many individual stars to randomly scatter across the wireframe nodes.</li>
+      <li><strong>Style:</strong> Choose whether the constellation draws an "Internal" skeletal wireframe, or a perimeter "Outline".</li>
+      <li><strong>Elemental Affinity:</strong> Setting this to "Mixed" will randomly assign vivid colors to the individual stars.</li>
+    </ul>
+
+    <h3>Map Overlays <span class="badge">Note, Legend</span></h3>
+    <p>Purely visual typography or graphical legend boxes.</p>
+    <ul>
+      <li><strong>Text Note:</strong> Add custom text to the map. Notes support custom Google Fonts, rotation, font sizes, and text wrapping. On the Navigation Chart, you can click and drag the 4 corners of a Note to create custom skewed text boxes.</li>
+      <li><strong>Legend:</strong> Automatically generates a graphical key for Planet Types, Orbit Types, or Elemental Affinities currently present in the system.</li>
+    </ul>
+
+    <h3>Groups <span class="badge">Folder</span></h3>
+    <p>Groups do not draw anything on the map themselves, but act as organizational folders.</p>
+    <ul>
+      <li><strong>Inheritance:</strong> Toggling the <strong>DM Only</strong> or <strong>Visibility</strong> state of a Group automatically applies that state to everything inside it.</li>
+      <li><strong>Nesting:</strong> Groups cannot be nested inside other Groups.</li>
+    </ul>
+  </div>
+
 </body>
 </html>

@@ -239,26 +239,26 @@
       "description": "Pango Sirage Astral Cartographer of Singe-Saari",
       "groupId": "krye0y6",
       "orbitedObjectName": null,
-      "noteDistanceAU": 162.68478738978374,
-      "noteAngle": 147.8728091934735,
-      "noteFontSize": 10,
+      "noteDistanceAU": 168.06017107591683,
+      "noteAngle": 147.3660863303898,
+      "noteFontSize": 28,
       "noteFontFamily": "Sacramento",
       "noteCorners": {
         "tl": {
-          "x": -53.03157150419429,
-          "y": -12.048166329739615
+          "x": -137.77176360818206,
+          "y": -34.635391948842695
         },
         "tr": {
-          "x": 51.86914739338681,
-          "y": -12.256681184051558
+          "x": 135.96676878190837,
+          "y": -32.73304607505757
         },
         "bl": {
-          "x": -53.17913271905854,
-          "y": 12.10634443280287
+          "x": -143.34498449779178,
+          "y": 34.91406479761754
         },
         "br": {
-          "x": 54.34155682986602,
-          "y": 12.198503080988303
+          "x": 145.14997932406547,
+          "y": 32.454373226282726
         }
       },
       "legendDistanceAU": 1,
@@ -272,27 +272,27 @@
       "isDMOnly": true,
       "groupId": "krye0y6",
       "orbitedObjectName": null,
-      "noteDistanceAU": 63.23117677806387,
-      "noteAngle": 237.75421137637392,
+      "noteDistanceAU": 59.58323695103233,
+      "noteAngle": 239.95817958796079,
       "noteRotation": 329.5215000722926,
-      "noteFontSize": 6,
+      "noteFontSize": 20,
       "noteFontFamily": "Caveat",
       "noteCorners": {
         "tl": {
-          "x": -36.1631383895874,
-          "y": -7.242677688598633
+          "x": -136.06173850736457,
+          "y": -27.10610360881404
         },
         "tr": {
-          "x": 36.401543617248535,
-          "y": -6.653535842895508
+          "x": 131.14491499142616,
+          "y": -23.957245228835774
         },
         "bl": {
-          "x": -35.59361934661865,
-          "y": 7.027463912963867
+          "x": -128.75333597519068,
+          "y": 25.09205123748913
         },
         "br": {
-          "x": 35.35521411895752,
-          "y": 6.868749618530273
+          "x": 133.67015949112903,
+          "y": 25.971297600160682
         }
       },
       "legendDistanceAU": 1,
@@ -305,27 +305,27 @@
       "description": "There are many small worldlets and settlements in the fringe.  ",
       "groupId": "krye0y6",
       "orbitedObjectName": null,
-      "noteDistanceAU": 61.25003077586327,
-      "noteAngle": 107.73747484705831,
-      "noteRotation": 12.852549156734767,
-      "noteFontSize": 6,
+      "noteDistanceAU": 56.64809643770295,
+      "noteAngle": 116.32270546344031,
+      "noteRotation": 19.22580382489979,
+      "noteFontSize": 20,
       "noteFontFamily": "Caveat",
       "noteCorners": {
         "tl": {
-          "x": -42.0546875,
-          "y": -7.9140625
+          "x": -130.39844045042992,
+          "y": -25.887176781892776
         },
         "tr": {
-          "x": 45.8203125,
-          "y": -8.2890625
+          "x": 143.1647028028965,
+          "y": -22.177468091249466
         },
         "bl": {
-          "x": -40.5546875,
-          "y": 8.5859375
+          "x": -119.9833867251873,
+          "y": 22.679818958044052
         },
         "br": {
-          "x": 36.7890625,
-          "y": 7.6171875
+          "x": 107.21712437272072,
+          "y": 25.38482591509819
         }
       },
       "legendDistanceAU": 1,
@@ -338,26 +338,26 @@
       "description": "Three empires controlling the system are on the moons of Calidar, Alorea (elves), Kragdur (dwarves) and Munaan (humans).",
       "groupId": "krye0y6",
       "orbitedObjectName": null,
-      "noteDistanceAU": 107.55863012834544,
-      "noteAngle": 214.61564355986715,
-      "noteFontSize": 6,
+      "noteDistanceAU": 106.77636288008507,
+      "noteAngle": 210.2974435497838,
+      "noteFontSize": 20,
       "noteFontFamily": "Caveat",
       "noteCorners": {
         "tl": {
-          "x": -21.14721469581127,
-          "y": -24.1181108802557
+          "x": -68.65759591680578,
+          "y": -93.49961498621265
         },
         "tr": {
-          "x": 45.887098506093025,
-          "y": -23.515087351202965
+          "x": 141.73965120339707,
+          "y": -92.86377676099774
         },
         "bl": {
-          "x": -21.793145522475243,
-          "y": 22.13159842789173
+          "x": -66.19920735989899,
+          "y": 92.21436079774465
         },
         "br": {
-          "x": -2.946738287806511,
-          "y": 25.501599803566933
+          "x": -6.882847926692323,
+          "y": 94.14903094946573
         }
       },
       "legendDistanceAU": 1,
@@ -370,26 +370,26 @@
       "description": "1512 CE, third day of Loriath",
       "groupId": "krye0y6",
       "orbitedObjectName": null,
-      "noteDistanceAU": 103.99818222808072,
-      "noteAngle": 118.35646255549578,
-      "noteFontSize": 7,
+      "noteDistanceAU": 115.99370349094119,
+      "noteAngle": 124.7777332638189,
+      "noteFontSize": 22,
       "noteFontFamily": "Caveat",
       "noteCorners": {
         "tl": {
-          "x": -36.6661491394043,
-          "y": -4.396968841552734
+          "x": -125.86413224293447,
+          "y": -15.05545880326235
         },
         "tr": {
-          "x": 36.06906509399414,
-          "y": -3.929637908935547
+          "x": 123.69601916325172,
+          "y": -15.303910280270241
         },
         "bl": {
-          "x": -38.2442741394043,
-          "y": 4.962406158447266
+          "x": -125.32202689366156,
+          "y": 16.19710377082091
         },
         "br": {
-          "x": 38.84135818481445,
-          "y": 3.3642005920410156
+          "x": 127.49013997334433,
+          "y": 14.162265312711678
         }
       },
       "legendDistanceAU": 1,
@@ -404,27 +404,27 @@
       "isDMOnly": true,
       "groupId": "krye0y6",
       "orbitedObjectName": "Soltan",
-      "noteDistanceAU": 115.3917576479915,
-      "noteAngle": 42.78432386805826,
+      "noteDistanceAU": 111.88452115305385,
+      "noteAngle": 47.417863799802774,
       "noteRotation": 321.7237720332585,
-      "noteFontSize": 6,
+      "noteFontSize": 20,
       "noteFontFamily": "Caveat",
       "noteCorners": {
         "tl": {
-          "x": -54.5,
-          "y": -24
+          "x": -146.0634994506836,
+          "y": -77.78530883789062
         },
         "tr": {
-          "x": 51.5,
-          "y": -23
+          "x": 139.4111099243164,
+          "y": -75.62124633789062
         },
         "bl": {
-          "x": -12.5,
-          "y": 23
+          "x": -30.527000427246094,
+          "y": 74.91635131835938
         },
         "br": {
-          "x": 15.5,
-          "y": 24
+          "x": 37.17938995361328,
+          "y": 78.49020385742188
         }
       },
       "legendDistanceAU": 0,
@@ -441,7 +441,7 @@
       "legendType": "OrbitType",
       "legendDistanceAU": 175.20663681121266,
       "legendAngle": 164.68552204798874,
-      "legendFontSize": 8,
+      "legendFontSize": 30,
       "legendScale": 0.501,
       "groupId": "krye0y6"
     },
@@ -456,7 +456,7 @@
       "legendType": "ElementalAffinity",
       "legendDistanceAU": 145.72817405057287,
       "legendAngle": 160.1952274051393,
-      "legendFontSize": 8,
+      "legendFontSize": 30,
       "legendScale": 0.5,
       "groupId": "krye0y6"
     },
@@ -472,9 +472,34 @@
       "legendMode": "partial",
       "legendDistanceAU": 116.5262691220274,
       "legendAngle": 155.01072706870772,
-      "legendFontSize": 8,
+      "legendFontSize": 30,
       "legendScale": 0.5,
       "groupId": "krye0y6"
     }
+  ],
+  "objectOrder": [
+    "krye0y6",
+    "djnvb5y",
+    "fh2kjnz",
+    "rltn586",
+    "ap1ymhz",
+    "0f54fx9",
+    "qekx2zh",
+    "e67mkbn",
+    "a2ennre",
+    "216aea9",
+    "yijg366",
+    "4xdxane",
+    "5dez3xq",
+    "trwxror",
+    "5rgx9if",
+    "pnput6j",
+    "3wim8mg",
+    "wgmpdyl",
+    "qpv7u7o",
+    "322jrbu",
+    "up8hahs",
+    "b5heyl3",
+    "tycip9b"
   ]
 }

@@ -123,6 +123,24 @@ class FileService {
       
       if (!fs.existsSync(defaultPath)) {
         fs.mkdirSync(defaultPath, { recursive: true });
+        
+        // Copy bundled default saves if this is the first time creating the directory
+        try {
+          const bundledSavesPath = path.join(app.getAppPath(), 'saves');
+          if (fs.existsSync(bundledSavesPath)) {
+            const files = fs.readdirSync(bundledSavesPath);
+            for (const file of files) {
+              if (file.endsWith('.json')) {
+                fs.copyFileSync(
+                  path.join(bundledSavesPath, file),
+                  path.join(defaultPath, file)
+                );
+              }
+            }
+          }
+        } catch (copyErr) {
+          console.error('Failed to copy default saves:', copyErr);
+        }
       }
       return { success: true, data: defaultPath };
     } catch (err) {

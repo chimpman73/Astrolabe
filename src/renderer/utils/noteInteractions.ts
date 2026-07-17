@@ -28,7 +28,8 @@ export function getNoteCorners(note: any) {
 export function getNoteNodes(
   obj: CelestialObject,
   zoom: number,
-  pan: { x: number; y: number }
+  pan: { x: number; y: number },
+  baseZoom: number
 ): NoteNodes {
   const isLegend = obj.type === 'legend';
   const corners = isLegend ? {
@@ -53,11 +54,13 @@ export function getNoteNodes(
 
   // To find corners in screen space, we rotate the local offsets by `rot`
   const rotRad = (rot * Math.PI) / 180;
+  
+  const overlayScale = zoom / (baseZoom || 1);
 
   const rotatePoint = (offsetX: number, offsetY: number) => {
     const rx = offsetX * Math.cos(rotRad) - offsetY * Math.sin(rotRad);
     const ry = offsetX * Math.sin(rotRad) + offsetY * Math.cos(rotRad);
-    return { x: cx + rx * zoom, y: cy + ry * zoom };
+    return { x: cx + rx * overlayScale, y: cy + ry * overlayScale };
   };
 
   return {
