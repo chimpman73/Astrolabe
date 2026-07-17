@@ -201,7 +201,7 @@ export function drawBookmark(
     groupedObjects.get(d)!.push(obj);
   });
 
-  // Draw objects and labels
+  // First Pass: Draw all object bodies
   groupedObjects.forEach((objects, distance) => {
     const r = getPixelRadius(distance);
     
@@ -217,12 +217,67 @@ export function drawBookmark(
     let clusterIndex = 0;
     
     angleGroups.forEach((cluster) => {
-      cluster.forEach((obj, objIndexInCluster) => {
+      cluster.forEach((obj) => {
         let objSize = ScaleManager.getBookmarkVisualRadius(obj.sizeClass || 'D') * sizeMultiplier;
         const physicalRadiusAU = ScaleManager.getPhysicalRadiusAU(obj);
         const physicalPixelSize = getPixelRadius(physicalRadiusAU);
         // Only override the symbolic icon size if the physical size is actually larger!
-        // This ensures massive objects (like giant stars, nebula clouds, or Dyson spheres) reflect their true scale.
+        objSize = Math.max(objSize, physicalPixelSize);
+        let x = centerX;
+        let y = centerY - r;
+        
+        if (clusterCount > 1) {
+          if (r === 0) {
+            // Binary central stars: spread horizontally
+            const spread = 80;
+            const offset = (clusterIndex - (clusterCount - 1) / 2) * spread;
+            x = centerX + offset;
+          } else {
+            // Fan out along the arc
+            const j = clusterIndex - (clusterCount - 1) / 2; 
+            const avgArcPixels = 120; // Approx horizontal space needed per item
+            let stepTheta = avgArcPixels / r;
+            if (stepTheta > Math.PI / 4) stepTheta = Math.PI / 4; // Cap angle to prevent wrapping
+            
+            const alpha = -Math.PI / 2 + j * stepTheta;
+            
+            x = centerX + r * Math.cos(alpha);
+            y = centerY + r * Math.sin(alpha);
+          }
+        }
+
+        const { bodyFill, bodyStroke } = getBodyColors(obj, !isDark, colorBg, colorStroke, '#e2b34a');
+        const scaleHeight = height - (showShell ? 15 : 45) - bottomMargin;
+        const pixelsPerAU = canvasBoundary > 0 ? scaleHeight / canvasBoundary : 1;
+        
+        drawSolidBody(
+          ctx, x, y, obj, objSize, bodyFill, bodyStroke, false, pixelsPerAU, 
+          true, centerX, centerY, undefined, undefined, width, r, centerY
+        );
+      });
+      clusterIndex++;
+    });
+  });
+
+  // Second Pass: Draw all labels and names on top of the bodies
+  groupedObjects.forEach((objects, distance) => {
+    const r = getPixelRadius(distance);
+    
+    const angleGroups = new Map<number, typeof objects>();
+    objects.forEach(o => {
+      const ang = o.initialAngle || 0;
+      if (!angleGroups.has(ang)) angleGroups.set(ang, []);
+      angleGroups.get(ang)!.push(o);
+    });
+    
+    const clusterCount = angleGroups.size;
+    let clusterIndex = 0;
+    
+    angleGroups.forEach((cluster) => {
+      cluster.forEach((obj, objIndexInCluster) => {
+        let objSize = ScaleManager.getBookmarkVisualRadius(obj.sizeClass || 'D') * sizeMultiplier;
+        const physicalRadiusAU = ScaleManager.getPhysicalRadiusAU(obj);
+        const physicalPixelSize = getPixelRadius(physicalRadiusAU);
         objSize = Math.max(objSize, physicalPixelSize);
         let x = centerX;
         let y = centerY - r;
@@ -260,17 +315,7 @@ export function drawBookmark(
           }
         }
 
-        const { bodyFill, bodyStroke } = getBodyColors(obj, !isDark, colorBg, colorStroke, '#e2b34a');
-        const scaleHeight = height - (showShell ? 15 : 45) - bottomMargin;
-        const pixelsPerAU = canvasBoundary > 0 ? scaleHeight / canvasBoundary : 1;
-        
-        drawSolidBody(
-          ctx, x, y, obj, objSize, bodyFill, bodyStroke, false, pixelsPerAU, 
-          true, centerX, centerY, undefined, undefined, width, r, centerY
-        );
-
         // --- Name label ---
-        // If multiple objects share this exact same angle, offset their text vertically so they don't overwrite each other
         const verticalOffset = objIndexInCluster * 14; 
         ctx.font = `normal ${Math.max(10, width * 0.035) * 1.5}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
         ctx.fillStyle = colorStroke;
@@ -278,7 +323,7 @@ export function drawBookmark(
         ctx.textBaseline = 'middle';
         ctx.fillText(obj.name, x + nameXOffset, y + verticalOffset);
 
-        // --- Distance label (only for the leftmost cluster, and only for the first object in that cluster) ---
+        // --- Distance label ---
         if (showDistance && clusterIndex === 0 && objIndexInCluster === 0) {
           ctx.font = `italic ${Math.max(8, width * 0.028) * 1.5}px 'ITC Eras-Bold', 'Eras Bold ITC', sans-serif`;
           ctx.fillStyle = colorMuted;

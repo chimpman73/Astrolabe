@@ -437,6 +437,35 @@ context.activeSphere?.shellBoundaryType === 'relativeMargin')
           drawStationaryIndicator(ctx, proj.x, proj.y, renderSize, this.#config.mutedColor);
         }
       }
+    });
+  }
+
+  #drawLabels({ ctx, activeZoom, positions, project, activeSphere, isExport }: MapStyleContext, activeVisibleObjects: CelestialObject[]): void {
+    const exportScale = isExport ? 2.5 : 1.0;
+    
+    // Calculate system reach for relative sizing of constellations
+    let maxDist = 0.1;
+    activeVisibleObjects.forEach((o: any) => {
+      if (o.type === 'note' || o.type === 'legend' || o.type === 'constellation') return;
+      const reach = ScaleManager.getPhysicalReachAU(o);
+      if (reach > maxDist) maxDist = reach;
+    });
+
+    activeVisibleObjects.forEach((obj: any) => {
+      if (obj.type === 'note' || obj.type === 'legend') return;
+      const pos = positions[obj.name];
+      if (!pos) return;
+
+      const proj = project(pos.x, pos.y);
+      
+      let renderSize = 1;
+      if (obj.type === 'constellation') {
+         renderSize = maxDist * activeZoom;
+      } else {
+         const baseRenderSize = ScaleManager.getNavChartVisualRadius(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles', activeZoom);
+         const isScalableType = ['planet', 'moon', 'asteroid', 'star'].includes(obj.type);
+         renderSize = Math.max(1, baseRenderSize + (isScalableType ? ((activeSphere?.navChartPlanetSizeOffset ?? 0) * exportScale) : 0));
+      }
 
       const shouldLabel = obj.type !== 'moon' || activeZoom > 150;
       if (shouldLabel) {
@@ -554,6 +583,7 @@ context.activeSphere?.shellBoundaryType === 'relativeMargin')
 
     this.drawShell(context, shellRadius, shellProj);
     this.drawBodies(context, context.visibleObjects);
+    this.#drawLabels(context, context.visibleObjects);
     this.#drawNotes(context, context.visibleObjects);
     this.#drawLegends(context, context.visibleObjects);
     
