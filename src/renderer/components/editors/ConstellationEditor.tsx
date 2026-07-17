@@ -1,9 +1,9 @@
 import React from 'react';
-import { CelestialObject, CelestialObjectType, SizeClass } from '../../../types/astrolabe';
+import { CelestialObject, CelestialObjectType, SizeClass, IConstellation } from '../../../types/astrolabe';
 import { shapeManager } from '../../utils/ShapeManager';
 
 interface ConstellationEditorProps {
-  obj: any;
+  obj: IConstellation;
   handleUpdateObject: (id: string, updated: Partial<CelestialObject>) => void;
 }
 

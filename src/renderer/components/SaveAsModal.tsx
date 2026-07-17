@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSystemStore } from '../store/useSystemStore';
 
-interface NewSystemModalProps {
+interface SaveAsModalProps {
   onClose: () => void;
 }
 
-export const SaveAsModal: React.FC<NewSystemModalProps> = ({ onClose }) => {
+export const SaveAsModal: React.FC<SaveAsModalProps> = ({ onClose }) => {
   const { activeSphere, updateActiveSphereMeta, saveCurrentSphere, setToastMessage } = useSystemStore();
   const [newSphereName, setNewSphereName] = useState('');
 

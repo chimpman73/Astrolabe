@@ -1,8 +1,8 @@
 import React from 'react';
-import { CelestialObject, CelestialObjectType } from '../../../types/astrolabe';
+import { CelestialObject, CelestialObjectType, IMapOverlay } from '../../../types/astrolabe';
 
 interface MapOverlayEditorProps {
-  obj: any;
+  obj: IMapOverlay;
   handleUpdateObject: (id: string, updated: Partial<CelestialObject>) => void;
 }
 

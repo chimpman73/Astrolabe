@@ -29,18 +29,24 @@ class FileService {
 
   async listSavesDirectory(dirPath) {
     try {
-      if (!dirPath || !fs.existsSync(dirPath)) {
+      if (!dirPath) {
+        return { success: false, error: 'Directory path is empty.', code: 'ERR_DIR_NOT_FOUND' };
+      }
+
+      const dirExists = await fs.promises.access(dirPath).then(() => true).catch(() => false);
+      if (!dirExists) {
         return { success: false, error: 'Directory does not exist.', code: 'ERR_DIR_NOT_FOUND' };
       }
 
-      const files = fs.readdirSync(dirPath);
+      const files = await fs.promises.readdir(dirPath);
       const jsonFiles = [];
 
-      for (const file of files) {
-        if (file.endsWith('.json')) {
+      const readPromises = files
+        .filter(file => file.endsWith('.json'))
+        .map(async (file) => {
           const fullPath = path.join(dirPath, file);
           try {
-            const raw = fs.readFileSync(fullPath, 'utf8');
+            const raw = await fs.promises.readFile(fullPath, 'utf8');
             const data = JSON.parse(raw);
             // Simple validation check: ensure it looks like a CrystalSphere configuration
             if (data.sphereName && (Array.isArray(data.objects) || data.version === 2)) {
@@ -58,8 +64,9 @@ class FileService {
             // Skip unparseable files
             console.warn(`Failed to parse file: ${file}`, e);
           }
-        }
-      }
+        });
+
+      await Promise.all(readPromises);
 
       return { success: true, data: jsonFiles };
     } catch (err) {
@@ -69,11 +76,12 @@ class FileService {
 
   async loadJsonFile(filePath) {
     try {
-      if (!fs.existsSync(filePath)) {
+      const fileExists = await fs.promises.access(filePath).then(() => true).catch(() => false);
+      if (!fileExists) {
         return { success: false, error: 'File does not exist.', code: 'ERR_FILE_NOT_FOUND' };
       }
 
-      const content = fs.readFileSync(filePath, 'utf8');
+      const content = await fs.promises.readFile(filePath, 'utf8');
       const data = JSON.parse(content);
       return { success: true, data };
     } catch (err) {
@@ -84,7 +92,7 @@ class FileService {
   async saveJsonFile(filePath, data) {
     try {
       const formattedData = JSON.stringify(data, null, 2);
-      fs.writeFileSync(filePath, formattedData, 'utf8');
+      await fs.promises.writeFile(filePath, formattedData, 'utf8');
       return { success: true };
     } catch (err) {
       return { success: false, error: err.message, code: 'ERR_FILE_WRITE_FAILED' };
@@ -110,33 +118,34 @@ class FileService {
       const base64Data = dataUrl.replace(/^data:image\/png;base64,/, '');
       const buffer = Buffer.from(base64Data, 'base64');
 
-      fs.writeFileSync(result.filePath, buffer);
+      await fs.promises.writeFile(result.filePath, buffer);
       return { success: true, data: result.filePath };
     } catch (err) {
       return { success: false, error: err.message, code: 'ERR_EXPORT_FAILED' };
     }
   }
 
-  getDefaultSaveDirectory() {
+  async getDefaultSaveDirectory() {
     try {
-      let defaultPath = path.join(app.getPath('userData'), 'saves');
+      const defaultPath = path.join(app.getPath('userData'), 'saves');
       
-      if (!fs.existsSync(defaultPath)) {
-        fs.mkdirSync(defaultPath, { recursive: true });
+      const dirExists = await fs.promises.access(defaultPath).then(() => true).catch(() => false);
+      if (!dirExists) {
+        await fs.promises.mkdir(defaultPath, { recursive: true });
         
         // Copy bundled default saves if this is the first time creating the directory
         try {
           const bundledSavesPath = path.join(app.getAppPath(), 'saves');
-          if (fs.existsSync(bundledSavesPath)) {
-            const files = fs.readdirSync(bundledSavesPath);
-            for (const file of files) {
-              if (file.endsWith('.json')) {
-                fs.copyFileSync(
-                  path.join(bundledSavesPath, file),
-                  path.join(defaultPath, file)
-                );
-              }
-            }
+          const bundledExists = await fs.promises.access(bundledSavesPath).then(() => true).catch(() => false);
+          if (bundledExists) {
+            const files = await fs.promises.readdir(bundledSavesPath);
+            const copyPromises = files
+              .filter(file => file.endsWith('.json'))
+              .map(file => fs.promises.copyFile(
+                path.join(bundledSavesPath, file),
+                path.join(defaultPath, file)
+              ));
+            await Promise.all(copyPromises);
           }
         } catch (copyErr) {
           console.error('Failed to copy default saves:', copyErr);
@@ -151,10 +160,11 @@ class FileService {
   async listShapesDirectory() {
     try {
       const shapesPath = path.join(app.getAppPath(), 'assets', 'shapes');
-      if (!fs.existsSync(shapesPath)) {
+      const dirExists = await fs.promises.access(shapesPath).then(() => true).catch(() => false);
+      if (!dirExists) {
         return { success: true, data: [] };
       }
-      const files = fs.readdirSync(shapesPath);
+      const files = await fs.promises.readdir(shapesPath);
       const shapes = files.filter(f => f.endsWith('.svg')).map(f => f.replace('.svg', ''));
       return { success: true, data: shapes };
     } catch (err) {
@@ -166,10 +176,11 @@ class FileService {
     try {
       const shapesPath = path.join(app.getAppPath(), 'assets', 'shapes');
       const filePath = path.join(shapesPath, `${shapeName}.svg`);
-      if (!fs.existsSync(filePath)) {
+      const fileExists = await fs.promises.access(filePath).then(() => true).catch(() => false);
+      if (!fileExists) {
         return { success: false, error: 'Shape not found.', code: 'ERR_SHAPE_NOT_FOUND' };
       }
-      const content = fs.readFileSync(filePath, 'utf8');
+      const content = await fs.promises.readFile(filePath, 'utf8');
       return { success: true, data: content };
     } catch (err) {
       return { success: false, error: err.message, code: 'ERR_SHAPE_READ_FAILED' };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CelestialObject, CelestialObjectType, WorldShape, ElementAffinity, SizeClass } from '../../../types/astrolabe';
+import { CelestialObject, CelestialObjectType, WorldShape, ElementAffinity, SizeClass, IPhysicalBody } from '../../../types/astrolabe';
 import { ScaleManager } from '../../utils/ScaleManager';
 import { shapeManager } from '../../utils/ShapeManager';
 import { getElementColor } from '../../utils/canvasRenderer';
@@ -21,7 +21,7 @@ const elementSvgUrls: Record<string, string> = {
 };
 
 interface PhysicalBodyEditorProps {
-  obj: any;
+  obj: IPhysicalBody;
   allObjects: CelestialObject[];
   handleUpdateObject: (id: string, updated: Partial<CelestialObject>) => void;
 }

@@ -69,7 +69,14 @@ const App: React.FC = () => {
 
   // Initialize ShapeManager
   useEffect(() => {
-    shapeManager.init().then(() => setShapesLoaded(true));
+    shapeManager.init()
+      .then(() => setShapesLoaded(true))
+      .catch((err) => {
+        useSystemStore.getState().setToastMessage({
+          type: 'error',
+          text: `Shape Directory Init Failure: ${err.message || err}`
+        });
+      });
   }, []);
 
   // Auto-load last file if directory is selected and no sphere is active

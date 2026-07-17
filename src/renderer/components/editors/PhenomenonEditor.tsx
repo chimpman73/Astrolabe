@@ -1,9 +1,9 @@
 import React from 'react';
-import { CelestialObject, CelestialObjectType, WorldShape, SizeClass, ElementAffinity } from '../../../types/astrolabe';
+import { CelestialObject, CelestialObjectType, WorldShape, SizeClass, ElementAffinity, IPhenomenon } from '../../../types/astrolabe';
 import { ScaleManager } from '../../utils/ScaleManager';
 
 interface PhenomenonEditorProps {
-  obj: any;
+  obj: IPhenomenon;
   allObjects: CelestialObject[];
   handleUpdateObject: (id: string, updated: Partial<CelestialObject>) => void;
 }

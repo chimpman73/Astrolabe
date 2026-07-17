@@ -1,9 +1,9 @@
 import React from 'react';
-import { CelestialObject } from '../../../types/astrolabe';
+import { CelestialObject, IGroup } from '../../../types/astrolabe';
 import { ObjectIcon } from '../ObjectIcon';
 
 interface GroupEditorProps {
-  obj: any;
+  obj: IGroup;
   allObjects: CelestialObject[];
   handleUpdateObject: (id: string, updated: Partial<CelestialObject>) => void;
 }

@@ -15,16 +15,21 @@ class ShapeManager {
 
   public async init(): Promise<void> {
     if (this.#initialized) return;
+    if (!window.astrolabeAPI) return; // Silent return for browser web fallback
     try {
-      const response = await window.astrolabeAPI?.listShapesDirectory();
-      if (response?.success && response.data) {
+      const response = await window.astrolabeAPI.listShapesDirectory();
+      if (!response || !response.success) {
+        throw new Error(response?.error || 'Failed to list shapes directory');
+      }
+      if (response.data) {
         this.#shapeList = response.data;
         // Preload all shapes into cache
         await Promise.all(this.#shapeList.map(shape => this.#loadAndCacheShape(shape)));
       }
       this.#initialized = true;
-    } catch (e) {
+    } catch (e: any) {
       console.error('Failed to initialize ShapeManager', e);
+      throw e;
     }
   }
 

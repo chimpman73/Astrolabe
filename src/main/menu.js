@@ -101,6 +101,15 @@ function setupApplicationMenu() {
       ]
     },
     {
+      label: 'View',
+      submenu: [
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { type: 'separator' },
+        { role: 'toggleDevTools' }
+      ]
+    },
+    {
       label: 'Help',
       submenu: [
         {
