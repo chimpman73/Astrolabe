@@ -50,8 +50,12 @@ This file tracks the design, development, and integration tasks for the Astrolab
 | **AST-042** | Export & Rendering Bug Fixes | Low | `Done` | Fixed high-res export element scaling, title alignment overlaps, and group expansion state. |
 | **AST-043** | Coding Standards Compliance | High | `Done` | Refactored frontend classes to use `#` for encapsulation and strictly enforce one class per file. |
 | **AST-044** | Legend Object | High | `Done` | Implement dynamic on-canvas map legends for Planets, Orbits, and Elements. |
-| **AST-045** | Fixed Layout Template | High | `Done` | Refactored Nav Chart to use static multipliers for margins, locking parchment proportions independent of orbital objects. |
+| **AST-045** | Fixed Layout Template | High | `Done` | Refactor Nav Chart to use static multipliers for margins, locking parchment proportions independent of orbital objects. |
+| **AST-046** | Editor UI Refactor - Map Overlays & Groups | Medium | `Done` | Standardize editors configuration layout and group styling. |
+| **AST-047** | Cross-Category Rendering Order | High | `Done` | Add unified objectOrder array to enforce absolute rendering order. |
 | **AST-048** | System Time Calendar Mapping | High | `Done` | Refactor system date logic to use base Year, Day, Epoch decoupled from simulation elapsed time offsets. |
+| **AST-049** | Custom Shape Rotations & Outlines | High | `Done` | Add shapeRotation and cloud internal custom shapes with scale-independent outlines. |
+| **AST-050** | Bookmark Orbit Sharing Adjustments | High | `Done` | Fan out objects along paths, shrink cloud arc/particles, and stagger name/distance labels vertically. |
 ---
 
 ## Detailed Task Breakdown
@@ -301,3 +305,16 @@ This file tracks the design, development, and integration tasks for the Astrolab
   * Update `NavChartView` to dynamically calculate the displayed simulation date dynamically from the baseline + elapsed `currentSystemDate`.
   * Reordered Nav Chart toolbar to prioritize scrubber/animation controls.
   * Bound "Reset Timeline" to instantly snap `currentSystemDate` back to 0.
+
+### Phase 15: Rendering and Layout Adjustments
+- [x] **AST-049: Custom Shape Rotations & Outlines**
+  * Added `shapeRotation` to `ICelestialBase` for local shape rotations (degrees).
+  * Added `cloudObjectCustomShapeName` and `cloudObjectShapeRotation` to support custom shapes for cloud internal objects.
+  * Implemented scale-independent stroke widths in `BaseRenderer` and `CloudRenderer` to keep custom SVG outlines visible and crisp when scaled down.
+  * Updated UI editors (PhysicalBodyEditor, ConstellationEditor, PhenomenonEditor) to display rotation inputs side-by-side with shape selectors.
+
+- [x] **AST-050: Bookmark Orbit Sharing Adjustments**
+  * Spaced out fanned objects along the orbital path (adjusting their angle) instead of concentric shifting.
+  * Scaled cloud arcDegrees (`cloudArcScale = Math.max(0.4, 1 / groupSize)`) and matched internal objects/particles sizes and positions in Bookmark View.
+  * Staggered name and distance labels vertically in a zig-zag pattern if they are fanned closely to prevent horizontal overlapping.
+  * Positioned labels centered above (names) and below (distances) fanned bodies, and shifted the system center up dynamically to prevent clipping of the bottom label.

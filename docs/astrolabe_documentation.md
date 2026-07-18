@@ -185,8 +185,16 @@ The application saves and loads system states via JSON configuration files store
         },
         "cloudObjectShape": {
           "type": "string",
-          "enum": ["sphere", "disc", "pyramid", "cluster", "irregular", "elliptical"],
+          "enum": ["sphere", "disc", "pyramid", "cluster", "irregular", "elliptical", "rectangular", "hollow_world", "custom"],
           "description": "For cloud types: shape of objects drawn inside the cloud."
+        },
+        "cloudObjectCustomShapeName": {
+          "type": ["string", "null"],
+          "description": "For cloud types: custom shape name for internal objects."
+        },
+        "cloudObjectShapeRotation": {
+          "type": "number",
+          "description": "For cloud types: local rotation in degrees for custom internal objects."
         },
         "cloudObjectSizeClass": {
           "type": "string",
@@ -268,6 +276,10 @@ The application saves and loads system states via JSON configuration files store
         "customShapeName": {
           "type": ["string", "null"],
           "description": "The name of the custom shape/SVG (from the shapes directory) to render for this object."
+        },
+        "shapeRotation": {
+          "type": "number",
+          "description": "For objects rendering custom shapes: local rotation in degrees."
         },
         "noteDistanceAU": {
           "type": "number",
@@ -449,7 +461,14 @@ A vertical strip (fixed width 280px) displaying a radial hierarchy.
 * **Default Theme**: Defaults to **Dark Mode** for enhanced starlight contrast.
 * **Scale-to-Fit Canvas**: The canvas itself is styled with standard CSS containment (`max-width: 100%`, `max-height: 100%`, `width: auto`, `height: auto`, and `aspect-ratio: 1 / 3`), which forces it to scale down to fit whichever dimension is smaller (width or height). 
 * **Dynamic Gap Compression**: The Bookmark does not use a strict linear scale. To prevent overlapping inner planets and excessive empty outer space, it mathematically compresses large orbital gaps using a fractional power curve and enforces a minimum pixel padding between distinct orbits (exempting `Size J` mega-objects). 
-* **Shared Orbit Grouping**: If multiple bodies share the exact same orbital distance, they are fanned out horizontally along the top arc of their shared dashed orbit path to prevent overlapping icons. Name labels automatically alternate sides (pointing outward) and a single distance label is drawn for the group. Exception: If the bodies share both distance AND initial angle, they are permitted to draw directly on top of each other.
+* **Shared Orbit Grouping & Scaling**: If multiple bodies share the exact same orbital distance:
+  * They are fanned out symmetrically along the orbital arc of their shared dashed path (`alpha = -Math.PI / 2 + j * stepTheta`), keeping their exact radius `rBase` but spreading out horizontally.
+  * They are proportionally scaled down (`scaleFactor = Math.max(0.6, 1 - (groupSize - 1) * 0.1)`) so they all fit on the vertical layout.
+  * If one of them is a cloud, its `arcDegrees` (arc width) is dynamically shrunk (`cloudArcScale = Math.max(0.4, 1 / groupSize)`) and its internal objects/particles are scaled down by this factor as well, so it occupies less angular space.
+  * Fanned-out clouds center themselves correctly around their fanned angle, fanning their internal particles along with them.
+  * Labels (names and distances) are drawn centered directly above (name) and below (distance) each object's fanned-out coordinate.
+  * To resolve label overlaps in crowded orbits, names and distances are staggered vertically (raising or lowering every other one by an offset) in a zig-zag pattern.
+  * The system central object is shifted up dynamically (`bottomMargin` is increased) to leave room for its distance label ("0.00 AU") below it.
 * **Dynamic Scaling & Boundaries**:
   * If the Crystal Shell outline is **ON**, the drawing boundary `shellDistance` defaults to `2 * maxDistance` (Double) or `1.2 * maxDistance` (Relative Margin) depending on `shellBoundaryType`, centering the furthest planet on screen and allocating the top portion of the canvas to the shell and navigation metadata.
   * If the Crystal Shell outline is toggled **OFF**, the drawing boundary `shellDistance` recalibrates to `maxDistance`, scaling the furthest planet directly to the top of the canvas and distributing all planets proportionally across the full screen height (with proportional margins to prevent clipping).

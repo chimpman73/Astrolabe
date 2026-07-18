@@ -152,8 +152,11 @@ export abstract class BaseRenderer {
     }
   }
 
-  protected applyCustomShapeTransform(ctx: CanvasRenderingContext2D, customShapeName: string | undefined, x: number, y: number, size: number): number {
+  protected applyCustomShapeTransform(ctx: CanvasRenderingContext2D, customShapeName: string | undefined, x: number, y: number, size: number, shapeRotation: number = 0): number {
     ctx.translate(x, y);
+    if (shapeRotation !== 0) {
+      ctx.rotate((shapeRotation * Math.PI) / 180);
+    }
     const bounds = shapeManager.getCachedBounds(customShapeName ?? '');
     let cx = 50, cy = 50, maxDim = 100;
     if (bounds && bounds.w > 0 && bounds.h > 0) {
@@ -186,8 +189,9 @@ export abstract class BaseRenderer {
       const path = shapeManager.getCachedPath(obj.customShapeName);
       if (path) {
         ctx.save();
-        this.applyCustomShapeTransform(ctx, obj.customShapeName, x, y, size);
-        
+        const maxDim = this.applyCustomShapeTransform(ctx, obj.customShapeName, x, y, size, obj.shapeRotation);
+        const scale = (2 * size) / maxDim;
+        ctx.lineWidth = 1.5 / scale; // Ensure a clean visible stroke
         ctx.fill(path);
         ctx.stroke(path);
         ctx.restore();

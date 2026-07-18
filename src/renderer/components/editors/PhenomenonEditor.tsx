@@ -1,6 +1,7 @@
 import React from 'react';
 import { CelestialObject, CelestialObjectType, WorldShape, SizeClass, ElementAffinity, IPhenomenon } from '../../../types/astrolabe';
 import { ScaleManager } from '../../utils/ScaleManager';
+import { shapeManager } from '../../utils/ShapeManager';
 
 interface PhenomenonEditorProps {
   obj: IPhenomenon;
@@ -92,18 +93,7 @@ export const PhenomenonEditor: React.FC<PhenomenonEditorProps> = ({ obj, allObje
         </div>
       )}
 
-      <div className="editor-form-group">
-        <label>Arc Width (Degrees)</label>
-        <input
-          type="number"
-          step="1"
-          min="1"
-          max="359"
-          className="editor-input"
-          value={obj.arcDegrees ?? 30}
-          onChange={e => handleUpdateObject(id, { arcDegrees: parseFloat(e.target.value) || 30 })}
-        />
-      </div>
+
 
       <div className="editor-form-group">
         <label>Transparency & Cloudiness</label>
@@ -149,6 +139,9 @@ export const PhenomenonEditor: React.FC<PhenomenonEditorProps> = ({ obj, allObje
             <option value="cluster">⊛ Cluster</option>
             <option value="irregular">✦ Irregular</option>
             <option value="elliptical">⬭ Elliptical</option>
+            <option value="rectangular">▭ Rectangular</option>
+            <option value="hollow_world">◎ Hollow World</option>
+            <option value="custom">⚙️ Custom SVG</option>
           </select>
           <input
             type="number"
@@ -162,6 +155,36 @@ export const PhenomenonEditor: React.FC<PhenomenonEditorProps> = ({ obj, allObje
           />
         </div>
       </div>
+
+      {obj.cloudObjectShape === 'custom' && (
+        <div className="editor-form-group border-l-2 border-[var(--color-accent-gold)] pl-2 ml-1">
+          <label>Custom Shape & Rotation (Deg)</label>
+          <div style={{ display: 'flex', flexDirection: 'row', gap: '8px', width: '100%' }}>
+            <select
+              className="editor-select"
+              style={{ flex: '1 1 0%', minWidth: 0 }}
+              value={obj.cloudObjectCustomShapeName ?? ''}
+              onChange={e => handleUpdateObject(id, { cloudObjectCustomShapeName: e.target.value })}
+              title="Custom Shape Name"
+            >
+              <option value="">-- Select --</option>
+              {shapeManager.getAvailableShapes().map(shape => (
+                <option key={shape} value={shape}>{shape}</option>
+              ))}
+            </select>
+            <input
+              type="number"
+              step="any"
+              className="editor-input"
+              style={{ flex: '1 1 0%', minWidth: 0 }}
+              value={obj.cloudObjectShapeRotation ?? 0}
+              onChange={e => handleUpdateObject(id, { cloudObjectShapeRotation: parseFloat(e.target.value) || 0 })}
+              title="Shape Rotation (Degrees)"
+              placeholder="Rotation"
+            />
+          </div>
+        </div>
+      )}
 
       <div className="editor-form-group">
         <label>Internal Size Class & Size (miles)</label>
@@ -201,6 +224,19 @@ export const PhenomenonEditor: React.FC<PhenomenonEditorProps> = ({ obj, allObje
         <h5 className="font-title text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
           Orbital Mechanics
         </h5>
+      </div>
+
+      <div className="editor-form-group">
+        <label>Arc Width (Degrees)</label>
+        <input
+          type="number"
+          step="1"
+          min="1"
+          max="359"
+          className="editor-input"
+          value={obj.arcDegrees ?? 30}
+          onChange={e => handleUpdateObject(id, { arcDegrees: parseFloat(e.target.value) || 30 })}
+        />
       </div>
 
       <div className="editor-form-group">

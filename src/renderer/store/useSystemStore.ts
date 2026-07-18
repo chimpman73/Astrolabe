@@ -120,7 +120,9 @@ function migrateToV2(v1Data: any): CrystalSphere {
         cloudObjectShape: obj.cloudObjectShape,
         cloudObjectSizeClass: obj.cloudObjectSizeClass,
         cloudObjectPhysicalSize: obj.cloudObjectPhysicalSize || obj.cloudObjectSize,
-        cloudObjectDensity: obj.cloudObjectDensity
+        cloudObjectDensity: obj.cloudObjectDensity,
+        cloudObjectCustomShapeName: obj.cloudObjectCustomShapeName,
+        cloudObjectShapeRotation: obj.cloudObjectShapeRotation
       } as IPhenomenon);
     }
     else if (obj.type === 'constellation') {
@@ -137,7 +139,14 @@ function migrateToV2(v1Data: any): CrystalSphere {
         constellationFillAlpha: obj.constellationFillAlpha,
         constellationFlipX: obj.constellationFlipX,
         initialAngle: obj.initialAngle,
-        distanceOrbited: obj.distanceOrbited
+        distanceOrbited: obj.distanceOrbited,
+        orbitalPeriodDays: obj.orbitalPeriodDays,
+        orbitEccentricity: obj.orbitEccentricity,
+        orbitRotation: obj.orbitRotation,
+        isStationary: obj.isStationary,
+        orbitDirection: obj.orbitDirection,
+        affectsShellBoundary: false,
+        shapeRotation: obj.shapeRotation
       } as IConstellation);
     }
     else if (obj.type === 'note' || obj.type === 'legend') {
@@ -183,7 +192,8 @@ function migrateToV2(v1Data: any): CrystalSphere {
         branchLevels: obj.branchLevels,
         branchDensity: obj.branchDensity,
         hasLeaves: obj.hasLeaves,
-        branchBend: obj.branchBend
+        branchBend: obj.branchBend,
+        shapeRotation: obj.shapeRotation
       } as IPhysicalBody);
     }
   });

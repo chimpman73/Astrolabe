@@ -87,6 +87,9 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
       updated.arcDegrees = updated.arcDegrees ?? current.arcDegrees ?? 30;
       updated.cloudTransparency = updated.cloudTransparency ?? current.cloudTransparency ?? 0.45;
       updated.cloudiness = updated.cloudiness ?? current.cloudiness ?? 0.5;
+      updated.cloudObjectShape = updated.cloudObjectShape ?? current.cloudObjectShape ?? 'sphere';
+      updated.cloudObjectCustomShapeName = updated.cloudObjectCustomShapeName ?? current.cloudObjectCustomShapeName ?? '';
+      updated.cloudObjectShapeRotation = updated.cloudObjectShapeRotation ?? current.cloudObjectShapeRotation ?? 0;
     }
     if (updated.type === 'living_world') {
       const current = allObjects.find(o => o.id === id)!;
@@ -100,6 +103,11 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
       updated.constellationDetail = updated.constellationDetail ?? current.constellationDetail ?? 1;
       updated.constellationStarCount = updated.constellationStarCount ?? current.constellationStarCount ?? 5;
       updated.constellationFlipX = updated.constellationFlipX ?? current.constellationFlipX ?? false;
+      updated.orbitedObjectName = updated.orbitedObjectName !== undefined ? updated.orbitedObjectName : (current.orbitedObjectName ?? null);
+      updated.distanceOrbited = updated.distanceOrbited ?? current.distanceOrbited ?? 1.0;
+      updated.initialAngle = updated.initialAngle ?? current.initialAngle ?? 0;
+      updated.orbitalPeriodDays = updated.orbitalPeriodDays ?? current.orbitalPeriodDays ?? 365;
+      updated.affectsShellBoundary = false;
     }
     updateCelestialObject(id, updated);
   };
@@ -114,9 +122,9 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
     if (['star', 'planet', 'moon', 'asteroid', 'station', 'living_world', 'custom'].includes(type)) {
       newObj = { ...newObj, sizeClass: 'D', physicalSize: 1000, sizeUnit: 'miles', orbitedObjectName: null, distanceOrbited: 1.0, initialAngle: 0, orbitalPeriodDays: 365, affectsShellBoundary: true };
     } else if (type === 'cloud') {
-      newObj = { ...newObj, arcDegrees: 30, cloudTransparency: 0.45, cloudiness: 0.5, cloudObjectShape: 'sphere', cloudObjectSizeClass: 'A', cloudObjectPhysicalSize: 5, orbitedObjectName: null, distanceOrbited: 1.0, initialAngle: 0 };
+      newObj = { ...newObj, arcDegrees: 30, cloudTransparency: 0.45, cloudiness: 0.5, cloudObjectShape: 'sphere', cloudObjectSizeClass: 'A', cloudObjectPhysicalSize: 5, orbitedObjectName: null, distanceOrbited: 1.0, initialAngle: 0, cloudObjectCustomShapeName: '', cloudObjectShapeRotation: 0 };
     } else if (type === 'constellation') {
-      newObj = { ...newObj, arcDegrees: 30, customShapeName: 'Aries', constellationFillAlpha: 0.2, constellationStyle: 'internal', constellationDetail: 1, constellationStarCount: 5, constellationStarMinSizeClass: 'A', constellationStarMaxSizeClass: 'C' };
+      newObj = { ...newObj, arcDegrees: 30, customShapeName: 'Aries', constellationFillAlpha: 0.2, constellationStyle: 'internal', constellationDetail: 1, constellationStarCount: 5, constellationStarMinSizeClass: 'A', constellationStarMaxSizeClass: 'C', orbitedObjectName: null, distanceOrbited: 1.0, initialAngle: 0, orbitalPeriodDays: 365, affectsShellBoundary: false };
     } else if (type === 'note' || type === 'legend') {
       newObj = { ...newObj, noteDistanceAU: 0, noteAngle: 0, noteFontSize: 16 };
       if (type === 'note') newObj.noteMaxWidth = 120;
@@ -366,7 +374,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                   <div className="editor-card-body">
                     
                     <div className="flex items-center gap-4 mb-3">
-                      {obj.type !== 'group' && obj.type !== 'note' && obj.type !== 'legend' && (
+                      {obj.type !== 'group' && obj.type !== 'note' && obj.type !== 'legend' && obj.type !== 'constellation' && (
                         <div className="flex items-center gap-2 cursor-pointer">
                           <input 
                             type="checkbox"
@@ -412,7 +420,7 @@ export const SaveManager: React.FC<SaveManagerProps> = ({ onCollapse }) => {
                       <PhenomenonEditor obj={obj as IPhenomenon} allObjects={allObjects} handleUpdateObject={handleUpdateObject} />
                     )}
                     {obj.type === 'constellation' && (
-                      <ConstellationEditor obj={obj as IConstellation} handleUpdateObject={handleUpdateObject} />
+                      <ConstellationEditor obj={obj as IConstellation} allObjects={allObjects} handleUpdateObject={handleUpdateObject} />
                     )}
                     {['note', 'legend'].includes(obj.type) && (
                       <MapOverlayEditor obj={obj as IMapOverlay} handleUpdateObject={handleUpdateObject} />

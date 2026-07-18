@@ -14,7 +14,7 @@ export class StarRenderer extends BaseRenderer {
     ctx.globalAlpha = cAlpha;
     
       if (customPath instanceof Path2D) {
-        const maxDim = this.applyCustomShapeTransform(ctx, obj.customShapeName, x, y, size * cSize);
+        const maxDim = this.applyCustomShapeTransform(ctx, obj.customShapeName, x, y, size * cSize, obj.shapeRotation);
       
       const expansion = (cSize - 1) * maxDim / 2;
       ctx.lineWidth = expansion * 2;

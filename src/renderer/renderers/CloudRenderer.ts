@@ -1,7 +1,7 @@
 import { BaseRenderer } from './BaseRenderer';
 import { RenderContext } from '../../types/renderer';
 import { ScaleManager } from '../utils/ScaleManager';
-
+import { shapeManager } from '../utils/ShapeManager';
 import { PRNG } from '../utils/PRNG';
 
 export class CloudRenderer extends BaseRenderer {
@@ -57,8 +57,10 @@ export class CloudRenderer extends BaseRenderer {
       const cloudW = bookmarkR * halfAngle * 2;
       const numSegments = Math.max(100, Math.floor(cloudW));
 
+      const centerAlpha = orbitAngle !== undefined ? orbitAngle * (Math.PI / 180) : 1.5 * Math.PI;
+
       this.drawCloudArc(ctx, numSegments, isFullRing, amp, numBumps, false, (nx, envelope, bump) => {
-        const alpha = 1.5 * Math.PI + nx * halfAngle;
+        const alpha = centerAlpha + nx * halfAngle;
         const currentR = bookmarkR + halfH * envelope * bump;
         return {
           x: parentX + currentR * Math.cos(alpha),
@@ -67,7 +69,7 @@ export class CloudRenderer extends BaseRenderer {
       });
       
       this.drawCloudArc(ctx, numSegments, isFullRing, amp, numBumps, true, (nx, envelope, bump) => {
-        const alpha = 1.5 * Math.PI + nx * halfAngle;
+        const alpha = centerAlpha + nx * halfAngle;
         const currentR = Math.max(0, bookmarkR - halfH * envelope * bump);
         return {
           x: parentX + currentR * Math.cos(alpha),
@@ -118,7 +120,10 @@ export class CloudRenderer extends BaseRenderer {
       
       let scaledBaseSize = 0;
       if (isBookmarkView) {
-        scaledBaseSize = ScaleManager.getBookmarkVisualRadius(baseSizeClass) * (bookmarkWidth ? bookmarkWidth / 300 : 1);
+        const baseCloudSize = ScaleManager.getBookmarkVisualRadius(obj.sizeClass || 'D') * (bookmarkWidth ? bookmarkWidth / 300 : 1);
+        const scaleFactor = size / Math.max(1, baseCloudSize);
+        const cloudArcScale = (obj as any).cloudArcScale ?? 1;
+        scaledBaseSize = ScaleManager.getBookmarkVisualRadius(baseSizeClass) * (bookmarkWidth ? bookmarkWidth / 300 : 1) * scaleFactor * cloudArcScale;
       } else {
         scaledBaseSize = ScaleManager.getNavChartVisualRadius(baseSizeClass, basePhysicalSize, 'miles', context.zoom || 1);
         if (context.isExport) {
@@ -136,7 +141,10 @@ export class CloudRenderer extends BaseRenderer {
         const rndAngleFrac = (rng.next() * 2) - 1; // -1 to 1
         const rndRadFrac = (rng.next() * 2) - 1; // -1 to 1
         
-        const s = Math.max(0.5, scaledBaseSize * (0.7 + rng.next() * 0.6));
+        let s = Math.max(0.5, scaledBaseSize * (0.7 + rng.next() * 0.6));
+        if (objShape === 'custom') {
+          s = Math.max(3, s); // Enforce minimum radius of 3px for custom shapes so they are visible
+        }
 
         let cx = 0;
         let cy = 0;
@@ -144,13 +152,14 @@ export class CloudRenderer extends BaseRenderer {
         if (isBookmarkView) {
           if (bookmarkWidth === undefined || bookmarkCenterY === undefined || bookmarkR === undefined || parentX === undefined) continue;
           
+          const centerAlpha = orbitAngle !== undefined ? orbitAngle * (Math.PI / 180) : 1.5 * Math.PI;
           const halfAngle = Math.min(Math.PI / 2, (arcDegrees / 2) * (Math.PI / 180));
           
           const nx = rndAngleFrac;
           const envelope = isFullRing ? 1 : (1 - nx * nx);
           const bump = (1 - amp) + amp * Math.cos(nx * Math.PI * numBumps);
           
-          const alpha = 1.5 * Math.PI + nx * halfAngle;
+          const alpha = centerAlpha + nx * halfAngle;
           const rDelta = halfH * envelope * bump;
           const currentR = bookmarkR + rndRadFrac * rDelta;
           
@@ -170,6 +179,21 @@ export class CloudRenderer extends BaseRenderer {
           
           cx = parentX + rPos * Math.cos(angle);
           cy = parentY + rPos * Math.sin(angle);
+        }
+
+        if (objShape === 'custom' && obj.cloudObjectCustomShapeName) {
+          const path = shapeManager.getCachedPath(obj.cloudObjectCustomShapeName);
+          if (path) {
+            ctx.save();
+            const particleRotationDeg = (obj.cloudObjectShapeRotation || 0) + (rndRot * 180 / Math.PI);
+            const maxDim = this.applyCustomShapeTransform(ctx, obj.cloudObjectCustomShapeName, cx, cy, s, particleRotationDeg);
+            const scale = (2 * s) / maxDim;
+            ctx.lineWidth = (isBookmarkView ? 1 : 1.5) / scale; // Ensure a clean visible stroke
+            ctx.fill(path);
+            ctx.stroke(path);
+            ctx.restore();
+            continue;
+          }
         }
 
         ctx.save();

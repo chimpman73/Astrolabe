@@ -2,7 +2,7 @@
   "version": 2,
   "sphereName": "Pillarspace",
   "currentCampaignDate": "2026-07-15",
-  "currentSystemDate": 10918,
+  "currentSystemDate": 44,
   "groups": [
     {
       "id": "1784087146186",
@@ -28,11 +28,15 @@
       "distanceOrbited": 0,
       "initialAngle": 0,
       "orbitalPeriodDays": 0,
-      "affectsShellBoundary": true,
+      "affectsShellBoundary": false,
       "elementAffinity": "fire",
-      "worldShape": "elliptical",
+      "worldShape": "custom",
       "isStationary": true,
-      "groupId": "1784087146186"
+      "groupId": "1784087146186",
+      "customShapeName": "pillar",
+      "coronaAlpha": 0.3,
+      "coronaSize": 1.2,
+      "shapeRotation": 90
     },
     {
       "id": "1784079734210",
@@ -88,7 +92,7 @@
       "arcDegrees": 15,
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
-      "cloudObjectShape": "sphere",
+      "cloudObjectShape": "custom",
       "cloudObjectSizeClass": "I",
       "cloudObjectPhysicalSize": 500000,
       "orbitedObjectName": "The Pillar",
@@ -99,9 +103,11 @@
       "sizeClass": "J",
       "sizeUnit": "AU",
       "physicalSize": 1,
-      "cloudObjectDensity": 0,
+      "cloudObjectDensity": 5,
       "isStationary": true,
-      "groupId": "1784087146186"
+      "groupId": "1784087146186",
+      "cloudObjectCustomShapeName": "pillar",
+      "cloudObjectShapeRotation": 0
     },
     {
       "id": "1784080132897",
@@ -131,7 +137,7 @@
       "arcDegrees": 15,
       "cloudTransparency": 0.45,
       "cloudiness": 0.5,
-      "cloudObjectShape": "sphere",
+      "cloudObjectShape": "custom",
       "cloudObjectSizeClass": "I",
       "cloudObjectPhysicalSize": 500000,
       "orbitedObjectName": "The Pillar",
@@ -143,10 +149,33 @@
       "sizeUnit": "AU",
       "physicalSize": 1,
       "isStationary": true,
-      "groupId": "1784087146186"
+      "groupId": "1784087146186",
+      "cloudObjectDensity": 4,
+      "cloudObjectCustomShapeName": "pillar"
     }
   ],
-  "constellations": [],
+  "constellations": [
+    {
+      "id": "1784267140465",
+      "name": "Pillar test constellation",
+      "type": "constellation",
+      "arcDegrees": 10,
+      "customShapeName": "pillar",
+      "constellationFillAlpha": 0.2,
+      "constellationStyle": "outline",
+      "constellationDetail": 20,
+      "constellationStarCount": 10,
+      "constellationStarMinSizeClass": "D",
+      "constellationStarMaxSizeClass": "G",
+      "orbitedObjectName": null,
+      "distanceOrbited": 23,
+      "initialAngle": 90,
+      "orbitalPeriodDays": 0,
+      "affectsShellBoundary": true,
+      "isStationary": true,
+      "shapeRotation": 17
+    }
+  ],
   "mapOverlays": [],
   "orbitalDrawStrength": 3,
   "navChartPlanetSizeOffset": 3,
@@ -159,7 +188,8 @@
     "1784080126366",
     "1784080132897",
     "1784080134938",
-    "1784087146186"
+    "1784087146186",
+    "1784267140465"
   ],
   "campaignYear": 1000,
   "campaignDay": 1,

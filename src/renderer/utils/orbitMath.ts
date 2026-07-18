@@ -185,7 +185,7 @@ export function calculateSystemPositions(
     let orbitRotation = 0;
 
     // Type guard / extraction
-    if ('distanceOrbited' in obj) {
+    if ('distanceOrbited' in obj || obj.type === 'constellation') {
       distanceOrbited = obj.distanceOrbited ?? 0;
       initialAngle = obj.initialAngle ?? 0;
       orbitalPeriodDays = (obj as any).orbitalPeriodDays ?? 0;

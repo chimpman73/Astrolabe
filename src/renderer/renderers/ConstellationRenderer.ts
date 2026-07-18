@@ -25,6 +25,9 @@ export class ConstellationRenderer extends BaseRenderer {
     
     ctx.save();
     ctx.translate(x, y);
+    if (obj.shapeRotation) {
+      ctx.rotate((obj.shapeRotation * Math.PI) / 180);
+    }
     
     const detail = obj.constellationDetail || 1;
     const starCount = obj.constellationStarCount ?? 5;

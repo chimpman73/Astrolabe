@@ -40,6 +40,7 @@ export interface ICelestialBase {
   elementAffinity?: ElementAffinity | null;
   worldShape?: WorldShape;
   customShapeName?: string;
+  shapeRotation?: number;
   hasLeaves?: boolean;
   branchLevels?: number;
   branchDensity?: number;
@@ -52,6 +53,8 @@ export interface ICelestialBase {
   cloudObjectSizeClass?: SizeClass;
   cloudObjectPhysicalSize?: number;
   cloudObjectDensity?: number;
+  cloudObjectCustomShapeName?: string;
+  cloudObjectShapeRotation?: number;
   arcDegrees?: number;
   constellationDetail?: number;
   constellationStarCount?: number;
@@ -120,6 +123,8 @@ export interface IPhenomenon extends ICelestialBase {
   cloudObjectSizeClass?: SizeClass;
   cloudObjectPhysicalSize?: number;
   cloudObjectDensity?: number;
+  cloudObjectCustomShapeName?: string;
+  cloudObjectShapeRotation?: number;
 }
 
 export interface IConstellation extends ICelestialBase {

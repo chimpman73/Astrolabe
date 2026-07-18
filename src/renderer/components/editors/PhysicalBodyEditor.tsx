@@ -194,19 +194,32 @@ export const PhysicalBodyEditor: React.FC<PhysicalBodyEditorProps> = ({ obj, all
           </div>
 
           {obj.worldShape === 'custom' && (
-            <div className="editor-form-group flex-1">
-              <label>Custom Shape</label>
-              <select
-                className="editor-select"
-                value={obj.customShapeName ?? ''}
-                onChange={e => handleUpdateObject(id, { customShapeName: e.target.value })}
-              >
-                <option value="">-- Select --</option>
-                {shapeManager.getAvailableShapes().map(shape => (
-                  <option key={shape} value={shape}>{shape}</option>
-                ))}
-              </select>
-            </div>
+            <>
+              <div className="editor-form-group flex-1">
+                <label>Custom Shape</label>
+                <select
+                  className="editor-select"
+                  value={obj.customShapeName ?? ''}
+                  onChange={e => handleUpdateObject(id, { customShapeName: e.target.value })}
+                >
+                  <option value="">-- Select --</option>
+                  {shapeManager.getAvailableShapes().map(shape => (
+                    <option key={shape} value={shape}>{shape}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="editor-form-group flex-1">
+                <label>Shape Rotation (Deg)</label>
+                <input
+                  type="number"
+                  step="any"
+                  className="editor-input"
+                  value={obj.shapeRotation ?? 0}
+                  onChange={e => handleUpdateObject(id, { shapeRotation: parseFloat(e.target.value) || 0 })}
+                  title="Shape Rotation (Degrees)"
+                />
+              </div>
+            </>
           )}
         </div>
       )}
