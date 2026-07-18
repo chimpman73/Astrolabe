@@ -15,7 +15,7 @@ export class OutlineStrategy implements IConstellationStrategy {
     const totalLength = pathEl.getTotalLength();
     
     const points: ConstellationPoint[] = [];
-    const steps = Math.max(2, detailLevel);
+    const steps = detailLevel * 5;
     const stepLength = totalLength / steps;
     
     for (let i = 0; i <= steps; i++) {
