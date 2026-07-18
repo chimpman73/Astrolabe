@@ -53,6 +53,16 @@ class ShapeManager {
     return this.#pathCache.get(shapeName) || null;
   }
 
+  public getCachedPathData(shapeName: string): string | null {
+    if (!shapeName) return null;
+    return this.#stringCache.get(shapeName) || null;
+  }
+
+  public getCachedSkeleton(shapeName: string): any | null {
+    if (!shapeName) return null;
+    return this.#skeletonCache.get(shapeName) || null;
+  }
+
   public getCachedBounds(shapeName: string): {x: number, y: number, w: number, h: number} | null {
     if (!shapeName) return null;
     if (this.#boundsCache.has(shapeName)) {

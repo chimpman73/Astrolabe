@@ -50,6 +50,7 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
   const [selectedShapeToEdit, setSelectedShapeToEdit] = useState<string | null>(null);
 
   // Canvas refs
+  const silhouetteCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const outlineCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const constellationCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -214,12 +215,25 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
   // Edit / Load existing shape
   const handleEditShapeSelect = async (name: string) => {
     try {
+      setSelectedShapeToEdit(name);
+      setShapeName(name);
+
+      // 1. Try to load from ShapeManager memory cache first (instant!)
+      const cachedPathData = shapeManager.getCachedPathData(name);
+      const cachedSkeleton = shapeManager.getCachedSkeleton(name);
+
+      if (cachedPathData && cachedSkeleton) {
+        const reconstructedSvg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="${cachedPathData}" fill="white" /></svg>`;
+        setTracedSvgContent(reconstructedSvg);
+        setTracedSkeletonData(cachedSkeleton);
+        setStep('preview-save');
+        return;
+      }
+
+      // 2. Fallback to IPC
       if (!window.astrolabeAPI?.loadShape || !window.astrolabeAPI?.loadShapeSkeleton) {
         throw new Error('Load shape APIs not available.');
       }
-
-      setSelectedShapeToEdit(name);
-      setShapeName(name);
 
       const shapeRes = await window.astrolabeAPI.loadShape(name);
       const skelRes = await window.astrolabeAPI.loadShapeSkeleton(name);
@@ -236,6 +250,41 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
       }
     } catch (err: any) {
       setToastMessage({ type: 'error', text: `Load error: ${err.message || err}` });
+    }
+  };
+
+  // Recreate black-and-white silhouette base64 image from SVG path, and go back to configure-generate
+  const handleRedoTrace = () => {
+    if (!tracedSvgContent) return;
+    
+    try {
+      const pathData = getPathData(tracedSvgContent);
+      if (!pathData) throw new Error('SVG path data not found.');
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 500;
+      canvas.height = 500;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#000000'; // black background
+        ctx.fillRect(0, 0, 500, 500);
+        
+        ctx.save();
+        ctx.scale(5, 5); // 100x100 -> 500x500
+        ctx.fillStyle = '#ffffff'; // white foreground silhouette
+        ctx.fill(new Path2D(pathData));
+        ctx.restore();
+
+        const base64Image = canvas.toDataURL('image/png').replace(/^data:image\/png;base64,/, '');
+        setImageBase64(base64Image);
+        setSourceFilename('recreated_silhouette.png');
+        setSourceType('upload');
+        setStep('configure-generate');
+      } else {
+        throw new Error('Canvas 2D context not available.');
+      }
+    } catch (err: any) {
+      setToastMessage({ type: 'error', text: `Failed to redo trace: ${err.message || err}` });
     }
   };
 
@@ -267,7 +316,11 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
   // Extract path data from SVG string
   const getPathData = (svgStr: string | null): string | null => {
     if (!svgStr) return null;
-    const match = svgStr.match(/<path[^>]*d="([^"]+)"/i);
+    const trimmed = svgStr.trim();
+    if (!trimmed.startsWith('<')) {
+      return trimmed;
+    }
+    const match = trimmed.match(/<path[^>]*d="([^"]+)"/i);
     return (match && match[1]) ? match[1] : null;
   };
 
@@ -282,7 +335,32 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
     const outlineStrategy = new OutlineStrategy();
     const outlineData = outlineStrategy.generate(pathData, path2d, selectedLOD, 'preview_seed');
 
-    // 1. Render Outline Canvas
+    // 1. Render Solid Silhouette Canvas
+    const silhouetteCanvas = silhouetteCanvasRef.current;
+    if (silhouetteCanvas) {
+      const ctx = silhouetteCanvas.getContext('2d');
+      if (ctx) {
+        const w = silhouetteCanvas.width;
+        const h = silhouetteCanvas.height;
+        ctx.clearRect(0, 0, w, h);
+        
+        // Space background
+        ctx.fillStyle = '#0f172a'; // space color
+        ctx.fillRect(0, 0, w, h);
+
+        // Draw path standard scale
+        ctx.save();
+        ctx.translate(20, 20); // 20px padding
+        ctx.scale(1.6, 1.6);  // 100x100 -> 160x160
+        ctx.fillStyle = 'rgba(224, 202, 166, 0.95)'; // parchment body color
+        ctx.shadowColor = 'rgba(255, 215, 0, 0.4)';
+        ctx.shadowBlur = 10;
+        ctx.fill(path2d);
+        ctx.restore();
+      }
+    }
+
+    // 2. Render Outline Canvas
     const outlineCanvas = outlineCanvasRef.current;
     if (outlineCanvas) {
       const ctx = outlineCanvas.getContext('2d');
@@ -330,7 +408,7 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
       }
     }
 
-    // 2. Render Constellation Canvas
+    // 3. Render Constellation Canvas
     const constellationCanvas = constellationCanvasRef.current;
     if (constellationCanvas && tracedSkeletonData) {
       const ctx = constellationCanvas.getContext('2d');
@@ -676,43 +754,66 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
                 )}
               </div>
 
-              {/* 2-Column Previews */}
-              <div className="grid grid-cols-2 gap-6">
+              {/* 3 Previews Layout */}
+              <div className="space-y-4">
                 
-                {/* Column Left: Outline Preview */}
-                <div className="space-y-2 text-center">
+                {/* Row 1: Vector Silhouette Preview (Centered) */}
+                <div className="space-y-1.5 text-center max-w-[210px] mx-auto">
                   <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]">
-                    Constellation Outline (LOD {selectedLOD})
+                    Vector Silhouette Outline
                   </span>
                   <div className="border border-[var(--color-border-parchment)] bg-[#0f172a] rounded overflow-hidden p-1 flex justify-center shadow-lg">
                     <canvas 
-                      ref={outlineCanvasRef}
+                      ref={silhouetteCanvasRef}
                       width={200}
                       height={200}
                       className="max-w-full aspect-square bg-[#0f172a]"
                     />
                   </div>
-                  <span className="text-[10px] text-[var(--color-text-muted)] block leading-relaxed px-2">
-                    Samples stars and edges along the boundary path outline. Used for the 'outline' constellation style.
+                  <span className="text-[9px] text-[var(--color-text-muted)] block leading-tight">
+                    Solid rendering used for custom planets, stations, or sargasso clouds on the Navigation Map.
                   </span>
                 </div>
 
-                {/* Column Right: Constellation Skeleton Preview */}
-                <div className="space-y-2 text-center">
-                  <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]">
-                    Constellation Internal (LOD {selectedLOD})
-                  </span>
-                  <div className="border border-[var(--color-border-parchment)] bg-[#0f172a] rounded overflow-hidden p-1 flex justify-center shadow-lg">
-                    <canvas 
-                      ref={constellationCanvasRef}
-                      width={200}
-                      height={200}
-                      className="max-w-full aspect-square bg-[#0f172a]"
-                    />
+                {/* Row 2: Two LOD Preview Columns */}
+                <div className="grid grid-cols-2 gap-6">
+                  
+                  {/* Column Left: Outline Preview */}
+                  <div className="space-y-2 text-center">
+                    <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]">
+                      Constellation Outline (LOD {selectedLOD})
+                    </span>
+                    <div className="border border-[var(--color-border-parchment)] bg-[#0f172a] rounded overflow-hidden p-1 flex justify-center shadow-lg">
+                      <canvas 
+                        ref={outlineCanvasRef}
+                        width={200}
+                        height={200}
+                        className="max-w-full aspect-square bg-[#0f172a]"
+                      />
+                    </div>
+                    <span className="text-[10px] text-[var(--color-text-muted)] block leading-relaxed px-2">
+                      Samples stars and edges along the boundary path outline. Used for the 'outline' constellation style.
+                    </span>
                   </div>
-                  <span className="text-[10px] text-[var(--color-text-muted)] block leading-relaxed px-2">
-                    Samples stars and edges inside the shape body. Used for the 'internal' constellation style.
-                  </span>
+
+                  {/* Column Right: Constellation Skeleton Preview */}
+                  <div className="space-y-2 text-center">
+                    <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]">
+                      Constellation Internal (LOD {selectedLOD})
+                    </span>
+                    <div className="border border-[var(--color-border-parchment)] bg-[#0f172a] rounded overflow-hidden p-1 flex justify-center shadow-lg">
+                      <canvas 
+                        ref={constellationCanvasRef}
+                        width={200}
+                        height={200}
+                        className="max-w-full aspect-square bg-[#0f172a]"
+                      />
+                    </div>
+                    <span className="text-[10px] text-[var(--color-text-muted)] block leading-relaxed px-2">
+                      Samples stars and edges inside the shape body. Used for the 'internal' constellation style.
+                    </span>
+                  </div>
+
                 </div>
 
               </div>
@@ -738,6 +839,13 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
 
               {/* Save actions */}
               <div className="flex justify-end gap-2 pt-2">
+                <button
+                  onClick={handleRedoTrace}
+                  className="px-4 py-2 border border-[var(--color-border-parchment)] text-[var(--color-accent-gold)] hover:bg-[var(--color-bg-base)] transition-colors rounded uppercase font-bold text-[10px] tracking-wider"
+                  title="Recreate silhouette image and adjust tracing settings"
+                >
+                  Redo / Adjust Parameters
+                </button>
                 <button
                   onClick={onClose}
                   className="px-4 py-2 border border-[var(--color-border-parchment)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-base)] transition-colors rounded uppercase font-bold text-[10px] tracking-wider"
