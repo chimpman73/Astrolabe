@@ -351,7 +351,7 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
         // Draw path standard scale
         ctx.save();
         ctx.translate(20, 20); // 20px padding
-        ctx.scale(1.6, 1.6);  // 100x100 -> 160x160
+        ctx.scale(1.4, 1.4);  // 100x100 -> 140x140
         ctx.fillStyle = 'rgba(224, 202, 166, 0.95)'; // parchment body color
         ctx.shadowColor = 'rgba(255, 215, 0, 0.4)';
         ctx.shadowBlur = 10;
@@ -378,16 +378,16 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
         ctx.setLineDash([2, 3]);
         for (const edge of outlineData.edges || []) {
           ctx.beginPath();
-          ctx.moveTo(edge.p1.x * 1.6 + 20, edge.p1.y * 1.6 + 20);
-          ctx.lineTo(edge.p2.x * 1.6 + 20, edge.p2.y * 1.6 + 20);
+          ctx.moveTo(edge.p1.x * 1.4 + 20, edge.p1.y * 1.4 + 20);
+          ctx.lineTo(edge.p2.x * 1.4 + 20, edge.p2.y * 1.4 + 20);
           ctx.stroke();
         }
 
         // Draw star nodes
         ctx.setLineDash([]);
         for (const pt of outlineData.points || []) {
-          const cx = pt.x * 1.6 + 20;
-          const cy = pt.y * 1.6 + 20;
+          const cx = pt.x * 1.4 + 20;
+          const cy = pt.y * 1.4 + 20;
 
           // Radial glow
           const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 6);
@@ -427,16 +427,16 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
         ctx.setLineDash([2, 3]);
         for (const edge of lodData.edges || []) {
           ctx.beginPath();
-          ctx.moveTo(edge.p1.x * 1.6 + 20, edge.p1.y * 1.6 + 20);
-          ctx.lineTo(edge.p2.x * 1.6 + 20, edge.p2.y * 1.6 + 20);
+          ctx.moveTo(edge.p1.x * 1.4 + 20, edge.p1.y * 1.4 + 20);
+          ctx.lineTo(edge.p2.x * 1.4 + 20, edge.p2.y * 1.4 + 20);
           ctx.stroke();
         }
 
         // Draw star nodes
         ctx.setLineDash([]);
         for (const pt of lodData.points || []) {
-          const cx = pt.x * 1.6 + 20;
-          const cy = pt.y * 1.6 + 20;
+          const cx = pt.x * 1.4 + 20;
+          const cy = pt.y * 1.4 + 20;
 
           // Radial glow
           const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 6);
@@ -460,7 +460,7 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-[var(--color-bg-panel)] border-2 border-double border-[var(--color-border-parchment)] w-full max-w-2xl rounded-lg shadow-2xl flex flex-col max-h-[90vh] text-[var(--color-text-main)] overflow-hidden">
+      <div className="bg-[var(--color-bg-panel)] border-2 border-double border-[var(--color-border-parchment)] w-full max-w-4xl rounded-lg shadow-2xl flex flex-col max-h-[90vh] text-[var(--color-text-main)] overflow-hidden">
         
         {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-[var(--color-border-parchment)] px-6 py-4 bg-black/20">
@@ -754,66 +754,61 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
                 )}
               </div>
 
-              {/* 3 Previews Layout */}
-              <div className="space-y-4">
+              {/* 3-Column Previews Layout (Side-by-Side) */}
+              <div className="grid grid-cols-3 gap-4">
                 
-                {/* Row 1: Vector Silhouette Preview (Centered) */}
-                <div className="space-y-1.5 text-center max-w-[210px] mx-auto">
+                {/* Column 1: Vector Silhouette Preview */}
+                <div className="space-y-1.5 text-center">
                   <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]">
-                    Vector Silhouette Outline
+                    Vector Silhouette
                   </span>
                   <div className="border border-[var(--color-border-parchment)] bg-[#0f172a] rounded overflow-hidden p-1 flex justify-center shadow-lg">
                     <canvas 
                       ref={silhouetteCanvasRef}
-                      width={200}
-                      height={200}
+                      width={180}
+                      height={180}
                       className="max-w-full aspect-square bg-[#0f172a]"
                     />
                   </div>
-                  <span className="text-[9px] text-[var(--color-text-muted)] block leading-tight">
-                    Solid rendering used for custom planets, stations, or sargasso clouds on the Navigation Map.
+                  <span className="text-[9px] text-[var(--color-text-muted)] block leading-tight px-1">
+                    Solid rendering used for custom planets, stations, or sargasso clouds.
                   </span>
                 </div>
 
-                {/* Row 2: Two LOD Preview Columns */}
-                <div className="grid grid-cols-2 gap-6">
-                  
-                  {/* Column Left: Outline Preview */}
-                  <div className="space-y-2 text-center">
-                    <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]">
-                      Constellation Outline (LOD {selectedLOD})
-                    </span>
-                    <div className="border border-[var(--color-border-parchment)] bg-[#0f172a] rounded overflow-hidden p-1 flex justify-center shadow-lg">
-                      <canvas 
-                        ref={outlineCanvasRef}
-                        width={200}
-                        height={200}
-                        className="max-w-full aspect-square bg-[#0f172a]"
-                      />
-                    </div>
-                    <span className="text-[10px] text-[var(--color-text-muted)] block leading-relaxed px-2">
-                      Samples stars and edges along the boundary path outline. Used for the 'outline' constellation style.
-                    </span>
+                {/* Column 2: Outline Preview */}
+                <div className="space-y-1.5 text-center">
+                  <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]">
+                    Constellation Outline (LOD {selectedLOD})
+                  </span>
+                  <div className="border border-[var(--color-border-parchment)] bg-[#0f172a] rounded overflow-hidden p-1 flex justify-center shadow-lg">
+                    <canvas 
+                      ref={outlineCanvasRef}
+                      width={180}
+                      height={180}
+                      className="max-w-full aspect-square bg-[#0f172a]"
+                    />
                   </div>
+                  <span className="text-[9px] text-[var(--color-text-muted)] block leading-tight px-1">
+                    Samples stars and edges along the boundary path outline.
+                  </span>
+                </div>
 
-                  {/* Column Right: Constellation Skeleton Preview */}
-                  <div className="space-y-2 text-center">
-                    <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]">
-                      Constellation Internal (LOD {selectedLOD})
-                    </span>
-                    <div className="border border-[var(--color-border-parchment)] bg-[#0f172a] rounded overflow-hidden p-1 flex justify-center shadow-lg">
-                      <canvas 
-                        ref={constellationCanvasRef}
-                        width={200}
-                        height={200}
-                        className="max-w-full aspect-square bg-[#0f172a]"
-                      />
-                    </div>
-                    <span className="text-[10px] text-[var(--color-text-muted)] block leading-relaxed px-2">
-                      Samples stars and edges inside the shape body. Used for the 'internal' constellation style.
-                    </span>
+                {/* Column 3: Constellation Skeleton Preview */}
+                <div className="space-y-1.5 text-center">
+                  <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]">
+                    Constellation Internal (LOD {selectedLOD})
+                  </span>
+                  <div className="border border-[var(--color-border-parchment)] bg-[#0f172a] rounded overflow-hidden p-1 flex justify-center shadow-lg">
+                    <canvas 
+                      ref={constellationCanvasRef}
+                      width={180}
+                      height={180}
+                      className="max-w-full aspect-square bg-[#0f172a]"
+                    />
                   </div>
-
+                  <span className="text-[9px] text-[var(--color-text-muted)] block leading-tight px-1">
+                    Samples stars and edges inside the shape body.
+                  </span>
                 </div>
 
               </div>
