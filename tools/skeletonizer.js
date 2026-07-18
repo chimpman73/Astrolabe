@@ -196,7 +196,14 @@ function decimateGraph(graph, targetNodes) {
     return { points: finalPoints, edges: finalEdges };
 }
 
-async function generateSkeletonData(jimpImg) {
+async function generateSkeletonData(jimpImgOrBuffer) {
+    let jimpImg;
+    if (Buffer.isBuffer(jimpImgOrBuffer)) {
+        jimpImg = await Jimp.read(jimpImgOrBuffer);
+    } else {
+        jimpImg = jimpImgOrBuffer;
+    }
+
     // 1. Scale down and pad to 100x100
     const scaled = jimpImg.clone().contain(100, 100);
     

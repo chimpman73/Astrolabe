@@ -148,7 +148,7 @@ class ShapeGeneratorService {
         ]
       });
 
-      const skeletonData = await generateSkeletonData(jimpImg);
+      const skeletonData = await generateSkeletonData(buffer);
 
       return {
         success: true,
