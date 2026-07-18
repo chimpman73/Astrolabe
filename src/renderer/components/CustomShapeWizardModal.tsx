@@ -265,12 +265,12 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
       canvas.height = 500;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.fillStyle = '#000000'; // black background
+        ctx.fillStyle = '#ffffff'; // white background
         ctx.fillRect(0, 0, 500, 500);
         
         ctx.save();
         ctx.scale(5, 5); // 100x100 -> 500x500
-        ctx.fillStyle = '#ffffff'; // white foreground silhouette
+        ctx.fillStyle = '#000000'; // black foreground silhouette
         ctx.fill(new Path2D(pathData));
         ctx.restore();
 

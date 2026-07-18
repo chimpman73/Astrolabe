@@ -86,10 +86,13 @@ function extractGraph(grid, width, height) {
 
 function decimateGraph(graph, targetNodes) {
     let { points, edges } = graph;
+    if (!points || points.length === 0) {
+        return { points: [], edges: [] };
+    }
     
     // Ensure points have an edges Set
     let nodes = points.map((p, i) => ({ id: i, x: p.x, y: p.y, edges: new Set(p.edges || []) }));
-    if (!points[0].edges) {
+    if (!points[0] || !points[0].edges) {
         for (let e of edges) {
             let u = points.indexOf(e.p1);
             let v = points.indexOf(e.p2);
@@ -202,13 +205,41 @@ async function generateSkeletonData(jimpImg) {
     const height = 100;
     const grid = new Uint8Array(width * height);
     
+    // Auto-detect if background is light or dark by checking the four corners
+    let darkCorners = 0;
+    let lightCorners = 0;
+    const corners = [
+      [0, 0],
+      [width - 1, 0],
+      [0, height - 1],
+      [width - 1, height - 1]
+    ];
+    for (const [cx, cy] of corners) {
+      const hex = scaled.getPixelColor(cx, cy);
+      const rgba = Jimp.intToRGBA(hex);
+      if (rgba.a > 128) {
+        if (rgba.r < 128 || rgba.g < 128 || rgba.b < 128) {
+          darkCorners++;
+        } else {
+          lightCorners++;
+        }
+      }
+    }
+    
+    // If corners are mostly dark, we assume a dark background (and thus light foreground)
+    const isDarkBackground = darkCorners > lightCorners;
+
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
             const hex = scaled.getPixelColor(x, y);
             const rgba = Jimp.intToRGBA(hex);
-            // Black pixels are foreground (skeletonized)
-            if (rgba.a > 128 && (rgba.r < 128 || rgba.g < 128 || rgba.b < 128)) {
-                grid[y * width + x] = 1;
+            if (rgba.a > 128) {
+                const isPixelDark = (rgba.r < 128 || rgba.g < 128 || rgba.b < 128);
+                // If dark background, light pixels are foreground.
+                // If light background, dark pixels are foreground.
+                if (isDarkBackground ? !isPixelDark : isPixelDark) {
+                    grid[y * width + x] = 1;
+                }
             }
         }
     }
