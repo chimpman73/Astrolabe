@@ -224,6 +224,12 @@ interface IAstrolabeAPI {
   getDefaultSaveDirectory: () => Promise<IpcResponse<string>>;
   listShapesDirectory: () => Promise<IpcResponse<string[]>>;
   loadShape: (shapeName: string) => Promise<IpcResponse<string>>;
+  loadShapeSkeleton: (shapeName: string) => Promise<IpcResponse<any>>;
+  saveCustomShape: (data: { shapeName: string; svgContent: string; skeletonData: any }) => Promise<IpcResponse<void>>;
+  deleteCustomShape: (shapeName: string) => Promise<IpcResponse<void>>;
+  generateImageFromPrompt: (data: { prompt: string; provider: 'gemini' | 'openai'; apiKey: string }) => Promise<IpcResponse<string>>;
+  traceAndSkeletonize: (data: { imageBase64: string; traceParams: { turnpolicy?: number; turdsize?: number; alphamax?: number } }) => Promise<IpcResponse<{ svgContent: string; skeletonData: any }>>;
+  selectImageFile: () => Promise<IpcResponse<{ base64Data: string; filename: string }>>;
   onBackendError: (callback: (data: { type: string; message: string; stack?: string }) => void) => void;
   onMenuAction: (callback: (action: string) => void) => void;
 }

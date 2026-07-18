@@ -5,6 +5,7 @@ import { NavChartView } from './components/NavChartView';
 import { SaveManager } from './components/SaveManager';
 import { OpenSystemModal } from './components/OpenSystemModal';
 import { SaveAsModal } from './components/SaveAsModal';
+import { CustomShapeWizardModal } from './components/CustomShapeWizardModal';
 import { Compass, HelpCircle, ChevronRight } from 'lucide-react';
 import { shapeManager } from './utils/ShapeManager';
 
@@ -19,6 +20,9 @@ const App: React.FC = () => {
     setToastMessage,
     viewMode,
     setViewMode,
+    customShapeWizardOpen,
+    customShapeWizardMode,
+    setCustomShapeWizard,
   } = useSystemStore();
 
   // Dialog overlays state
@@ -131,6 +135,10 @@ const App: React.FC = () => {
           setShowOpenModal(true);
         } else if (action === 'save-as') {
           setShowSaveAsModal(true);
+        } else if (action === 'new-custom-shape') {
+          useSystemStore.getState().setCustomShapeWizard(true, 'create');
+        } else if (action === 'edit-custom-shape') {
+          useSystemStore.getState().setCustomShapeWizard(true, 'edit');
         } else if (action === 'save-file') {
           const state = useSystemStore.getState();
           if (!state.activeSphere) return;
@@ -322,6 +330,12 @@ const App: React.FC = () => {
       {/* Modals */}
       {showOpenModal && <OpenSystemModal onClose={() => setShowOpenModal(false)} />}
       {showSaveAsModal && <SaveAsModal onClose={() => setShowSaveAsModal(false)} />}
+      {customShapeWizardOpen && (
+        <CustomShapeWizardModal
+          initialMode={customShapeWizardMode}
+          onClose={() => setCustomShapeWizard(false)}
+        />
+      )}
     </div>
   );
 };

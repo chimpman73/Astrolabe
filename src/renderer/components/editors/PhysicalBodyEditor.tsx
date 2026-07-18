@@ -3,6 +3,7 @@ import { CelestialObject, CelestialObjectType, WorldShape, ElementAffinity, Size
 import { ScaleManager } from '../../utils/ScaleManager';
 import { shapeManager } from '../../utils/ShapeManager';
 import { getElementColor } from '../../utils/canvasRenderer';
+import { useSystemStore } from '../../store/useSystemStore';
 
 import fireSvgUrl from '../../../../assets/elements/fire.svg';
 import waterSvgUrl from '../../../../assets/elements/water.svg';
@@ -196,9 +197,27 @@ export const PhysicalBodyEditor: React.FC<PhysicalBodyEditorProps> = ({ obj, all
           {obj.worldShape === 'custom' && (
             <>
               <div className="editor-form-group flex-1">
-                <label>Custom Shape</label>
+                <label className="flex justify-between items-center w-full">
+                  <span>Custom Shape</span>
+                  <div className="flex gap-2 text-[10px]">
+                    <button
+                      type="button"
+                      onClick={() => useSystemStore.getState().setCustomShapeWizard(true, 'create')}
+                      className="text-[var(--color-accent-gold)] hover:underline cursor-pointer font-bold bg-transparent border-0 p-0"
+                    >
+                      + New
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => useSystemStore.getState().setCustomShapeWizard(true, 'edit')}
+                      className="text-[var(--color-text-muted)] hover:underline cursor-pointer font-bold bg-transparent border-0 p-0"
+                    >
+                      ⚙️ Edit
+                    </button>
+                  </div>
+                </label>
                 <select
-                  className="editor-select"
+                  className="editor-select w-full"
                   value={obj.customShapeName ?? ''}
                   onChange={e => handleUpdateObject(id, { customShapeName: e.target.value })}
                 >

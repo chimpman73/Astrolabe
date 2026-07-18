@@ -159,14 +159,27 @@ class FileService {
 
   async listShapesDirectory() {
     try {
-      const shapesPath = path.join(app.getAppPath(), 'assets', 'shapes');
-      const dirExists = await fs.promises.access(shapesPath).then(() => true).catch(() => false);
-      if (!dirExists) {
-        return { success: true, data: [] };
+      const builtInPath = path.join(app.getAppPath(), 'assets', 'shapes');
+      const customPath = path.join(app.getPath('userData'), 'shapes');
+      
+      const shapesSet = new Set();
+
+      // 1. Read built-in shapes
+      const builtInExists = await fs.promises.access(builtInPath).then(() => true).catch(() => false);
+      if (builtInExists) {
+        const files = await fs.promises.readdir(builtInPath);
+        files.filter(f => f.endsWith('.svg')).forEach(f => shapesSet.add(f.replace('.svg', '')));
       }
-      const files = await fs.promises.readdir(shapesPath);
-      const shapes = files.filter(f => f.endsWith('.svg')).map(f => f.replace('.svg', ''));
-      return { success: true, data: shapes };
+
+      // 2. Read custom user shapes
+      const customExists = await fs.promises.access(customPath).then(() => true).catch(() => false);
+      if (!customExists) {
+        await fs.promises.mkdir(customPath, { recursive: true });
+      }
+      const customFiles = await fs.promises.readdir(customPath);
+      customFiles.filter(f => f.endsWith('.svg')).forEach(f => shapesSet.add(f.replace('.svg', '')));
+
+      return { success: true, data: Array.from(shapesSet) };
     } catch (err) {
       return { success: false, error: err.message, code: 'ERR_SHAPES_DIR_READ_FAILED' };
     }
@@ -174,16 +187,93 @@ class FileService {
 
   async loadShape(shapeName) {
     try {
-      const shapesPath = path.join(app.getAppPath(), 'assets', 'shapes');
-      const filePath = path.join(shapesPath, `${shapeName}.svg`);
-      const fileExists = await fs.promises.access(filePath).then(() => true).catch(() => false);
-      if (!fileExists) {
-        return { success: false, error: 'Shape not found.', code: 'ERR_SHAPE_NOT_FOUND' };
+      const customPath = path.join(app.getPath('userData'), 'shapes', `${shapeName}.svg`);
+      const customExists = await fs.promises.access(customPath).then(() => true).catch(() => false);
+      
+      if (customExists) {
+        const content = await fs.promises.readFile(customPath, 'utf8');
+        return { success: true, data: content };
       }
-      const content = await fs.promises.readFile(filePath, 'utf8');
-      return { success: true, data: content };
+
+      const builtInPath = path.join(app.getAppPath(), 'assets', 'shapes', `${shapeName}.svg`);
+      const builtInExists = await fs.promises.access(builtInPath).then(() => true).catch(() => false);
+      
+      if (builtInExists) {
+        const content = await fs.promises.readFile(builtInPath, 'utf8');
+        return { success: true, data: content };
+      }
+
+      return { success: false, error: 'Shape not found.', code: 'ERR_SHAPE_NOT_FOUND' };
     } catch (err) {
       return { success: false, error: err.message, code: 'ERR_SHAPE_READ_FAILED' };
+    }
+  }
+
+  async loadShapeSkeleton(shapeName) {
+    try {
+      const customPath = path.join(app.getPath('userData'), 'shapes', `${shapeName}_skeleton.json`);
+      const customExists = await fs.promises.access(customPath).then(() => true).catch(() => false);
+      
+      if (customExists) {
+        const content = await fs.promises.readFile(customPath, 'utf8');
+        return { success: true, data: JSON.parse(content) };
+      }
+
+      const builtInPath = path.join(app.getAppPath(), 'assets', 'shapes', `${shapeName}_skeleton.json`);
+      const builtInExists = await fs.promises.access(builtInPath).then(() => true).catch(() => false);
+      
+      if (builtInExists) {
+        const content = await fs.promises.readFile(builtInPath, 'utf8');
+        return { success: true, data: JSON.parse(content) };
+      }
+
+      return { success: false, error: 'Skeleton not found.', code: 'ERR_SKELETON_NOT_FOUND' };
+    } catch (err) {
+      return { success: false, error: err.message, code: 'ERR_SKELETON_READ_FAILED' };
+    }
+  }
+
+  async saveCustomShape(shapeName, svgContent, skeletonData) {
+    try {
+      const customDir = path.join(app.getPath('userData'), 'shapes');
+      const customExists = await fs.promises.access(customDir).then(() => true).catch(() => false);
+      if (!customExists) {
+        await fs.promises.mkdir(customDir, { recursive: true });
+      }
+
+      const cleanName = shapeName.toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+      const svgPath = path.join(customDir, `${cleanName}.svg`);
+      const jsonPath = path.join(customDir, `${cleanName}_skeleton.json`);
+
+      await fs.promises.writeFile(svgPath, svgContent, 'utf8');
+      await fs.promises.writeFile(jsonPath, JSON.stringify(skeletonData), 'utf8');
+
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message, code: 'ERR_SHAPE_SAVE_FAILED' };
+    }
+  }
+
+  async deleteCustomShape(shapeName) {
+    try {
+      const cleanName = shapeName.toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+      const customDir = path.join(app.getPath('userData'), 'shapes');
+      const svgPath = path.join(customDir, `${cleanName}.svg`);
+      const jsonPath = path.join(customDir, `${cleanName}_skeleton.json`);
+
+      const svgExists = await fs.promises.access(svgPath).then(() => true).catch(() => false);
+      if (svgExists) {
+        await fs.promises.unlink(svgPath);
+      }
+      
+      const jsonExists = await fs.promises.access(jsonPath).then(() => true).catch(() => false);
+      if (jsonExists) {
+        await fs.promises.unlink(jsonPath);
+      }
+
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message, code: 'ERR_SHAPE_DELETE_FAILED' };
     }
   }
 }

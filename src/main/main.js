@@ -6,5 +6,5 @@ const appManager = new AppManager();
 appManager.init();
 
 const fileService = new FileService(appManager);
-const ipcController = new IpcController(fileService);
+const ipcController = new IpcController(fileService, appManager);
 ipcController.init();

@@ -9,6 +9,12 @@ contextBridge.exposeInMainWorld('astrolabeAPI', {
   getDefaultSaveDirectory: () => ipcRenderer.invoke('get-default-save-directory'),
   listShapesDirectory: () => ipcRenderer.invoke('list-shapes-directory'),
   loadShape: (shapeName) => ipcRenderer.invoke('load-shape', shapeName),
+  loadShapeSkeleton: (shapeName) => ipcRenderer.invoke('load-shape-skeleton', shapeName),
+  saveCustomShape: (data) => ipcRenderer.invoke('save-custom-shape', data),
+  deleteCustomShape: (shapeName) => ipcRenderer.invoke('delete-custom-shape', shapeName),
+  generateImageFromPrompt: (data) => ipcRenderer.invoke('generate-image-from-prompt', data),
+  traceAndSkeletonize: (data) => ipcRenderer.invoke('trace-and-skeletonize', data),
+  selectImageFile: () => ipcRenderer.invoke('select-image-file'),
   onBackendError: (callback) => {
     ipcRenderer.on('backend-error', (event, data) => callback(data));
   },

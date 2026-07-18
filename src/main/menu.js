@@ -66,6 +66,25 @@ function setupApplicationMenu() {
           }
         },
         { type: 'separator' },
+        {
+          label: 'New Custom Shape...',
+          click: () => {
+            const focusedWindow = BrowserWindow.getFocusedWindow();
+            if (focusedWindow) {
+              focusedWindow.webContents.send('menu-action', 'new-custom-shape');
+            }
+          }
+        },
+        {
+          label: 'Edit Custom Shape...',
+          click: () => {
+            const focusedWindow = BrowserWindow.getFocusedWindow();
+            if (focusedWindow) {
+              focusedWindow.webContents.send('menu-action', 'edit-custom-shape');
+            }
+          }
+        },
+        { type: 'separator' },
         isMac ? { role: 'close' } : { role: 'quit' }
       ]
     },

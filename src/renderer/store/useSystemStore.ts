@@ -48,6 +48,9 @@ interface SystemState {
   clearDecorations: () => void;
   selectedObjectId: string | null;
   setSelectedObjectId: (id: string | null) => void;
+  customShapeWizardOpen: boolean;
+  customShapeWizardMode: 'create' | 'edit';
+  setCustomShapeWizard: (open: boolean, mode?: 'create' | 'edit') => void;
 }
 
 // Generate a simple ID
@@ -234,9 +237,15 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   viewMode: 'PC',
   decorations: [],
   selectedObjectId: null,
+  customShapeWizardOpen: false,
+  customShapeWizardMode: 'create',
 
   setSelectedObjectId: (id) => set({ selectedObjectId: id }),
   setViewMode: (mode) => set({ viewMode: mode }),
+  setCustomShapeWizard: (open, mode = 'create') => set({ 
+    customShapeWizardOpen: open, 
+    customShapeWizardMode: mode 
+  }),
 
   generateDecorations: (maxRadius: number) => {
     const numDecorations = Math.floor(Math.random() * 5) + 5;

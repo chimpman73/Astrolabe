@@ -33,6 +33,17 @@ class ShapeManager {
     }
   }
 
+  public async reload(): Promise<void> {
+    this.#initialized = false;
+    this.#shapeList = [];
+    this.#pathCache.clear();
+    this.#stringCache.clear();
+    this.#graphCache.clear();
+    this.#skeletonCache.clear();
+    this.#boundsCache.clear();
+    await this.init();
+  }
+
   public getAvailableShapes(): string[] {
     return this.#shapeList;
   }
@@ -104,12 +115,13 @@ class ShapeManager {
           const pathData = match[1];
           this.#stringCache.set(shapeName, pathData);
 
-          // Try fetching the pre-computed skeleton json
+          // Try fetching the pre-computed skeleton json via IPC
           try {
-            const skelResponse = await fetch(`/assets/shapes/${shapeName}_skeleton.json`);
-            if (skelResponse.ok) {
-              const skelData = await skelResponse.json();
-              this.#skeletonCache.set(shapeName, skelData);
+            if (window.astrolabeAPI?.loadShapeSkeleton) {
+              const skelResponse = await window.astrolabeAPI.loadShapeSkeleton(shapeName);
+              if (skelResponse && skelResponse.success && skelResponse.data) {
+                this.#skeletonCache.set(shapeName, skelResponse.data);
+              }
             }
           } catch (e) {
             // Silently ignore if a shape doesn't have a skeleton file
