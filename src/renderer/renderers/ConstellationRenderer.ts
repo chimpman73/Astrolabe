@@ -79,7 +79,64 @@ export class ConstellationRenderer extends BaseRenderer {
       p2: { x: (e.p2.x - cx) * sX, y: (e.p2.y - cy) * sY }
     }));
 
-    // A) Draw wireframe
+    // A1) Detect and fill closed triangles (3-cycles) to add polygon depth
+    const n = constellationData.points.length;
+    if (n >= 3) {
+      const adj = Array.from({ length: n }, () => new Set<number>());
+      
+      const getPointIndex = (p: { x: number, y: number }): number => {
+        return constellationData.points.findIndex(pt => 
+          Math.abs(pt.x - p.x) < 0.001 && Math.abs(pt.y - p.y) < 0.001
+        );
+      };
+
+      for (const edge of constellationData.edges) {
+        const u = getPointIndex(edge.p1);
+        const v = getPointIndex(edge.p2);
+        if (u !== -1 && v !== -1 && u !== v) {
+          adj[u].add(v);
+          adj[v].add(u);
+        }
+      }
+
+      const triangles: [number, number, number][] = [];
+      for (let i = 0; i < n; i++) {
+        for (const j of adj[i]) {
+          if (j > i) {
+            for (const k of adj[j]) {
+              if (k > j && adj[i].has(k)) {
+                triangles.push([i, j, k]);
+              }
+            }
+          }
+        }
+      }
+
+      if (triangles.length > 0) {
+        ctx.save();
+        const baseColor = obj.elementAffinity ? bodyFill : '#ffffff';
+        ctx.fillStyle = baseColor;
+        // Use a soft translucent overlay for polygon fill depth
+        ctx.globalAlpha = (obj.constellationFillAlpha ?? 0.2) * 0.7;
+        
+        for (const [i, j, k] of triangles) {
+          const p1 = mappedPoints[i];
+          const p2 = mappedPoints[j];
+          const p3 = mappedPoints[k];
+          if (p1 && p2 && p3) {
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.lineTo(p3.x, p3.y);
+            ctx.closePath();
+            ctx.fill();
+          }
+        }
+        ctx.restore();
+      }
+    }
+
+    // A2) Draw wireframe lines
     ctx.beginPath();
     for (const edge of mappedEdges) {
       ctx.moveTo(edge.p1.x, edge.p1.y);

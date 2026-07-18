@@ -92,16 +92,42 @@ export class InternalGeometricStrategy implements IConstellationStrategy {
       }
     }
 
-    // 4. Add geometric loops (triangles, quads)
-    // We add back a fraction of the unused valid edges. We favor shorter edges.
-    const loopFactor = 0.15; // 15% of remaining valid edges added back
-    const edgesToAdd = Math.floor(unusedEdges.length * loopFactor);
-    
-    for (let i = 0; i < edgesToAdd; i++) {
-      // Unused edges are already sorted by distance, so taking from the beginning
-      // favors small, tight geometric shapes (triangles/quads).
-      const edge = unusedEdges[i];
-      edges.push({ p1: edge.p1, p2: edge.p2 });
+    // 4. Add geometric loops (connect each node to its nearest neighbors to form triangles/quads)
+    const adjCount = Array(points.length).fill(0);
+    for (const edge of edges) {
+      const u = points.indexOf(edge.p1);
+      const v = points.indexOf(edge.p2);
+      if (u !== -1 && v !== -1) {
+        adjCount[u]++;
+        adjCount[v]++;
+      }
+    }
+
+    for (let i = 0; i < points.length; i++) {
+      // Find all valid edges incident to points[i]
+      const incident = validEdges.filter(e => e.i === i || e.j === i);
+      // Sort by distance
+      incident.sort((a, b) => a.dist - b.dist);
+      
+      // Try to add edges until degree is at least 3
+      for (const edge of incident) {
+        if (adjCount[i] >= 3) break;
+        
+        const otherIdx = edge.i === i ? edge.j : edge.i;
+        if (adjCount[otherIdx] >= 3) continue; // Keep other degrees reasonable too
+        
+        // Check if this edge already exists
+        const exists = edges.some(e => 
+          (e.p1 === edge.p1 && e.p2 === edge.p2) || 
+          (e.p1 === edge.p2 && e.p2 === edge.p1)
+        );
+        
+        if (!exists) {
+          edges.push({ p1: edge.p1, p2: edge.p2 });
+          adjCount[i]++;
+          adjCount[otherIdx]++;
+        }
+      }
     }
 
     return { points, edges };
