@@ -755,58 +755,58 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
               </div>
 
               {/* 3-Column Previews Layout (Side-by-Side) */}
-              <div className="grid grid-cols-3 gap-4">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', alignItems: 'start' }}>
                 
                 {/* Column 1: Vector Silhouette Preview */}
-                <div className="space-y-1.5 text-center">
-                  <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]">
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '6px' }}>
+                  <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]" style={{ fontSize: '10px' }}>
                     Vector Silhouette
                   </span>
-                  <div className="border border-[var(--color-border-parchment)] bg-[#0f172a] rounded overflow-hidden p-1 flex justify-center shadow-lg">
+                  <div style={{ display: 'flex', justifyContent: 'center', padding: '4px', background: '#0f172a', border: '1px solid var(--color-border-parchment)', borderRadius: '4px', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
                     <canvas 
                       ref={silhouetteCanvasRef}
                       width={180}
                       height={180}
-                      className="max-w-full aspect-square bg-[#0f172a]"
+                      style={{ maxWidth: '100%', aspectRatio: '1/1', backgroundColor: '#0f172a', display: 'block' }}
                     />
                   </div>
-                  <span className="text-[9px] text-[var(--color-text-muted)] block leading-tight px-1">
+                  <span style={{ fontSize: '9px', color: 'var(--color-text-muted)', lineHeight: '1.25', padding: '0 4px' }}>
                     Solid rendering used for custom planets, stations, or sargasso clouds.
                   </span>
                 </div>
 
                 {/* Column 2: Outline Preview */}
-                <div className="space-y-1.5 text-center">
-                  <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]">
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '6px' }}>
+                  <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]" style={{ fontSize: '10px' }}>
                     Constellation Outline (LOD {selectedLOD})
                   </span>
-                  <div className="border border-[var(--color-border-parchment)] bg-[#0f172a] rounded overflow-hidden p-1 flex justify-center shadow-lg">
+                  <div style={{ display: 'flex', justifyContent: 'center', padding: '4px', background: '#0f172a', border: '1px solid var(--color-border-parchment)', borderRadius: '4px', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
                     <canvas 
                       ref={outlineCanvasRef}
                       width={180}
                       height={180}
-                      className="max-w-full aspect-square bg-[#0f172a]"
+                      style={{ maxWidth: '100%', aspectRatio: '1/1', backgroundColor: '#0f172a', display: 'block' }}
                     />
                   </div>
-                  <span className="text-[9px] text-[var(--color-text-muted)] block leading-tight px-1">
+                  <span style={{ fontSize: '9px', color: 'var(--color-text-muted)', lineHeight: '1.25', padding: '0 4px' }}>
                     Samples stars and edges along the boundary path outline.
                   </span>
                 </div>
 
                 {/* Column 3: Constellation Skeleton Preview */}
-                <div className="space-y-1.5 text-center">
-                  <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]">
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '6px' }}>
+                  <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]" style={{ fontSize: '10px' }}>
                     Constellation Internal (LOD {selectedLOD})
                   </span>
-                  <div className="border border-[var(--color-border-parchment)] bg-[#0f172a] rounded overflow-hidden p-1 flex justify-center shadow-lg">
+                  <div style={{ display: 'flex', justifyContent: 'center', padding: '4px', background: '#0f172a', border: '1px solid var(--color-border-parchment)', borderRadius: '4px', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
                     <canvas 
                       ref={constellationCanvasRef}
                       width={180}
                       height={180}
-                      className="max-w-full aspect-square bg-[#0f172a]"
+                      style={{ maxWidth: '100%', aspectRatio: '1/1', backgroundColor: '#0f172a', display: 'block' }}
                     />
                   </div>
-                  <span className="text-[9px] text-[var(--color-text-muted)] block leading-tight px-1">
+                  <span style={{ fontSize: '9px', color: 'var(--color-text-muted)', lineHeight: '1.25', padding: '0 4px' }}>
                     Samples stars and edges inside the shape body.
                   </span>
                 </div>
