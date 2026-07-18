@@ -479,7 +479,7 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
         </div>
 
         {/* Modal Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 text-xs">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 text-sm">
           
           {/* STEP 1: Source Selection */}
           {step === 'source-selection' && (
@@ -633,17 +633,17 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
                         />
                       </div>
                       <div>
-                        <span style={{ fontWeight: 'bold', display: 'block', color: 'var(--color-accent-gold)', fontSize: '11px' }}>
+                        <span style={{ fontWeight: 'bold', display: 'block', color: 'var(--color-accent-gold)', fontSize: '14px' }}>
                           Source Silhouette
                         </span>
-                        <span style={{ color: 'var(--color-text-muted)', fontFamily: 'monospace', wordBreak: 'break-all', fontSize: '9px' }}>
+                        <span style={{ color: 'var(--color-text-muted)', fontFamily: 'monospace', wordBreak: 'break-all', fontSize: '11px' }}>
                           {sourceFilename || 'recreated_silhouette.png'}
                         </span>
                       </div>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <label style={{ fontWeight: 'bold', fontSize: '10px' }}>Shape Library Name</label>
+                      <label style={{ fontWeight: 'bold', fontSize: '13px' }}>Shape Library Name</label>
                       <input 
                         type="text"
                         className="editor-input w-full"
@@ -656,13 +656,13 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
 
                   {/* Right Column: Tracing Parameters & Action */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px', border: '1px solid var(--color-border-parchment)', borderRadius: '6px', background: 'rgba(0,0,0,0.1)' }}>
-                    <h5 style={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.05em', color: 'var(--color-accent-gold)', borderBottom: '1px solid rgba(200, 177, 133, 0.2)', paddingBottom: '4px', margin: 0 }}>
+                    <h5 style={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '13px', letterSpacing: '0.05em', color: 'var(--color-accent-gold)', borderBottom: '1px solid rgba(200, 177, 133, 0.2)', paddingBottom: '4px', margin: 0 }}>
                       Tracing Configuration
                     </h5>
 
                     {/* Turdsize Slider */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '10px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '13px' }}>
                         <span>Stray Spot Culling (Turdsize)</span>
                         <span style={{ fontFamily: 'monospace' }}>{turdsize}px</span>
                       </div>
@@ -674,14 +674,14 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
                         value={turdsize}
                         onChange={e => setTurdsize(parseInt(e.target.value))}
                       />
-                      <span style={{ fontSize: '9px', color: 'var(--color-text-muted)', lineHeight: '1.2' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', lineHeight: '1.2' }}>
                         Ignores spot noise/stray pixel clusters smaller than this radius.
                       </span>
                     </div>
 
                     {/* Alphamax Slider */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '10px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '13px' }}>
                         <span>Corner Threshold (Alphamax)</span>
                         <span style={{ fontFamily: 'monospace' }}>{alphamax.toFixed(2)}</span>
                       </div>
@@ -694,7 +694,7 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
                         value={alphamax}
                         onChange={e => setAlphamax(parseFloat(e.target.value))}
                       />
-                      <span style={{ fontSize: '9px', color: 'var(--color-text-muted)', lineHeight: '1.2' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', lineHeight: '1.2' }}>
                         Lower makes path corners more sharp/angular; higher makes them smoother/circular.
                       </span>
                     </div>
@@ -704,7 +704,7 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
                       <button
                         onClick={handleTraceImage}
                         disabled={isTracing}
-                        className="px-5 py-2.5 bg-[var(--color-accent-gold)] text-[#2b2316] font-bold rounded flex items-center gap-2 hover:bg-[var(--color-accent-gold)]/80 disabled:opacity-50 transition-all font-title uppercase tracking-wider text-[10px]"
+                        className="px-5 py-2.5 bg-[var(--color-accent-gold)] text-[#2b2316] font-bold rounded flex items-center gap-2 hover:bg-[var(--color-accent-gold)]/80 disabled:opacity-50 transition-all font-title uppercase tracking-wider text-xs"
                         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                       >
                         {isTracing ? (
@@ -764,7 +764,7 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
                 
                 {/* Column 1: Vector Silhouette Preview */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '6px' }}>
-                  <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]" style={{ fontSize: '10px' }}>
+                  <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider" style={{ fontSize: '13px' }}>
                     Vector Silhouette
                   </span>
                   <div style={{ display: 'flex', justifyContent: 'center', padding: '4px', background: '#0f172a', border: '1px solid var(--color-border-parchment)', borderRadius: '4px', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
@@ -775,14 +775,14 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
                       style={{ maxWidth: '100%', aspectRatio: '1/1', backgroundColor: '#0f172a', display: 'block' }}
                     />
                   </div>
-                  <span style={{ fontSize: '9px', color: 'var(--color-text-muted)', lineHeight: '1.25', padding: '0 4px' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', lineHeight: '1.25', padding: '0 4px' }}>
                     Solid rendering used for custom planets, stations, or sargasso clouds.
                   </span>
                 </div>
 
                 {/* Column 2: Outline Preview */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '6px' }}>
-                  <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]" style={{ fontSize: '10px' }}>
+                  <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider" style={{ fontSize: '13px' }}>
                     Constellation Outline (LOD {selectedLOD})
                   </span>
                   <div style={{ display: 'flex', justifyContent: 'center', padding: '4px', background: '#0f172a', border: '1px solid var(--color-border-parchment)', borderRadius: '4px', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
@@ -793,14 +793,14 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
                       style={{ maxWidth: '100%', aspectRatio: '1/1', backgroundColor: '#0f172a', display: 'block' }}
                     />
                   </div>
-                  <span style={{ fontSize: '9px', color: 'var(--color-text-muted)', lineHeight: '1.25', padding: '0 4px' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', lineHeight: '1.25', padding: '0 4px' }}>
                     Samples stars and edges along the boundary path outline.
                   </span>
                 </div>
 
                 {/* Column 3: Constellation Skeleton Preview */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '6px' }}>
-                  <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]" style={{ fontSize: '10px' }}>
+                  <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider" style={{ fontSize: '13px' }}>
                     Constellation Internal (LOD {selectedLOD})
                   </span>
                   <div style={{ display: 'flex', justifyContent: 'center', padding: '4px', background: '#0f172a', border: '1px solid var(--color-border-parchment)', borderRadius: '4px', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
@@ -811,7 +811,7 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
                       style={{ maxWidth: '100%', aspectRatio: '1/1', backgroundColor: '#0f172a', display: 'block' }}
                     />
                   </div>
-                  <span style={{ fontSize: '9px', color: 'var(--color-text-muted)', lineHeight: '1.25', padding: '0 4px' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', lineHeight: '1.25', padding: '0 4px' }}>
                     Samples stars and edges inside the shape body.
                   </span>
                 </div>
