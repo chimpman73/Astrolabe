@@ -100,7 +100,7 @@ class ShapeGeneratorService {
       };
 
       const svg = await new Promise((resolve, reject) => {
-        potrace.trace(jimpImg, params, (err, svgOutput) => {
+        potrace.trace(buffer, params, (err, svgOutput) => {
           if (err) reject(err);
           else resolve(svgOutput);
         });
