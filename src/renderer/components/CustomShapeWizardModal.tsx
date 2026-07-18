@@ -5,6 +5,7 @@ import {
   X, ChevronLeft, ChevronRight, Sparkles, Upload, Trash2, 
   Wand2, RefreshCw, Sliders, Check 
 } from 'lucide-react';
+import { OutlineStrategy } from '../utils/constellation/OutlineStrategy';
 
 interface CustomShapeWizardModalProps {
   onClose: () => void;
@@ -278,29 +279,54 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
     if (!pathData) return;
 
     const path2d = new Path2D(pathData);
+    const outlineStrategy = new OutlineStrategy();
+    const outlineData = outlineStrategy.generate(pathData, path2d, selectedLOD, 'preview_seed');
 
     // 1. Render Outline Canvas
     const outlineCanvas = outlineCanvasRef.current;
     if (outlineCanvas) {
       const ctx = outlineCanvas.getContext('2d');
-      if (ctx) {
+      if (ctx && outlineData) {
         const w = outlineCanvas.width;
         const h = outlineCanvas.height;
         ctx.clearRect(0, 0, w, h);
         
-        // Parchment / Space background
         ctx.fillStyle = '#0f172a'; // space color
         ctx.fillRect(0, 0, w, h);
 
-        // Draw path standard scale
-        ctx.save();
-        ctx.translate(20, 20); // 20px padding
-        ctx.scale(1.6, 1.6);  // 100x100 -> 160x160
-        ctx.fillStyle = 'rgba(224, 202, 166, 0.95)'; // parchment body color
-        ctx.shadowColor = 'rgba(255, 215, 0, 0.4)';
-        ctx.shadowBlur = 10;
-        ctx.fill(path2d);
-        ctx.restore();
+        // Draw connections
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 3]);
+        for (const edge of outlineData.edges || []) {
+          ctx.beginPath();
+          ctx.moveTo(edge.p1.x * 1.6 + 20, edge.p1.y * 1.6 + 20);
+          ctx.lineTo(edge.p2.x * 1.6 + 20, edge.p2.y * 1.6 + 20);
+          ctx.stroke();
+        }
+
+        // Draw star nodes
+        ctx.setLineDash([]);
+        for (const pt of outlineData.points || []) {
+          const cx = pt.x * 1.6 + 20;
+          const cy = pt.y * 1.6 + 20;
+
+          // Radial glow
+          const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 6);
+          grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+          grad.addColorStop(0.3, 'rgba(125, 211, 252, 0.6)'); // cyan tint
+          grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 6, 0, 2 * Math.PI);
+          ctx.fill();
+
+          // Star core
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(cx, cy, 1.5, 0, 2 * Math.PI);
+          ctx.fill();
+        }
       }
     }
 
@@ -656,7 +682,7 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
                 {/* Column Left: Outline Preview */}
                 <div className="space-y-2 text-center">
                   <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]">
-                    Custom Shape Outline
+                    Constellation Outline (LOD {selectedLOD})
                   </span>
                   <div className="border border-[var(--color-border-parchment)] bg-[#0f172a] rounded overflow-hidden p-1 flex justify-center shadow-lg">
                     <canvas 
@@ -667,14 +693,14 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
                     />
                   </div>
                   <span className="text-[10px] text-[var(--color-text-muted)] block leading-relaxed px-2">
-                    Standard rendering for custom planets, stations, or sargasso clouds on the Navigation Map.
+                    Samples stars and edges along the boundary path outline. Used for the 'outline' constellation style.
                   </span>
                 </div>
 
                 {/* Column Right: Constellation Skeleton Preview */}
                 <div className="space-y-2 text-center">
                   <span className="font-bold block text-[var(--color-accent-gold)] uppercase tracking-wider text-[10px]">
-                    Constellation Geometry (LOD {selectedLOD})
+                    Constellation Internal (LOD {selectedLOD})
                   </span>
                   <div className="border border-[var(--color-border-parchment)] bg-[#0f172a] rounded overflow-hidden p-1 flex justify-center shadow-lg">
                     <canvas 
@@ -685,7 +711,7 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
                     />
                   </div>
                   <span className="text-[10px] text-[var(--color-text-muted)] block leading-relaxed px-2">
-                    Pre-computed geometric graph nodes and connections drawn when constellation outline is set to 'internal'.
+                    Samples stars and edges inside the shape body. Used for the 'internal' constellation style.
                   </span>
                 </div>
 
@@ -695,7 +721,7 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
               <div className="bg-black/10 p-4 border border-[var(--color-border-parchment)] rounded space-y-2">
                 <div className="flex justify-between font-bold">
                   <span className="text-[var(--color-accent-gold)]">Preview Constellation Detail Level (LOD)</span>
-                  <span className="font-mono">LOD {selectedLOD} ({selectedLOD * 5} nodes)</span>
+                  <span className="font-mono">LOD {selectedLOD} ({selectedLOD} outline nodes / {selectedLOD * 5} internal nodes)</span>
                 </div>
                 <input 
                   type="range"
