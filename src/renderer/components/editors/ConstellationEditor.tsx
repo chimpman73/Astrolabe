@@ -1,7 +1,6 @@
 import React from 'react';
 import { CelestialObject, CelestialObjectType, SizeClass, IConstellation } from '../../../types/astrolabe';
 import { shapeManager } from '../../utils/ShapeManager';
-import { useSystemStore } from '../../store/useSystemStore';
 
 interface ConstellationEditorProps {
   obj: IConstellation;
@@ -22,25 +21,7 @@ export const ConstellationEditor: React.FC<ConstellationEditorProps> = ({ obj, a
       </div>
 
       <div className="editor-form-group">
-        <label className="flex justify-between items-center w-full">
-          <span>Type, Custom Shape & Rotation (Deg)</span>
-          <div className="flex gap-2 text-[10px]">
-            <button
-              type="button"
-              onClick={() => useSystemStore.getState().setCustomShapeWizard(true, 'create')}
-              className="text-[var(--color-accent-gold)] hover:underline cursor-pointer font-bold bg-transparent border-0 p-0"
-            >
-              + New Shape
-            </button>
-            <button
-              type="button"
-              onClick={() => useSystemStore.getState().setCustomShapeWizard(true, 'edit')}
-              className="text-[var(--color-text-muted)] hover:underline cursor-pointer font-bold bg-transparent border-0 p-0"
-            >
-              ⚙️ Edit
-            </button>
-          </div>
-        </label>
+        <label>Type, Custom Shape & Rotation (Deg)</label>
         <div style={{ display: 'flex', flexDirection: 'row', gap: '8px', width: '100%' }}>
           <select 
             className="editor-select"
