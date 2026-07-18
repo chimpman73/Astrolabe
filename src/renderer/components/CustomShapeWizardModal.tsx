@@ -877,9 +877,9 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
                 </button>
               </div>
 
-              <div className="border border-[var(--color-border-parchment)] rounded bg-black/10 max-h-[300px] overflow-y-auto">
+              <div className="border border-[var(--color-border-parchment)] rounded bg-black/10" style={{ maxHeight: '380px', overflowY: 'auto' }}>
                 {availableShapes.length > 0 ? (
-                  <table className="w-full text-left border-collapse text-xs">
+                  <table className="w-full text-left border-collapse text-sm">
                     <thead>
                       <tr className="border-b border-[var(--color-border-parchment)] bg-black/20 text-[var(--color-accent-gold)] uppercase tracking-wider font-bold">
                         <th className="p-3">Shape Name</th>
@@ -898,14 +898,14 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
                           <td className="p-3 text-right flex justify-end gap-1">
                             <button
                               onClick={() => handleEditShapeSelect(name)}
-                              className="px-2.5 py-1 text-[9px] font-bold border border-[var(--color-border-parchment)] text-[var(--color-text-muted)] hover:bg-[var(--color-accent-gold)] hover:text-[#2b2316] transition-colors rounded uppercase"
+                              className="px-2.5 py-1 text-xs font-bold border border-[var(--color-border-parchment)] text-[var(--color-text-muted)] hover:bg-[var(--color-accent-gold)] hover:text-[#2b2316] transition-colors rounded uppercase"
                               title="Edit/Preview shape details"
                             >
                               Edit & Preview
                             </button>
                             <button
                               onClick={() => handleDeleteShape(name)}
-                              className="px-2.5 py-1 text-[9px] font-bold border border-[var(--color-accent-red)]/35 text-[var(--color-accent-red)] hover:bg-[var(--color-accent-red)] hover:text-white transition-colors rounded uppercase flex items-center gap-1"
+                              className="px-2.5 py-1 text-xs font-bold border border-[var(--color-accent-red)]/35 text-[var(--color-accent-red)] hover:bg-[var(--color-accent-red)] hover:text-white transition-colors rounded uppercase flex items-center gap-1"
                               title="Delete shape files"
                             >
                               <Trash2 className="w-3 h-3" /> Delete
