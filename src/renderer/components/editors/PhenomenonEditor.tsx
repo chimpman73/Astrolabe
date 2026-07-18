@@ -1,7 +1,10 @@
 import React from 'react';
-import { CelestialObject, CelestialObjectType, WorldShape, SizeClass, ElementAffinity, IPhenomenon } from '../../../types/astrolabe';
-import { ScaleManager } from '../../utils/ScaleManager';
-import { shapeManager } from '../../utils/ShapeManager';
+import { CelestialObject, CelestialObjectType, WorldShape, ElementAffinity, IPhenomenon } from '../../../types/astrolabe';
+import { SizeClassEditor } from './common/SizeClassEditor';
+import { CustomShapeSelector } from './common/CustomShapeSelector';
+import { OrbitEditor } from './common/OrbitEditor';
+import { LoreEditor } from './common/LoreEditor';
+import { CollapsibleSection } from './common/CollapsibleSection';
 
 interface PhenomenonEditorProps {
   obj: IPhenomenon;
@@ -14,12 +17,7 @@ export const PhenomenonEditor: React.FC<PhenomenonEditorProps> = ({ obj, allObje
 
   return (
     <>
-      {/* SECTION 1: Classification & Appearance */}
-      <div className="save-manager-section-header mt-4 mb-2 border-b border-[var(--color-border-parchment)] pb-1">
-        <h5 className="font-title text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
-          Classification & Appearance
-        </h5>
-      </div>
+      <CollapsibleSection title="Classification & Appearance">
 
       <div className="flex gap-2">
         <div className="editor-form-group flex-1">
@@ -51,47 +49,14 @@ export const PhenomenonEditor: React.FC<PhenomenonEditorProps> = ({ obj, allObje
         </div>
       </div>
 
-      <div className="editor-form-group">
-        <label>Size Class & Size ({obj.sizeUnit || 'miles'})</label>
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '8px', width: '100%' }}>
-          <select
-            className="editor-select"
-            style={{ flex: '1 1 0%', minWidth: 0 }}
-            value={obj.sizeClass || 'D'}
-            onChange={e => {
-              const newClass = e.target.value as SizeClass;
-              const newUnit = newClass === 'J' ? 'AU' : 'miles';
-              handleUpdateObject(id, { sizeClass: newClass, sizeUnit: newUnit });
-            }}
-          >
-            <option value="A">A (&lt; 10 mi)</option>
-            <option value="B">B (10-100 mi)</option>
-            <option value="C">C (100-1k mi)</option>
-            <option value="D">D (1k-4k mi)</option>
-            <option value="E">E (4k-10k mi)</option>
-            <option value="F">F (10k-40k mi)</option>
-            <option value="G">G (40k-100k mi)</option>
-            <option value="H">H (100k-1M mi)</option>
-            <option value="I">I (1M-10M mi)</option>
-            <option value="J">J (&ge; AU)</option>
-          </select>
-          <input 
-            type="number" 
-            step="any"
-            className={`editor-input ${!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') ? 'border-[var(--color-accent-red)] text-[var(--color-accent-red)]' : ''}`}
-            style={{ flex: '1 1 0%', minWidth: 0 }}
-            value={obj.physicalSize ?? 1000}
-            onChange={e => handleUpdateObject(id, { physicalSize: parseFloat(e.target.value) || 0 })}
-            title={!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') ? 'Physical size is out of bounds for the selected Size Class.' : ''}
-          />
-        </div>
-      </div>
-      
-      {!ScaleManager.isValidSize(obj.sizeClass || 'D', obj.physicalSize || 1000, obj.sizeUnit || 'miles') && (
-        <div className="text-[var(--color-accent-red)] text-[10px] -mt-1 mb-2 px-1 font-bold">
-          Warning: Size is out of bounds for Class {obj.sizeClass || 'D'}
-        </div>
-      )}
+      <SizeClassEditor
+        sizeClass={obj.sizeClass || 'D'}
+        physicalSize={obj.physicalSize ?? 1000}
+        sizeUnit={obj.sizeUnit || 'miles'}
+        label={`Size Class & Size (${obj.sizeUnit || 'miles'})`}
+        onChange={updated => handleUpdateObject(id, updated)}
+        showValidation={true}
+      />
 
 
 
@@ -158,75 +123,30 @@ export const PhenomenonEditor: React.FC<PhenomenonEditorProps> = ({ obj, allObje
 
       {obj.cloudObjectShape === 'custom' && (
         <div className="editor-form-group border-l-2 border-[var(--color-accent-gold)] pl-2 ml-1">
-          <label>Custom Shape & Rotation (Deg)</label>
-          <div style={{ display: 'flex', flexDirection: 'row', gap: '8px', width: '100%' }}>
-            <select
-              className="editor-select"
-              style={{ flex: '1 1 0%', minWidth: 0 }}
-              value={obj.cloudObjectCustomShapeName ?? ''}
-              onChange={e => handleUpdateObject(id, { cloudObjectCustomShapeName: e.target.value })}
-              title="Custom Shape Name"
-            >
-              <option value="">-- Select --</option>
-              {shapeManager.getAvailableShapes().map(shape => (
-                <option key={shape} value={shape}>{shape}</option>
-              ))}
-            </select>
-            <input
-              type="number"
-              step="any"
-              className="editor-input"
-              style={{ flex: '1 1 0%', minWidth: 0 }}
-              value={obj.cloudObjectShapeRotation ?? 0}
-              onChange={e => handleUpdateObject(id, { cloudObjectShapeRotation: parseFloat(e.target.value) || 0 })}
-              title="Shape Rotation (Degrees)"
-              placeholder="Rotation"
-            />
-          </div>
+          <CustomShapeSelector
+            customShapeName={obj.cloudObjectCustomShapeName ?? ''}
+            shapeRotation={obj.cloudObjectShapeRotation ?? 0}
+            label="Custom Shape & Rotation (Deg)"
+            onChange={updated => handleUpdateObject(id, {
+              cloudObjectCustomShapeName: updated.customShapeName,
+              cloudObjectShapeRotation: updated.shapeRotation,
+            })}
+          />
         </div>
       )}
 
-      <div className="editor-form-group">
-        <label>Internal Size Class & Size (miles)</label>
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '8px', width: '100%' }}>
-          <select
-            className="editor-select"
-            style={{ flex: '1 1 0%', minWidth: 0 }}
-            value={obj.cloudObjectSizeClass ?? 'A'}
-            onChange={e => handleUpdateObject(id, { cloudObjectSizeClass: e.target.value as SizeClass })}
-            title="Internal Size Class"
-          >
-            <option value="A">A (&lt; 10 mi)</option>
-            <option value="B">B (10-100 mi)</option>
-            <option value="C">C (100-1,000 mi)</option>
-            <option value="D">D (1,000-4,000 mi)</option>
-            <option value="E">E (4,000-10,000 mi)</option>
-            <option value="F">F (10,000-40,000 mi)</option>
-            <option value="G">G (40k-100k mi)</option>
-            <option value="H">H (100k-1m mi)</option>
-            <option value="I">I (1m-10m mi)</option>
-          </select>
-          <input
-            type="number"
-            step="any"
-            min="0"
-            className="editor-input"
-            style={{ flex: '1 1 0%', minWidth: 0 }}
-            value={obj.cloudObjectPhysicalSize ?? 5}
-            onChange={e => handleUpdateObject(id, { cloudObjectPhysicalSize: parseFloat(e.target.value) || 0 })}
-            title="Internal Physical Size"
-          />
-        </div>
-      </div>
+      <SizeClassEditor
+        sizeClass={obj.cloudObjectSizeClass || 'A'}
+        physicalSize={obj.cloudObjectPhysicalSize ?? 5}
+        label="Internal Size Class & Size (miles)"
+        onChange={updated => handleUpdateObject(id, {
+          cloudObjectSizeClass: updated.sizeClass,
+          cloudObjectPhysicalSize: updated.physicalSize,
+        })}
+        showValidation={false}
+      />
 
-      {/* SECTION 2: Orbital Mechanics */}
-      <div className="save-manager-section-header mt-5 mb-2 border-b border-[var(--color-border-parchment)] pb-1">
-        <h5 className="font-title text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
-          Orbital Mechanics
-        </h5>
-      </div>
-
-      <div className="editor-form-group">
+      <div className="editor-form-group" style={{ marginTop: '0.5rem' }}>
         <label>Arc Width (Degrees)</label>
         <input
           type="number"
@@ -239,149 +159,14 @@ export const PhenomenonEditor: React.FC<PhenomenonEditorProps> = ({ obj, allObje
         />
       </div>
 
-      <div className="editor-form-group">
-        <label>Orbiting Parent & Distance (AU)</label>
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '8px', width: '100%' }}>
-          <select 
-            className="editor-select"
-            style={{ flex: '1 1 0%', minWidth: 0 }}
-            value={obj.orbitedObjectName || ''}
-            onChange={e => handleUpdateObject(id, { orbitedObjectName: e.target.value === '' ? null : e.target.value })}
-            title="Orbiting Parent"
-          >
-            <option value="">System Center</option>
-            {allObjects
-              .filter(o => o.name !== obj.name && o.type !== 'moon')
-              .map(o => (
-                <option key={o.name} value={o.name}>{o.name}</option>
-              ))}
-          </select>
-          <input 
-            type="number" 
-            step="any"
-            className="editor-input"
-            style={{ flex: '1 1 0%', minWidth: 0 }}
-            value={(obj.distanceOrbited || 0)}
-            onChange={e => handleUpdateObject(id, { distanceOrbited: parseFloat(e.target.value) || 0 })}
-            title="Orbit Distance (AU)"
-          />
-        </div>
-      </div>
+      </CollapsibleSection>
 
-      <div className="editor-form-group">
-        <label>Period (Days) & Initial Angle (Deg)</label>
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '8px', width: '100%' }}>
-          <input 
-            type="number" 
-            step="any"
-            className="editor-input"
-            style={{ flex: '1 1 0%', minWidth: 0 }}
-            value={obj.orbitalPeriodDays ?? ''}
-            onChange={e => handleUpdateObject(id, { orbitalPeriodDays: parseFloat(e.target.value) || 0 })}
-            title="Orbital Period (Days)"
-          />
-          <div style={{ display: 'flex', gap: '4px', flex: '1 1 0%', minWidth: 0 }}>
-            <input 
-              type="number" 
-              step="any"
-              className="editor-input"
-              style={{ flex: 1, minWidth: 0 }}
-              value={obj.initialAngle ?? 0}
-              onChange={e => handleUpdateObject(id, { initialAngle: parseFloat(e.target.value) || 0 })}
-              title="Initial Angle (Deg)"
-            />
-            <button
-              type="button"
-              onClick={() => handleUpdateObject(id, { initialAngle: Math.floor(Math.random() * 360) })}
-              className="px-2 text-xs bg-transparent border border-[var(--color-border-parchment)] text-[var(--color-text-muted)] hover:bg-[var(--color-accent-gold)] hover:text-[#2b2316] transition-colors"
-              title="Randomize Angle"
-            >
-              🎲
-            </button>
-          </div>
-        </div>
-      </div>
+      <OrbitEditor obj={obj} allObjects={allObjects} handleUpdateObject={handleUpdateObject} />
 
-      <div className="editor-form-group">
-        <label>Orbit Motion</label>
-        <div className="flex gap-1">
-          {(['prograde', 'stationary', 'retrograde'] as const).map((motion) => {
-            const isActive =
-              motion === 'stationary' ? !!obj.isStationary
-              : !obj.isStationary && (obj.orbitDirection ?? 'prograde') === motion;
-            return (
-              <button
-                key={motion}
-                type="button"
-                onClick={() => handleUpdateObject(id, {
-                  isStationary: motion === 'stationary',
-                  orbitDirection: motion !== 'stationary' ? motion : obj.orbitDirection,
-                })}
-                className={`flex-1 text-[9px] py-1 font-bold transition-colors ${
-                  isActive
-                    ? 'bg-[var(--color-accent-gold)] text-[#2b2316] border border-[var(--color-accent-gold)]'
-                    : 'bg-transparent text-[var(--color-text-muted)] border border-[var(--color-border-parchment)] hover:bg-[var(--color-bg-base)]'
-                }`}
-              >
-                {motion === 'prograde' ? '▶ PROGRADE' : motion === 'stationary' ? '◆ FIXED' : '◄ RETROGRADE'}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="editor-form-group" style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px dashed var(--color-border-parchment)' }}>
-        <label className="text-[10px] text-[var(--color-accent-gold)]">Advanced Orbit</label>
-        <div className="flex flex-col gap-2 mt-2">
-          <div>
-            <label style={{ fontSize: '9px', opacity: 0.8 }}>Eccentricity (0.0 to 0.99)</label>
-            <div className="flex gap-2 items-center">
-              <input 
-                type="range"
-                min="0"
-                max="0.99"
-                step="0.01"
-                className="flex-1"
-                value={obj.orbitEccentricity || 0}
-                onChange={e => handleUpdateObject(id, { orbitEccentricity: parseFloat(e.target.value) || 0 })}
-              />
-              <span className="text-[9px] w-6">{obj.orbitEccentricity?.toFixed(2) || '0.00'}</span>
-            </div>
-          </div>
-          <div>
-            <label style={{ fontSize: '9px', opacity: 0.8 }}>Rotation (Degrees)</label>
-            <input 
-              type="number"
-              step="any"
-              className="editor-input"
-              value={obj.orbitRotation || 0}
-              onChange={e => handleUpdateObject(id, { orbitRotation: parseFloat(e.target.value) || 0 })}
-            />
-          </div>
-          {(obj.orbitEccentricity || 0) > 0 && (
-            <div className="flex justify-between text-[9px] text-[var(--color-text-muted)] mt-1 border-t border-[var(--color-border-parchment)] pt-1">
-              <span>Periapsis: {((obj.distanceOrbited || 0) * (1 - (obj.orbitEccentricity || 0))).toFixed(2)} AU</span>
-              <span>Apoapsis: {((obj.distanceOrbited || 0) * (1 + (obj.orbitEccentricity || 0))).toFixed(2)} AU</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* SECTION 3: Lore & Details */}
-      <div className="save-manager-section-header mt-5 mb-2 border-b border-[var(--color-border-parchment)] pb-1">
-        <h5 className="font-title text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
-          Lore & Details
-        </h5>
-      </div>
-
-      <div className="editor-form-group">
-        <label>Description</label>
-        <textarea 
-          className="editor-textarea"
-          value={obj.description || ''}
-          onChange={e => handleUpdateObject(id, { description: e.target.value })}
-        />
-      </div>
+      <LoreEditor
+        value={obj.description || ''}
+        onChange={val => handleUpdateObject(id, { description: val })}
+      />
     </>
   );
 };

@@ -2,6 +2,9 @@ import React from 'react';
 import { CelestialObject, IGroup } from '../../../types/astrolabe';
 import { ObjectIcon } from '../ObjectIcon';
 
+import { LoreEditor } from './common/LoreEditor';
+import { CollapsibleSection } from './common/CollapsibleSection';
+
 interface GroupEditorProps {
   obj: IGroup;
   allObjects: CelestialObject[];
@@ -14,28 +17,13 @@ export const GroupEditor: React.FC<GroupEditorProps> = ({ obj, allObjects, handl
 
   return (
     <>
-      {/* SECTION 1: General Information */}
-      <div className="save-manager-section-header mt-4 mb-2 border-b border-[var(--color-border-parchment)] pb-1">
-        <h5 className="font-title text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
-          General Information
-        </h5>
-      </div>
-
-      <div className="editor-form-group">
-        <label>Description</label>
-        <textarea 
-          className="editor-textarea"
-          value={obj.description || ''}
-          onChange={e => handleUpdateObject(id, { description: e.target.value })}
-        />
-      </div>
+      <LoreEditor
+        value={obj.description || ''}
+        onChange={val => handleUpdateObject(id, { description: val })}
+        sectionHeader="General Information"
+      />
       
-      {/* SECTION 2: Group Contents */}
-      <div className="save-manager-section-header mt-5 mb-2 border-b border-[var(--color-border-parchment)] pb-1">
-        <h5 className="font-title text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
-          Group Contents
-        </h5>
-      </div>
+      <CollapsibleSection title="Group Contents">
 
       <div className="editor-form-group mt-2">
          {children.length === 0 ? (
@@ -52,6 +40,7 @@ export const GroupEditor: React.FC<GroupEditorProps> = ({ obj, allObjects, handl
             </div>
          )}
       </div>
+      </CollapsibleSection>
     </>
   );
 };

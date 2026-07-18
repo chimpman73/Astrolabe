@@ -1,5 +1,6 @@
 import React from 'react';
 import { CelestialObject, CelestialObjectType, IMapOverlay } from '../../../types/astrolabe';
+import { CollapsibleSection } from './common/CollapsibleSection';
 
 interface MapOverlayEditorProps {
   obj: IMapOverlay;
@@ -11,12 +12,7 @@ export const MapOverlayEditor: React.FC<MapOverlayEditorProps> = ({ obj, handleU
 
   return (
     <>
-      {/* SECTION 1: Type & Configuration */}
-      <div className="save-manager-section-header mt-4 mb-2 border-b border-[var(--color-border-parchment)] pb-1">
-        <h5 className="font-title text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
-          Type & Configuration
-        </h5>
-      </div>
+      <CollapsibleSection title="Type & Configuration">
 
       <div className="editor-form-group">
         <label>Type</label>
@@ -69,14 +65,9 @@ export const MapOverlayEditor: React.FC<MapOverlayEditorProps> = ({ obj, handleU
             </select>
           </div>
         </div>
-      )}
+      )}      </CollapsibleSection>
 
-      {/* SECTION 2: Placement & Layout */}
-      <div className="save-manager-section-header mt-5 mb-2 border-b border-[var(--color-border-parchment)] pb-1">
-        <h5 className="font-title text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
-          Placement & Layout
-        </h5>
-      </div>
+      <CollapsibleSection title="Placement & Layout">
 
       <div className="editor-form-group">
         <label>Distance from Center (AU) & Angle (Deg)</label>
@@ -162,14 +153,9 @@ export const MapOverlayEditor: React.FC<MapOverlayEditorProps> = ({ obj, handleU
             }}
           />
         </div>
-      )}
+      )}      </CollapsibleSection>
 
-      {/* SECTION 3: Typography */}
-      <div className="save-manager-section-header mt-5 mb-2 border-b border-[var(--color-border-parchment)] pb-1">
-        <h5 className="font-title text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
-          Typography
-        </h5>
-      </div>
+      <CollapsibleSection title="Typography">
 
       <div className="editor-form-group">
         <label>Font Family & Size (px)</label>
@@ -204,6 +190,7 @@ export const MapOverlayEditor: React.FC<MapOverlayEditorProps> = ({ obj, handleU
           />
         </div>
       </div>
+      </CollapsibleSection>
     </>
   );
 };

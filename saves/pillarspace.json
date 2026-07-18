@@ -22,7 +22,7 @@
       "name": "The Pillar",
       "type": "star",
       "sizeClass": "J",
-      "physicalSize": 1,
+      "physicalSize": 2,
       "sizeUnit": "AU",
       "orbitedObjectName": null,
       "distanceOrbited": 0,
@@ -51,7 +51,8 @@
       "orbitalPeriodDays": 1314000,
       "affectsShellBoundary": true,
       "elementAffinity": "earth",
-      "groupId": "1784087146186"
+      "groupId": "1784087146186",
+      "worldShape": "sphere"
     },
     {
       "id": "1784079750749",
@@ -164,7 +165,7 @@
       "constellationFillAlpha": 0.2,
       "constellationStyle": "outline",
       "constellationDetail": 20,
-      "constellationStarCount": 10,
+      "constellationStarCount": 16,
       "constellationStarMinSizeClass": "D",
       "constellationStarMaxSizeClass": "G",
       "orbitedObjectName": null,
@@ -173,7 +174,9 @@
       "orbitalPeriodDays": 0,
       "affectsShellBoundary": true,
       "isStationary": true,
-      "shapeRotation": 17
+      "shapeRotation": 20,
+      "constellationFlipX": false,
+      "elementAffinity": "mixed"
     }
   ],
   "mapOverlays": [],
