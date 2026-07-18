@@ -133,7 +133,7 @@ export interface IConstellation extends ICelestialBase {
   constellationStarCount?: number;
   constellationStarMinSizeClass?: SizeClass;
   constellationStarMaxSizeClass?: SizeClass;
-  constellationStyle?: 'outline' | 'internal';
+  constellationStyle?: 'outline' | 'internal' | 'mesh';
   constellationFillAlpha?: number;
   constellationFlipX?: boolean;
   

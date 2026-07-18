@@ -102,7 +102,7 @@ class ShapeManager {
 
   public getConstellationData(
     shapeName: string, 
-    style: 'outline' | 'internal', 
+    style: 'outline' | 'internal' | 'mesh', 
     detailLevel: number,
     seed: string
   ): ConstellationData | null {
@@ -130,6 +130,8 @@ class ShapeManager {
           // Fallback to runtime generation if no skeleton file exists
           data = this.#internalStrategy.generate(pathData, path2d, detailLevel, seed);
         }
+      } else if (style === 'mesh') {
+        data = this.#internalStrategy.generate(pathData, path2d, detailLevel, seed);
       } else {
         data = this.#outlineStrategy.generate(pathData, path2d, detailLevel, seed);
       }
