@@ -11,6 +11,7 @@ export interface ConstellationEdge {
 export interface ConstellationData {
   points: ConstellationPoint[];
   edges: ConstellationEdge[];
+  triangles?: [number, number, number][];
 }
 
 export interface IConstellationStrategy {

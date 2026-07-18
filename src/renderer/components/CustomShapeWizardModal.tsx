@@ -38,6 +38,7 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
   const [turdsize, setTurdsize] = useState(2);
   const [alphamax, setAlphamax] = useState(1.0);
   const [isTracing, setIsTracing] = useState(false);
+  const [algorithm, setAlgorithm] = useState<'thinning' | 'triangulation'>('thinning');
 
   // Resulting shape data
   const [tracedSvgContent, setTracedSvgContent] = useState<string | null>(null);
@@ -165,7 +166,8 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
         imageBase64,
         traceParams: {
           turdsize,
-          alphamax
+          alphamax,
+          algorithm
         }
       });
 
@@ -696,6 +698,33 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
                       />
                       <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', lineHeight: '1.2' }}>
                         Lower makes path corners more sharp/angular; higher makes them smoother/circular.
+                      </span>
+                    </div>
+
+                    {/* Internal Skeleton Generator Choice */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div style={{ fontWeight: 'bold', fontSize: '13px' }}>
+                        Internal Wireframe Generator
+                      </div>
+                      <select
+                        style={{
+                          width: '100%',
+                          padding: '6px 10px',
+                          borderRadius: '4px',
+                          border: '1px solid var(--color-border-parchment)',
+                          backgroundColor: 'var(--color-bg-panel)',
+                          color: 'var(--color-text-main)',
+                          fontSize: '13px',
+                          cursor: 'pointer'
+                        }}
+                        value={algorithm}
+                        onChange={e => setAlgorithm(e.target.value as 'thinning' | 'triangulation')}
+                      >
+                        <option value="thinning">Morphological Thinning (Classic Spine)</option>
+                        <option value="triangulation">Geometric Triangulation (Volumetric Mesh)</option>
+                      </select>
+                      <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', lineHeight: '1.2' }}>
+                        Thinning creates a 1D stick-figure spine; Triangulation creates a dense mesh of triangles/polygons.
                       </span>
                     </div>
 

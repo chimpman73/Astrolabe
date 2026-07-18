@@ -102,7 +102,7 @@ class ShapeManager {
 
   public getConstellationData(
     shapeName: string, 
-    style: 'outline' | 'internal' | 'mesh', 
+    style: 'outline' | 'internal', 
     detailLevel: number,
     seed: string
   ): ConstellationData | null {
@@ -130,13 +130,47 @@ class ShapeManager {
           // Fallback to runtime generation if no skeleton file exists
           data = this.#internalStrategy.generate(pathData, path2d, detailLevel, seed);
         }
-      } else if (style === 'mesh') {
-        data = this.#internalStrategy.generate(pathData, path2d, detailLevel, seed);
       } else {
         data = this.#outlineStrategy.generate(pathData, path2d, detailLevel, seed);
       }
       
       if (data) {
+        if (!data.triangles) {
+          const n = data.points.length;
+          if (n >= 3) {
+            const adj = Array.from({ length: n }, () => new Set<number>());
+            const getPointIndex = (p: { x: number, y: number }): number => {
+              return data.points.findIndex(pt => 
+                Math.abs(pt.x - p.x) < 0.001 && Math.abs(pt.y - p.y) < 0.001
+              );
+            };
+
+            for (const edge of data.edges) {
+              const u = getPointIndex(edge.p1);
+              const v = getPointIndex(edge.p2);
+              if (u !== -1 && v !== -1 && u !== v) {
+                adj[u].add(v);
+                adj[v].add(u);
+              }
+            }
+
+            const triangles: [number, number, number][] = [];
+            for (let i = 0; i < n; i++) {
+              for (const j of adj[i]) {
+                if (j > i) {
+                  for (const k of adj[j]) {
+                    if (k > j && adj[i].has(k)) {
+                      triangles.push([i, j, k]);
+                    }
+                  }
+                }
+              }
+            }
+            data.triangles = triangles;
+          } else {
+            data.triangles = [];
+          }
+        }
         this.#graphCache.set(cacheKey, data);
         return data;
       }

@@ -116,11 +116,10 @@ export const ConstellationEditor: React.FC<ConstellationEditorProps> = ({ obj, a
             className="editor-select"
             style={{ flex: '1 1 0%', minWidth: 0 }}
             value={obj.constellationStyle || 'internal'}
-            onChange={e => handleUpdateObject(id, { constellationStyle: e.target.value as 'outline' | 'internal' | 'mesh' })}
+            onChange={e => handleUpdateObject(id, { constellationStyle: e.target.value as 'outline' | 'internal' })}
             title="Line Drawing Style"
           >
             <option value="internal">Internal Geometric Graph</option>
-            <option value="mesh">Geometric Triangulation Mesh</option>
             <option value="outline">Shape Outline</option>
           </select>
           <input

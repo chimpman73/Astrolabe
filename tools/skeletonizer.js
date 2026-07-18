@@ -196,7 +196,7 @@ function decimateGraph(graph, targetNodes) {
     return { points: finalPoints, edges: finalEdges };
 }
 
-async function generateSkeletonData(jimpImgOrBuffer) {
+async function generateSkeletonData(jimpImgOrBuffer, algorithm = 'thinning') {
     let jimpImg;
     if (Buffer.isBuffer(jimpImgOrBuffer)) {
         jimpImg = await Jimp.read(jimpImgOrBuffer);
@@ -251,26 +251,187 @@ async function generateSkeletonData(jimpImgOrBuffer) {
         }
     }
     
-    // 3. Thinning
-    zhangSuenThinning(grid, width, height);
-    
-    // 4. Graph Extraction
-    const baseGraph = extractGraph(grid, width, height);
-    
-    // 5. Generate Multi-Resolution Solutions
-    // We generate exactly 20 levels. Level 1 = 5 nodes, Level 2 = 10 nodes ... Level 20 = 100 nodes.
-    const maxNodes = 100; 
+    // 3. Thinning / Triangulation
     const solutions = {};
-    
-    // Always run through decimateGraph at least once to ensure edges are converted from integer indices to Point objects
-    let currentGraph = decimateGraph(baseGraph, Math.min(baseGraph.points.length, maxNodes));
-    
-    for (let level = 20; level >= 1; level--) {
-        let targetNodes = level * 5;
-        if (currentGraph.points.length > targetNodes) {
-            currentGraph = decimateGraph(currentGraph, targetNodes);
+    if (algorithm === 'triangulation') {
+        const rand = (function(seedStr) {
+            let h = 2166136261 >>> 0;
+            for (let i = 0; i < seedStr.length; i++) {
+                h ^= seedStr.charCodeAt(i);
+                h = Math.imul(h, 16777619);
+            }
+            let state = h >>> 0;
+            return function() {
+                state = Math.imul(state ^ (state >>> 15), 1540483477) >>> 0;
+                return (state >>> 0) / 4294967296;
+            };
+        })('astrolabe_triangulation_seed');
+
+        const candidates = [];
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                if (grid[y * width + x] === 1) {
+                    candidates.push({ x, y });
+                }
+            }
         }
-        solutions[level] = currentGraph;
+
+        // Shuffle candidates deterministically
+        for (let i = candidates.length - 1; i > 0; i--) {
+            const j = Math.floor(rand() * (i + 1));
+            const temp = candidates[i];
+            candidates[i] = candidates[j];
+            candidates[j] = temp;
+        }
+
+        const selectedPoints = [];
+        const maxPoints = 100;
+        let minDistance = 8;
+        while (selectedPoints.length < maxPoints && minDistance >= 1) {
+            for (const pt of candidates) {
+                if (selectedPoints.length >= maxPoints) break;
+                let tooClose = false;
+                for (const spt of selectedPoints) {
+                    const dx = spt.x - pt.x;
+                    const dy = spt.y - pt.y;
+                    if (dx * dx + dy * dy < minDistance * minDistance) {
+                        tooClose = true;
+                        break;
+                    }
+                }
+                if (!tooClose) {
+                    selectedPoints.push(pt);
+                }
+            }
+            minDistance -= 1;
+        }
+
+        for (const pt of candidates) {
+            if (selectedPoints.length >= maxPoints) break;
+            if (!selectedPoints.includes(pt)) {
+                selectedPoints.push(pt);
+            }
+        }
+
+        // Generate 20 LOD levels
+        for (let level = 1; level <= 20; level++) {
+            const numPoints = level * 5;
+            const currentPoints = selectedPoints.slice(0, numPoints);
+
+            const validEdges = [];
+            for (let i = 0; i < currentPoints.length; i++) {
+                for (let j = i + 1; j < currentPoints.length; j++) {
+                    const p1 = currentPoints[i];
+                    const p2 = currentPoints[j];
+                    const dx = p2.x - p1.x;
+                    const dy = p2.y - p1.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist > 60) continue;
+
+                    let isValid = true;
+                    const samples = 8;
+                    for (let s = 1; s <= samples; s++) {
+                        const t = s / (samples + 1);
+                        const sx = Math.round(p1.x + t * dx);
+                        const sy = Math.round(p1.y + t * dy);
+                        if (sx < 0 || sx >= width || sy < 0 || sy >= height || grid[sy * width + sx] === 0) {
+                            isValid = false;
+                            break;
+                        }
+                    }
+                    if (isValid) {
+                        validEdges.push({ p1, p2, dist, i, j });
+                    }
+                }
+            }
+
+            validEdges.sort((a, b) => a.dist - b.dist);
+
+            const parent = Array.from({ length: currentPoints.length }, (_, i) => i);
+            function findRoot(i) {
+                let root = i;
+                while (root !== parent[root]) {
+                    root = parent[root];
+                }
+                let curr = i;
+                while (curr !== root) {
+                    let nxt = parent[curr];
+                    parent[curr] = root;
+                    curr = nxt;
+                }
+                return root;
+            }
+            function unionRoots(i, j) {
+                const rI = findRoot(i);
+                const rJ = findRoot(j);
+                if (rI !== rJ) {
+                    parent[rI] = rJ;
+                    return true;
+                }
+                return false;
+            }
+
+            const edges = [];
+            for (const edge of validEdges) {
+                if (unionRoots(edge.i, edge.j)) {
+                    edges.push({ p1: edge.p1, p2: edge.p2 });
+                }
+            }
+
+            const adjCount = Array(currentPoints.length).fill(0);
+            for (const edge of edges) {
+                const u = currentPoints.indexOf(edge.p1);
+                const v = currentPoints.indexOf(edge.p2);
+                if (u !== -1 && v !== -1) {
+                    adjCount[u]++;
+                    adjCount[v]++;
+                }
+            }
+
+            for (let i = 0; i < currentPoints.length; i++) {
+                const incident = validEdges.filter(e => e.i === i || e.j === i);
+                incident.sort((a, b) => a.dist - b.dist);
+
+                for (const edge of incident) {
+                    if (adjCount[i] >= 3) break;
+
+                    const otherIdx = edge.i === i ? edge.j : edge.i;
+                    if (adjCount[otherIdx] >= 3) continue;
+
+                    const exists = edges.some(e => 
+                        (e.p1 === edge.p1 && e.p2 === edge.p2) || 
+                        (e.p1 === edge.p2 && e.p2 === edge.p1)
+                    );
+
+                    if (!exists) {
+                        edges.push({ p1: edge.p1, p2: edge.p2 });
+                        adjCount[i]++;
+                        adjCount[otherIdx]++;
+                    }
+                }
+            }
+
+            solutions[level] = { points: currentPoints, edges };
+        }
+    } else {
+        // 3. Thinning
+        zhangSuenThinning(grid, width, height);
+        
+        // 4. Graph Extraction
+        const baseGraph = extractGraph(grid, width, height);
+        
+        // 5. Generate Multi-Resolution Solutions
+        const maxNodes = 100; 
+        
+        let currentGraph = decimateGraph(baseGraph, Math.min(baseGraph.points.length, maxNodes));
+        
+        for (let level = 20; level >= 1; level--) {
+            let targetNodes = level * 5;
+            if (currentGraph.points.length > targetNodes) {
+                currentGraph = decimateGraph(currentGraph, targetNodes);
+            }
+            solutions[level] = currentGraph;
+        }
     }
     
     return solutions;

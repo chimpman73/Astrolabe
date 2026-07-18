@@ -133,7 +133,7 @@ export interface IConstellation extends ICelestialBase {
   constellationStarCount?: number;
   constellationStarMinSizeClass?: SizeClass;
   constellationStarMaxSizeClass?: SizeClass;
-  constellationStyle?: 'outline' | 'internal' | 'mesh';
+  constellationStyle?: 'outline' | 'internal';
   constellationFillAlpha?: number;
   constellationFlipX?: boolean;
   
@@ -228,7 +228,7 @@ interface IAstrolabeAPI {
   saveCustomShape: (data: { shapeName: string; svgContent: string; skeletonData: any }) => Promise<IpcResponse<void>>;
   deleteCustomShape: (shapeName: string) => Promise<IpcResponse<void>>;
   generateImageFromPrompt: (data: { prompt: string; provider: 'gemini' | 'openai'; apiKey: string }) => Promise<IpcResponse<string>>;
-  traceAndSkeletonize: (data: { imageBase64: string; traceParams: { turnpolicy?: number; turdsize?: number; alphamax?: number } }) => Promise<IpcResponse<{ svgContent: string; skeletonData: any }>>;
+  traceAndSkeletonize: (data: { imageBase64: string; traceParams: { turnpolicy?: number; turdsize?: number; alphamax?: number; algorithm?: 'thinning' | 'triangulation' } }) => Promise<IpcResponse<{ svgContent: string; skeletonData: any }>>;
   selectImageFile: () => Promise<IpcResponse<{ base64Data: string; filename: string }>>;
   onBackendError: (callback: (data: { type: string; message: string; stack?: string }) => void) => void;
   onMenuAction: (callback: (action: string) => void) => void;

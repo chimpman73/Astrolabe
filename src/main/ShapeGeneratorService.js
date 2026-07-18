@@ -148,7 +148,7 @@ class ShapeGeneratorService {
         ]
       });
 
-      const skeletonData = await generateSkeletonData(buffer);
+      const skeletonData = await generateSkeletonData(buffer, traceParams.algorithm);
 
       return {
         success: true,
