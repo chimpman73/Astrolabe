@@ -3,7 +3,7 @@ import { useSystemStore } from '../store/useSystemStore';
 import { shapeManager } from '../utils/ShapeManager';
 import { 
   X, ChevronLeft, ChevronRight, Sparkles, Upload, Trash2, 
-  Wand2, RefreshCw, Sliders, Check 
+  Wand2, RefreshCw, Check 
 } from 'lucide-react';
 import { OutlineStrategy } from '../utils/constellation/OutlineStrategy';
 
@@ -38,7 +38,6 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
   const [turdsize, setTurdsize] = useState(2);
   const [alphamax, setAlphamax] = useState(1.0);
   const [isTracing, setIsTracing] = useState(false);
-  const [showAdvancedTrace, setShowAdvancedTrace] = useState(false);
 
   // Resulting shape data
   const [tracedSvgContent, setTracedSvgContent] = useState<string | null>(null);
@@ -619,110 +618,116 @@ export const CustomShapeWizardModal: React.FC<CustomShapeWizardModalProps> = ({
                 </div>
               )}
 
-              {/* Source image preview */}
+              {/* Source image loaded configuration & tracing grid */}
               {imageBase64 ? (
-                <div className="flex gap-4 p-4 border border-[var(--color-border-parchment)] rounded bg-black/10">
-                  <div className="w-28 h-28 bg-white border border-gray-400 rounded overflow-hidden flex items-center justify-center shrink-0">
-                    <img 
-                      src={`data:image/png;base64,${imageBase64}`}
-                      alt="Source Silhouette Preview"
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  </div>
-                  <div className="flex-1 flex flex-col justify-between py-1">
-                    <div>
-                      <span className="font-bold block text-[var(--color-accent-gold)]">Loaded Image:</span>
-                      <span className="text-[var(--color-text-muted)] font-mono">{sourceFilename}</span>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <div className="flex-1 space-y-1">
-                        <label className="font-semibold block text-[10px]">Shape Name</label>
-                        <input 
-                          type="text"
-                          className="editor-input w-full"
-                          value={shapeName}
-                          onChange={e => setShapeName(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '_'))}
-                          placeholder="e.g. custom_pegasus"
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'start' }}>
+                  
+                  {/* Left Column: Source Image & Shape Identity */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '16px', border: '1px solid var(--color-border-parchment)', borderRadius: '6px', background: 'rgba(0,0,0,0.1)' }}>
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                      <div style={{ width: '96px', height: '96px', background: '#ffffff', border: '1px solid var(--color-border-parchment)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, padding: '4px' }}>
+                        <img 
+                          src={`data:image/png;base64,${imageBase64}`}
+                          alt="Source Silhouette Preview"
+                          style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                         />
                       </div>
+                      <div>
+                        <span style={{ fontWeight: 'bold', display: 'block', color: 'var(--color-accent-gold)', fontSize: '11px' }}>
+                          Source Silhouette
+                        </span>
+                        <span style={{ color: 'var(--color-text-muted)', fontFamily: 'monospace', wordBreak: 'break-all', fontSize: '9px' }}>
+                          {sourceFilename || 'recreated_silhouette.png'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontWeight: 'bold', fontSize: '10px' }}>Shape Library Name</label>
+                      <input 
+                        type="text"
+                        className="editor-input w-full"
+                        value={shapeName}
+                        onChange={e => setShapeName(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '_'))}
+                        placeholder="e.g. custom_pegasus"
+                      />
                     </div>
                   </div>
+
+                  {/* Right Column: Tracing Parameters & Action */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px', border: '1px solid var(--color-border-parchment)', borderRadius: '6px', background: 'rgba(0,0,0,0.1)' }}>
+                    <h5 style={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.05em', color: 'var(--color-accent-gold)', borderBottom: '1px solid rgba(200, 177, 133, 0.2)', paddingBottom: '4px', margin: 0 }}>
+                      Tracing Configuration
+                    </h5>
+
+                    {/* Turdsize Slider */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '10px' }}>
+                        <span>Stray Spot Culling (Turdsize)</span>
+                        <span style={{ fontFamily: 'monospace' }}>{turdsize}px</span>
+                      </div>
+                      <input 
+                        type="range"
+                        min="0"
+                        max="40"
+                        style={{ cursor: 'pointer', width: '100%' }}
+                        value={turdsize}
+                        onChange={e => setTurdsize(parseInt(e.target.value))}
+                      />
+                      <span style={{ fontSize: '9px', color: 'var(--color-text-muted)', lineHeight: '1.2' }}>
+                        Ignores spot noise/stray pixel clusters smaller than this radius.
+                      </span>
+                    </div>
+
+                    {/* Alphamax Slider */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '10px' }}>
+                        <span>Corner Threshold (Alphamax)</span>
+                        <span style={{ fontFamily: 'monospace' }}>{alphamax.toFixed(2)}</span>
+                      </div>
+                      <input 
+                        type="range"
+                        min="0.0"
+                        max="1.3"
+                        step="0.05"
+                        style={{ cursor: 'pointer', width: '100%' }}
+                        value={alphamax}
+                        onChange={e => setAlphamax(parseFloat(e.target.value))}
+                      />
+                      <span style={{ fontSize: '9px', color: 'var(--color-text-muted)', lineHeight: '1.2' }}>
+                        Lower makes path corners more sharp/angular; higher makes them smoother/circular.
+                      </span>
+                    </div>
+
+                    {/* Trace Action Button */}
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px' }}>
+                      <button
+                        onClick={handleTraceImage}
+                        disabled={isTracing}
+                        className="px-5 py-2.5 bg-[var(--color-accent-gold)] text-[#2b2316] font-bold rounded flex items-center gap-2 hover:bg-[var(--color-accent-gold)]/80 disabled:opacity-50 transition-all font-title uppercase tracking-wider text-[10px]"
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                      >
+                        {isTracing ? (
+                          <>
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Tracing Path...
+                          </>
+                        ) : (
+                          <>
+                            Trace & Generate Constellation <ChevronRight className="w-4 h-4" />
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                  </div>
+
                 </div>
               ) : (
                 sourceType === 'upload' && (
-                  <div className="text-center p-8 border border-dashed border-[var(--color-border-parchment)] text-[var(--color-text-muted)]">
+                  <div className="text-center p-8 border border-dashed border-[var(--color-border-parchment)] text-[var(--color-text-muted)]" style={{ border: '1px dashed var(--color-border-parchment)', padding: '32px', textAlign: 'center', color: 'var(--color-text-muted)' }}>
                     No image file selected. Please click upload to select an image.
                   </div>
                 )
-              )}
-
-              {/* Tracing parameters */}
-              {imageBase64 && (
-                <div className="space-y-3 p-4 border border-[var(--color-border-parchment)] rounded bg-black/10">
-                  <button 
-                    onClick={() => setShowAdvancedTrace(!showAdvancedTrace)}
-                    className="flex items-center gap-1 font-bold text-[var(--color-accent-gold)] cursor-pointer"
-                  >
-                    <Sliders className="w-3.5 h-3.5" /> 
-                    {showAdvancedTrace ? 'Hide Tracing Controls' : 'Show Advanced Tracing Controls'}
-                  </button>
-
-                  {showAdvancedTrace && (
-                    <div className="grid grid-cols-2 gap-4 pt-2 border-t border-[var(--color-border-parchment)]/30">
-                      <div className="space-y-1">
-                        <div className="flex justify-between">
-                          <label>Turdsize (Stray spot culling)</label>
-                          <span className="font-bold font-mono">{turdsize}px</span>
-                        </div>
-                        <input 
-                          type="range"
-                          min="0"
-                          max="40"
-                          className="w-full"
-                          value={turdsize}
-                          onChange={e => setTurdsize(parseInt(e.target.value))}
-                        />
-                        <span className="text-[9px] text-[var(--color-text-muted)] block">Turdsize ignores small artifacts/spots smaller than this pixel radius.</span>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="flex justify-between">
-                          <label>Alphamax (Corner threshold)</label>
-                          <span className="font-bold font-mono">{alphamax.toFixed(2)}</span>
-                        </div>
-                        <input 
-                          type="range"
-                          min="0.0"
-                          max="1.3"
-                          step="0.05"
-                          className="w-full"
-                          value={alphamax}
-                          onChange={e => setAlphamax(parseFloat(e.target.value))}
-                        />
-                        <span className="text-[9px] text-[var(--color-text-muted)] block">Controls corner sharpness. Lower makes shapes more angular, higher more circular.</span>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex justify-end pt-2">
-                    <button
-                      onClick={handleTraceImage}
-                      disabled={isTracing}
-                      className="px-5 py-2.5 bg-[var(--color-accent-gold)] text-[#2b2316] font-bold rounded flex items-center gap-2 hover:bg-[var(--color-accent-gold)]/80 disabled:opacity-50 transition-all font-title uppercase tracking-wider text-[10px]"
-                    >
-                      {isTracing ? (
-                        <>
-                          <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Tracing Path...
-                        </>
-                      ) : (
-                        <>
-                          Trace Image & Generate Skeletons <ChevronRight className="w-4 h-4" />
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
               )}
             </div>
           )}
