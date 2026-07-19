@@ -2,7 +2,7 @@
   "version": 2,
   "sphereName": "Soltan Ephemeris",
   "currentCampaignDate": "2026-07-10",
-  "currentSystemDate": 0,
+  "currentSystemDate": 3935.9999999999845,
   "shellBoundaryType": "double",
   "orbitalDrawStrength": 3,
   "navChartPlanetSizeOffset": 3,
@@ -501,5 +501,8 @@
     "up8hahs",
     "b5heyl3",
     "tycip9b"
-  ]
+  ],
+  "epoch": "CE",
+  "campaignYear": 1512,
+  "campaignDay": 1
 }

@@ -95,9 +95,9 @@ export class LegendRenderer {
 
       // Draw Border Box (no fill)
       ctx.strokeStyle = config.strokeColor;
-      ctx.lineWidth = 1 / activeZoom;
+      ctx.lineWidth = 1 / (normalizedZoom * lScale);
       ctx.beginPath();
-      ctx.roundRect(-boxWidth/2, -boxHeight/2, boxWidth, boxHeight, 5 / activeZoom);
+      ctx.roundRect(-boxWidth/2, -boxHeight/2, boxWidth, boxHeight, 5 / (normalizedZoom * lScale));
       ctx.stroke();
 
       // Draw Title
@@ -127,7 +127,7 @@ export class LegendRenderer {
               const R = iconSize * 0.4;
               ctx.strokeStyle = config.legendTextColor;
               ctx.fillStyle = config.legendTextColor;
-              ctx.lineWidth = 1.5 / activeZoom;
+              ctx.lineWidth = 2.5 / (normalizedZoom * lScale);
               
               ctx.beginPath();
               if (item.key === 'central') {
@@ -159,7 +159,7 @@ export class LegendRenderer {
       if (isSelected) {
           ctx.fillStyle = config.strokeColor;
           ctx.beginPath();
-          const r = 5 / (activeZoom * lScale);
+          const r = 5 / (normalizedZoom * lScale);
           ctx.arc(0, 0, r, 0, Math.PI * 2);
           ctx.fill();
       }

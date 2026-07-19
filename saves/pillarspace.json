@@ -179,7 +179,64 @@
       "elementAffinity": "mixed"
     }
   ],
-  "mapOverlays": [],
+  "mapOverlays": [
+    {
+      "id": "1784422707881",
+      "name": "Planet Legend",
+      "type": "legend",
+      "noteDistanceAU": 58.46387702756124,
+      "noteAngle": 178.77045019032747,
+      "noteFontSize": 16,
+      "noteMaxWidth": 120,
+      "noteCorners": {
+        "tl": {
+          "x": -60.25,
+          "y": -30.25
+        },
+        "tr": {
+          "x": 59.75,
+          "y": -30.25
+        },
+        "bl": {
+          "x": -60.25,
+          "y": 29.75
+        },
+        "br": {
+          "x": 60.75,
+          "y": 30.75
+        }
+      },
+      "legendType": "PlanetType",
+      "legendMode": "partial",
+      "legendDistanceAU": 63.18496195737635,
+      "legendAngle": 168.6900675259798,
+      "legendFontSize": 16
+    },
+    {
+      "id": "1784422800061",
+      "name": "Orbits Legend",
+      "type": "legend",
+      "noteDistanceAU": 0,
+      "noteAngle": 0,
+      "noteFontSize": 16,
+      "noteMaxWidth": 120,
+      "legendType": "OrbitType",
+      "legendDistanceAU": 51.787593480068885,
+      "legendAngle": 166.15611574056533
+    },
+    {
+      "id": "1784423037538",
+      "name": "Elemental Legend",
+      "type": "legend",
+      "noteDistanceAU": 0,
+      "noteAngle": 0,
+      "noteFontSize": 16,
+      "noteMaxWidth": 120,
+      "legendType": "ElementalAffinity",
+      "legendDistanceAU": 40.37403192189202,
+      "legendAngle": 158.57641872184854
+    }
+  ],
   "orbitalDrawStrength": 3,
   "navChartPlanetSizeOffset": 3,
   "navTitleStrike": true,
@@ -192,7 +249,10 @@
     "1784080132897",
     "1784080134938",
     "1784087146186",
-    "1784267140465"
+    "1784267140465",
+    "1784422707881",
+    "1784422800061",
+    "1784423037538"
   ],
   "campaignYear": 1000,
   "campaignDay": 1,
