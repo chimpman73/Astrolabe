@@ -68,7 +68,7 @@ export class SystemDirectoryRenderer {
       const R = iconSize / 2 - 2 * z;
       ctx.strokeStyle = config.strokeColor;
       ctx.fillStyle = config.strokeColor;
-      ctx.lineWidth = 2.5 * z;
+      ctx.lineWidth = 1.8 * z;
 
       ctx.beginPath();
       if (orbitIconType === 'central') {

@@ -127,7 +127,7 @@ export class LegendRenderer {
               const R = iconSize * 0.4;
               ctx.strokeStyle = config.legendTextColor;
               ctx.fillStyle = config.legendTextColor;
-              ctx.lineWidth = R * 0.22;
+              ctx.lineWidth = R * 0.15;
               
               ctx.beginPath();
               if (item.key === 'central') {
