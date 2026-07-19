@@ -504,12 +504,16 @@ h1, h2, h3, h4, h5, .font-title {
   font-size: 12px;
   font-weight: 600;
   color: var(--color-text-main);
+  min-width: 0;
+  flex: 1;
+  margin-right: 8px;
 }
 
 .editor-card-actions {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .editor-card-body {
@@ -665,7 +669,8 @@ h1, h2, h3, h4, h5, .font-title {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 140px;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .editor-card-type-label {
@@ -674,6 +679,7 @@ h1, h2, h3, h4, h5, .font-title {
   font-weight: normal;
   font-style: italic;
   text-transform: capitalize;
+  flex-shrink: 0;
 }
 
 .editor-card-delete-btn {
