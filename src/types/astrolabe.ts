@@ -149,6 +149,7 @@ export interface IMapOverlay extends ICelestialBase {
   noteRotation?: number;
   noteFontSize?: number;
   noteFontFamily?: string;
+  noteJustification?: 'left' | 'center' | 'right';
   noteMaxWidth?: number;
   noteMaxHeight?: number;
   noteCorners?: {

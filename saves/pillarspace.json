@@ -14,6 +14,17 @@
       "initialAngle": 0,
       "orbitalPeriodDays": 0,
       "affectsShellBoundary": false
+    },
+    {
+      "id": "1784423956905",
+      "name": "Notes and Legends",
+      "type": "group",
+      "description": "A structural group for celestial bodies.",
+      "orbitedObjectName": null,
+      "distanceOrbited": 0,
+      "initialAngle": 0,
+      "orbitalPeriodDays": 0,
+      "affectsShellBoundary": false
     }
   ],
   "celestialBodies": [
@@ -155,30 +166,7 @@
       "cloudObjectCustomShapeName": "pillar"
     }
   ],
-  "constellations": [
-    {
-      "id": "1784267140465",
-      "name": "Pillar test constellation",
-      "type": "constellation",
-      "arcDegrees": 10,
-      "customShapeName": "pillar",
-      "constellationFillAlpha": 0.2,
-      "constellationStyle": "outline",
-      "constellationDetail": 20,
-      "constellationStarCount": 16,
-      "constellationStarMinSizeClass": "D",
-      "constellationStarMaxSizeClass": "G",
-      "orbitedObjectName": null,
-      "distanceOrbited": 23,
-      "initialAngle": 90,
-      "orbitalPeriodDays": 0,
-      "affectsShellBoundary": true,
-      "isStationary": true,
-      "shapeRotation": 20,
-      "constellationFlipX": false,
-      "elementAffinity": "mixed"
-    }
-  ],
+  "constellations": [],
   "mapOverlays": [
     {
       "id": "1784422707881",
@@ -208,9 +196,10 @@
       },
       "legendType": "PlanetType",
       "legendMode": "partial",
-      "legendDistanceAU": 63.18496195737635,
-      "legendAngle": 168.6900675259798,
-      "legendFontSize": 16
+      "legendDistanceAU": 64.64843656878965,
+      "legendAngle": 162.48354210155622,
+      "legendFontSize": 16,
+      "groupId": "1784423956905"
     },
     {
       "id": "1784422800061",
@@ -221,8 +210,9 @@
       "noteFontSize": 16,
       "noteMaxWidth": 120,
       "legendType": "OrbitType",
-      "legendDistanceAU": 51.787593480068885,
-      "legendAngle": 166.15611574056533
+      "legendDistanceAU": 53.15346895090373,
+      "legendAngle": 158.5265770820325,
+      "groupId": "1784423956905"
     },
     {
       "id": "1784423037538",
@@ -233,8 +223,224 @@
       "noteFontSize": 16,
       "noteMaxWidth": 120,
       "legendType": "ElementalAffinity",
-      "legendDistanceAU": 40.37403192189202,
-      "legendAngle": 158.57641872184854
+      "legendDistanceAU": 42.22192612228905,
+      "legendAngle": 148.8932426512604,
+      "groupId": "1784423956905"
+    },
+    {
+      "id": "1784424099568",
+      "name": "Signature",
+      "type": "note",
+      "noteDistanceAU": 62.915105798789256,
+      "noteAngle": 147.9520874668224,
+      "noteFontSize": 28,
+      "noteMaxWidth": 120,
+      "description": "Pango Sirage, Astral Cartographer of Singe-Saari",
+      "noteFontFamily": "Sacramento",
+      "noteCorners": {
+        "tl": {
+          "x": -158.6990852355957,
+          "y": -37.630123138427734
+        },
+        "tr": {
+          "x": 107.4454460144043,
+          "y": -37.290279388427734
+        },
+        "bl": {
+          "x": -158.90971755981445,
+          "y": 37.689640045166016
+        },
+        "br": {
+          "x": 210.16335678100586,
+          "y": 37.23076248168945
+        }
+      },
+      "groupId": "1784423956905"
+    },
+    {
+      "id": "1784424703258",
+      "name": "Date",
+      "type": "note",
+      "noteDistanceAU": 47.029503780368366,
+      "noteAngle": 132.3527305047427,
+      "noteFontSize": 20,
+      "noteMaxWidth": 120,
+      "description": "AC 1000",
+      "noteFontFamily": "Sacramento",
+      "noteCorners": {
+        "tl": {
+          "x": -58.57421875,
+          "y": -11.875
+        },
+        "tr": {
+          "x": 60.37890625,
+          "y": -11.375
+        },
+        "bl": {
+          "x": -62.18359375,
+          "y": 10.625
+        },
+        "br": {
+          "x": 60.37890625,
+          "y": 12.625
+        }
+      },
+      "groupId": "1784423956905"
+    },
+    {
+      "id": "1784425024941",
+      "name": "Catastrophie",
+      "type": "note",
+      "noteDistanceAU": 40.01141710107355,
+      "noteAngle": 209.4936120182892,
+      "noteFontSize": 20,
+      "noteMaxWidth": 120,
+      "description": "Even when the carnifex colonized this sphere over 12 millennia ago, the outer planets already lay shattered for eons.",
+      "noteCorners": {
+        "tl": {
+          "x": -87.55982971191406,
+          "y": -62.904693603515625
+        },
+        "tr": {
+          "x": 121.84153747558594,
+          "y": -61.687896728515625
+        },
+        "bl": {
+          "x": -92.17189025878906,
+          "y": 56.861419677734375
+        },
+        "br": {
+          "x": 57.89018249511719,
+          "y": 67.73117065429688
+        }
+      },
+      "noteFontFamily": "Caveat",
+      "noteRotation": 319.7527833080084,
+      "groupId": "1784423956905"
+    },
+    {
+      "id": "1784425359897",
+      "name": "Mystery",
+      "type": "note",
+      "noteDistanceAU": 17.88878961041384,
+      "noteAngle": 270.9901569171072,
+      "noteFontSize": 18,
+      "noteMaxWidth": 120,
+      "description": "There may have been (or may yet to be) a fourth outer planet, but as yet none can prove its existence.",
+      "noteFontFamily": "Caveat",
+      "noteCorners": {
+        "tl": {
+          "x": -125.0185546875,
+          "y": -38.34765625
+        },
+        "tr": {
+          "x": 123.9462890625,
+          "y": -36.26953125
+        },
+        "bl": {
+          "x": -124.0810546875,
+          "y": 36.90234375
+        },
+        "br": {
+          "x": 125.1533203125,
+          "y": 37.71484375
+        }
+      },
+      "isDMOnly": true,
+      "groupId": "1784423956905"
+    },
+    {
+      "id": "1784425530424",
+      "name": "Giants",
+      "type": "note",
+      "noteDistanceAU": 37.60626295660956,
+      "noteAngle": 42.639480610847265,
+      "noteFontSize": 20,
+      "noteMaxWidth": 120,
+      "description": "Giants tell of a time before time when the outer planets were whole and they ruled the sphere.",
+      "isDMOnly": true,
+      "noteCorners": {
+        "tl": {
+          "x": -109.50538516044617,
+          "y": -48.542938232421875
+        },
+        "tr": {
+          "x": 100.42523312568665,
+          "y": -47.244110107421875
+        },
+        "bl": {
+          "x": -99.94586157798767,
+          "y": 53.519927978515625
+        },
+        "br": {
+          "x": 109.02601361274719,
+          "y": 42.267120361328125
+        }
+      },
+      "noteFontFamily": "Caveat",
+      "groupId": "1784423956905",
+      "noteRotation": 315.61201456115583
+    },
+    {
+      "id": "1784426272940",
+      "name": "Pillars",
+      "type": "note",
+      "noteDistanceAU": 49.17888568392566,
+      "noteAngle": 176.2202755210399,
+      "noteFontSize": 20,
+      "noteMaxWidth": 120,
+      "description": "The Pillars (the central sun, along with the 3 outer planets) all stretch from the bottom of the sphere to the top, like astronomical columns.",
+      "noteFontFamily": "Caveat",
+      "noteCorners": {
+        "tl": {
+          "x": -144.828125,
+          "y": -39.65625
+        },
+        "tr": {
+          "x": 142.421875,
+          "y": -37.15625
+        },
+        "bl": {
+          "x": -149.765625,
+          "y": 38.46875
+        },
+        "br": {
+          "x": 152.171875,
+          "y": 38.34375
+        }
+      },
+      "groupId": "1784423956905"
+    },
+    {
+      "id": "1784426692201",
+      "name": "Elemental Affinity",
+      "type": "note",
+      "noteDistanceAU": 37.51904953150204,
+      "noteAngle": 315.6721668344334,
+      "noteFontSize": 18,
+      "noteMaxWidth": 120,
+      "description": "Pillarspace has a high affinity to all four elements.",
+      "noteFontFamily": "Caveat",
+      "noteCorners": {
+        "tl": {
+          "x": -77.078125,
+          "y": -23
+        },
+        "tr": {
+          "x": 71.921875,
+          "y": -23
+        },
+        "bl": {
+          "x": -73.828125,
+          "y": 21
+        },
+        "br": {
+          "x": 78.984375,
+          "y": 25
+        }
+      },
+      "noteRotation": 26.36010065381971,
+      "groupId": "1784423956905"
     }
   ],
   "orbitalDrawStrength": 3,
@@ -249,10 +455,17 @@
     "1784080132897",
     "1784080134938",
     "1784087146186",
-    "1784267140465",
     "1784422707881",
     "1784422800061",
-    "1784423037538"
+    "1784423037538",
+    "1784423956905",
+    "1784424099568",
+    "1784424703258",
+    "1784425024941",
+    "1784425359897",
+    "1784425530424",
+    "1784426272940",
+    "1784426692201"
   ],
   "campaignYear": 1000,
   "campaignDay": 1,

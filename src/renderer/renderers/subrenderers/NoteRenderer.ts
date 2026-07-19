@@ -9,6 +9,7 @@ export class NoteRenderer {
   ): void {
     const { ctx, activeZoom, baseZoom, project, selectedObjectId, objects } = context;
     const notes = visibleObjects.filter(o => o.type === 'note');
+    console.log(`NoteRenderer.draw: total notes = ${notes.length}`, notes);
     if (notes.length === 0) return;
 
     ctx.save();
@@ -18,6 +19,7 @@ export class NoteRenderer {
       const rot = note.noteRotation || 0;
       const fontSize = note.noteFontSize || 16;
       const fontFamily = note.noteFontFamily || 'Elan';
+      console.log(`NoteRenderer: note "${note.name}" (id: ${note.id}) description: "${note.description}" dist: ${dist} angle: ${angle}`);
       
       const rad = (angle * Math.PI) / 180;
       const x = Math.cos(rad) * dist;
@@ -86,8 +88,10 @@ export class NoteRenderer {
           currentY += lineHeight;
         }
       });
+      console.log(`NoteRenderer: note "${note.name}" lines calculated =`, lines);
 
       const isSelected = selectedObjectId !== null && objects.find((o: any) => o.id === selectedObjectId)?.name === note.name;
+      console.log(`NoteRenderer: note "${note.name}" isSelected = ${isSelected} (selectedObjectId: ${selectedObjectId})`);
       
       const drawPolyPath = () => {
         ctx.beginPath();
@@ -113,6 +117,7 @@ export class NoteRenderer {
       ctx.clip();
 
       lines.forEach((line) => {
+        console.log(`NoteRenderer: fillText "${line.text}" at x: ${line.x}, y: ${line.y}`);
         ctx.fillText(line.text, line.x, line.y);
       });
       ctx.restore();
